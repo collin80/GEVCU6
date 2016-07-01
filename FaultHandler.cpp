@@ -54,6 +54,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
   uint16_t FaultHandler::raiseFault(uint16_t device, uint16_t code, bool ongoing = false) 
   {
+	  return 0; //this function is broken.
 	  bool incPtr = false;
 	  globalTime = baseTime + (millis() / 100);
 

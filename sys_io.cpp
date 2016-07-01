@@ -235,7 +235,9 @@ Exactly like the previous function but for non-differential boards (all the non-
 */
 uint16_t getRawADC(uint8_t which) {
   uint32_t val;
-  
+
+if (sys_type < 6)
+{
   val = adc_values[adc[which][0]];
   
   //first remove the bias to bring us back to where it rests at zero input volts
@@ -248,7 +250,22 @@ uint16_t getRawADC(uint8_t which) {
   val = val >> 10; //divide by 1024 again to correct for gain multiplier
 	        
   if (val > 4096) val = 0; //if it somehow got wrapped anyway then set it back to zero
-  
+}
+else
+{
+	int32_t valu;
+    //first 4 analog readings must match old methods
+    if (which < 2) 
+	{
+		valu = getSPIADCReading(CS1, (which & 1) + 1);
+	}
+    else if (which < 4) valu = getSPIADCReading(CS2, (which & 1) + 1);
+    //the next three are new though. 4 = current sensor, 5 = pack high (ref to mid), 6 = pack low (ref to mid)
+    else if (which == 4) valu = getSPIADCReading(CS1, 0);
+    else if (which == 5) valu = getSPIADCReading(CS3, 1);
+    else if (which == 6) valu = getSPIADCReading(CS3, 2);
+	val = valu >> 8; //cut reading down to 16 bit value
+}  
   return val;
 }
 

@@ -28,6 +28,8 @@
 
 extern PrefHandler *sysPrefs;
 
+uint8_t systype;
+
 SerialConsole::SerialConsole(MemCache* memCache) :
 		memCache(memCache), heartbeat(NULL) {
 	init();
@@ -46,6 +48,8 @@ void SerialConsole::init() {
 	state = STATE_ROOT_MENU;
         loopcount=0;
         cancel=false;
+
+	sysPrefs->read(EESYS_SYSTEM_TYPE, &systype);
       
 }
 
@@ -100,6 +104,7 @@ void SerialConsole::printMenu() {
 	SerialUSB.println("w = GEVCU 4.2 reset wifi to factory defaults, setup GEVCU ad-hoc network");
 	SerialUSB.println("W = GEVCU 5.2 reset wifi to factory defaults, setup GEVCU as Access Point");
 	SerialUSB.println("s = Scan WiFi for nearby access points");
+	SerialUSB.println("A = Autocompensate ADC inputs");
 	SerialUSB.println();
 	SerialUSB.println("Config Commands (enter command=newvalue). Current values shown in parenthesis:");
     SerialUSB.println();
@@ -107,7 +112,6 @@ void SerialConsole::printMenu() {
 
 	Logger::console("LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", Logger::getLogLevel());
 
-	uint8_t systype;
 	sysPrefs->read(EESYS_SYSTEM_TYPE, &systype);
 	Logger::console("SYSTYPE=%i - Set board revision (Dued=2, GEVCU3=3, GEVCU4-5=4, GEVCU6.2=6)", systype);
 
@@ -742,23 +746,6 @@ void SerialConsole::handleShortCmd() {
 			}
 		}
 		break;
-	case 'U':
-		Logger::console("Adding a sequence of values from 0 to 255 into eeprom");
-		for (int i = 0; i < 256; i++) {
-			memCache->Write(1000 + i, (uint8_t) i);
-		}
-		Logger::info("Flushing cache");
-		memCache->FlushAllPages(); //write everything to eeprom
-		memCache->InvalidateAll(); //remove all data from cache
-		Logger::console("Operation complete.");
-		break;
-	case 'I':
-		Logger::console("Retrieving data previously saved");
-		for (int i = 0; i < 256; i++) {
-			memCache->Read(1000 + i, &val);
-			Logger::console("%d: %d", i, val);
-		}
-		break;
 	case 'E':
 		Logger::console("Reading System EEPROM values");
 		for (int i = 0; i < 256; i++) {
@@ -811,7 +798,26 @@ void SerialConsole::handleShortCmd() {
 			}
 		}
 		break;
-
+	case 'A':
+		uint32_t accum;
+		for (int i = 0; i < 7; i++)
+		{
+			accum = 0;
+			for (int j = 0; j < 400; j++)
+			{
+				accum += getRawADC(i);
+				//normally one shouldn't call watchdog reset in multiple
+				//places but this is a special case.
+				watchdogReset();
+				delay(7);
+			}
+			accum /= 400;
+			sysPrefs->write(EESYS_ADC0_OFFSET + (4*i), (uint16_t)(accum));
+			Logger::console("ADC %i offset is now %i", i, accum);
+		}
+		sysPrefs->saveChecksum();
+		setup_ADC_params(); //change takes immediate effect
+		break;
 	case 'S':
 		//there is not really any good way (currently) to auto generate this list
 		//the information just isn't stored anywhere in code. Perhaps we might
