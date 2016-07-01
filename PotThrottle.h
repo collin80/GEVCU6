@@ -34,6 +34,8 @@
 #include "TickHandler.h"
 #include "Logger.h"
 #include "DeviceManager.h"
+#include "FaultHandler.h"
+#include "FaultCodes.h"
 
 #define THROTTLE_INPUT_BRAKELIGHT  2
 
@@ -74,3 +76,5 @@ private:
 };
 
 #endif /* POT_THROTTLE_H_ */
+
+

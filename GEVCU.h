@@ -51,6 +51,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ichip_2128.h"
 #include "Sys_Messages.h"
 #include "CodaMotorController.h"
+#include "FaultHandler.h"
+#include "DCDCController.h"
+#include "EVIC.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,3 +70,5 @@ void setup();
 #define SYSTEM_GEVCU3	3
 
 #endif /* GEVCU_H_ */
+
+

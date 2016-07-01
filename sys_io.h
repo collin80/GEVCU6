@@ -81,5 +81,6 @@ bool setupSPIADC();
 int32_t getSPIADCReading(int CS, int sensor);
 void sys_io_adc_poll();
 void sys_early_setup();
+void sys_boot_setup();
 
 #endif

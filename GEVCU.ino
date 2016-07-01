@@ -88,8 +88,8 @@ void initWiReach()
 SerialUSB.begin(115200); // use SerialUSB only as the programming port doesn't work
 Serial2.begin(115200); // use Serial3 for GEVCU2, use Serial2 for GEVCU3+4
 
-sendWiReach("AT+iFD");//Host connection set to serial port
-delay(5000);
+//sendWiReach("AT+iFD");//Host connection set to serial port
+//delay(5000);
 sendWiReach("AT+iHIF=1");//Host connection set to serial port
 sendWiReach("AT+iBDRF=9");//Automatic baud rate on host serial port
 sendWiReach("AT+iRPG=secret"); //Password for iChip wbsite
@@ -216,20 +216,25 @@ void createObjects() {
 	PotBrake *pbrake = new PotBrake();
 	CanBrake *cbrake = new CanBrake();
 	DmocMotorController *dmotorController = new DmocMotorController();
-        CodaMotorController *cmotorController = new CodaMotorController();
+    CodaMotorController *cmotorController = new CodaMotorController();
+        DCDCController *dcdcController = new DCDCController();
 	BrusaMotorController *bmotorController = new BrusaMotorController();
 	ThinkBatteryManager *BMS = new ThinkBatteryManager();
 	ELM327Emu *emu = new ELM327Emu();
-	ICHIPWIFI *iChip = new ICHIPWIFI();
+	ICHIPWIFI *iChip = new ICHIPWIFI();	
+        EVIC *eVIC = new EVIC();
 }
-
-void initializeDevices() {
+     void initializeDevices() {
 	DeviceManager *deviceManager = DeviceManager::getInstance();
 
 	//heartbeat is always enabled now
 	heartbeat = new Heartbeat();
 	Logger::info("add: Heartbeat (id: %X, %X)", HEARTBEAT, heartbeat);
 	heartbeat->setup();
+
+	//fault handler is always enabled too - its also statically allocated so no using -> here
+	//This is initialized before the other devices so that they can go ahead and use it if they fault upon start up
+	faultHandler.setup();
 
 	/*
 	We used to instantiate all the objects here along with other code. To simplify things this is done somewhat
@@ -249,6 +254,8 @@ void initializeDevices() {
 }
 
 void setup() {
+	sys_boot_setup(); //sets digital outputs to "off" right as soon as the sketch gets control.
+	
         //delay(5000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
        
         //initWiReach();
@@ -268,7 +275,7 @@ void setup() {
         {
 	      Logger::info("Initializing EEPROM");
 	      initSysEEPROM();
-          initWiReach();
+          // initWiReach();
 	    } 
         else {Logger::info("Using existing EEPROM values");}//checksum is good, read in the values stored in EEPROM
 
@@ -317,5 +324,7 @@ void loop() {
 	//this should still be here. It checks for a flag set during an interrupt
 	sys_io_adc_poll();
 }
+
+
 
 
