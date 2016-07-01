@@ -104,11 +104,48 @@ void SerialConsole::printMenu() {
 	SerialUSB.println("Config Commands (enter command=newvalue). Current values shown in parenthesis:");
     SerialUSB.println();
     Logger::console("LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", Logger::getLogLevel());
-   
+
+	Logger::console("LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", Logger::getLogLevel());
+
 	uint8_t systype;
 	sysPrefs->read(EESYS_SYSTEM_TYPE, &systype);
-	Logger::console("SYSTYPE=%i - Set board revision (Dued=2, GEVCU3=3, GEVCU4=4)", systype);
+	Logger::console("SYSTYPE=%i - Set board revision (Dued=2, GEVCU3=3, GEVCU4-5=4, GEVCU6.2=6)", systype);
 
+	uint16_t val;
+	sysPrefs->read(EESYS_ADC0_OFFSET, &val);
+	Logger::console("ADC0OFF=%i - set ADC0 offset", val);
+	sysPrefs->read(EESYS_ADC0_GAIN, &val);
+	Logger::console("ADC0GAIN=%i - set ADC0 gain (1024 is 1 gain)", val);
+	sysPrefs->read(EESYS_ADC1_OFFSET, &val);
+	Logger::console("ADC1OFF=%i - set ADC1 offset", val);
+	sysPrefs->read(EESYS_ADC1_GAIN, &val);
+	Logger::console("ADC1GAIN=%i - set ADC1 gain (1024 is 1 gain)", val);
+	sysPrefs->read(EESYS_ADC2_OFFSET, &val);
+	Logger::console("ADC2OFF=%i - set ADC2 offset", val);
+	sysPrefs->read(EESYS_ADC2_GAIN, &val);
+	Logger::console("ADC2GAIN=%i - set ADC2 gain (1024 is 1 gain)", val);
+	sysPrefs->read(EESYS_ADC3_OFFSET, &val);
+	Logger::console("ADC3OFF=%i - set ADC3 offset", val);
+	sysPrefs->read(EESYS_ADC3_GAIN, &val);
+	Logger::console("ADC3GAIN=%i - set ADC3 gain (1024 is 1 gain)", val);
+
+	if (systype > 4)
+	{
+		sysPrefs->read(EESYS_ADC_PACKH_OFFSET, &val);
+		Logger::console("ADCPACKHOFF=%i - set pack high ADC offset", val);
+		sysPrefs->read(EESYS_ADC_PACKH_GAIN, &val);
+		Logger::console("ADCPACKHGAIN=%i - set pack high ADC gain (1024 is 1 gain)", val);
+		sysPrefs->read(EESYS_ADC_PACKL_OFFSET, &val);
+		Logger::console("ADCPACKLOFF=%i - set pack low ADC offset", val);
+		sysPrefs->read(EESYS_ADC_PACKL_GAIN, &val);
+		Logger::console("ADCPACKLGAIN=%i - set pack low ADC gain (1024 is 1 gain)", val);		
+		sysPrefs->read(EESYS_ADC_PACKC_OFFSET, &val);
+		Logger::console("ADCPACKCOFF=%i - set pack current offset", val);
+		sysPrefs->read(EESYS_ADC_PACKC_GAIN, &val);
+		Logger::console("ADCPACKCGAIN=%i - set pack current gain (1024 is 1 gain)", val);		
+		
+	}
+   
 	DeviceManager::getInstance()->printDeviceList();
 
 	if (motorController && motorController->getConfiguration()) {
@@ -428,15 +465,111 @@ void SerialConsole::handleConfigCmd() {
 			Logger::console("Invalid device ID (%X, %d)", newValue, newValue);
 		}
 	} else if (cmdString == String("SYSTYPE")) {
-		if (newValue < 5 && newValue > 0) {
+		if (newValue < 7 && newValue > 0) {
 			sysPrefs->write(EESYS_SYSTEM_TYPE, (uint8_t)(newValue));
 			sysPrefs->saveChecksum();
 			sysPrefs->forceCacheWrite(); //just in case someone takes us literally and power cycles quickly
 			Logger::console("System type updated. Power cycle to apply.");
 		}
 		else Logger::console("Invalid system type. Please enter a value 1 - 4");
-
-       
+	} else if (cmdString == String("ADC0OFF")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC0_OFFSET, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid offset. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADC0GAIN")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC0_GAIN, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid gain. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADC1OFF")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC1_OFFSET, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid offset. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADC1GAIN")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC1_GAIN, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid gain. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADC2OFF")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC2_OFFSET, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid offset. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADC2GAIN")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC2_GAIN, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid gain. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADC3OFF")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC3_OFFSET, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid offset. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADC3GAIN")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC3_GAIN, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid gain. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADCPACKHOFF")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC_PACKH_OFFSET, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid offset. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADCPACKHGAIN")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC_PACKH_GAIN, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid gain. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADCPACKLOFF")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC_PACKL_OFFSET, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid offset. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADCPACKLGAIN")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC_PACKL_GAIN, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid gain. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADCPACKCOFF")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC_PACKC_OFFSET, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid offset. Enter value from 0 to 65535");
+	} else if (cmdString == String("ADCPACKCGAIN")) {
+		if (newValue >= 0 && newValue <= 65535) {
+			sysPrefs->write(EESYS_ADC_PACKC_GAIN, (uint16_t)(newValue));
+			sysPrefs->saveChecksum();
+			setup_ADC_params(); //change takes immediate effect
+		}
+		else Logger::console("Invalid gain. Enter value from 0 to 65535");
 	} else if (cmdString == String("LOGLEVEL")) {
 		switch (newValue) {
 		case 0:

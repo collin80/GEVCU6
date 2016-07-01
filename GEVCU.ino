@@ -57,6 +57,7 @@ Random comments on things that should be coded up soon:
 #include <due_can.h>
 #include <due_wire.h>
 #include <DueTimer.h>
+#include <SPI.h>
 
 //RTC_clock rtc_clock(XTAL); //init RTC with the external 32k crystal as a reference
 
@@ -118,7 +119,7 @@ void initSysEEPROM() {
 	uint16_t sixteen;
 	uint32_t thirtytwo;
 
-	eight = 4; //GEVCU4 or GEVCU5 boards
+	eight = 6; //GEVCU 6.2 board
 	sysPrefs->write(EESYS_SYSTEM_TYPE, eight);
 
 	sixteen = 1024; //no gain
@@ -203,7 +204,7 @@ void initSysEEPROM() {
 	sysPrefs->write(EESYS_WIFI2_KEY, thirtytwo);
 	sysPrefs->write(EESYS_WIFIX_KEY, thirtytwo);
 
-	eight = 1;
+	eight = 0;  //0=debug, 1=info,2=warn,3=error,4=off
 	sysPrefs->write(EESYS_LOG_LEVEL, eight);
 
 	sysPrefs->saveChecksum();
@@ -264,17 +265,17 @@ void setup() {
 	memCache->setup();
 	sysPrefs = new PrefHandler(SYSTEM);
 	if (!sysPrefs->checksumValid()) 
-            {
+        {
 	      Logger::info("Initializing EEPROM");
 	      initSysEEPROM();
-              initWiReach();
+          initWiReach();
 	    } 
-          else {Logger::info("Using existing EEPROM values");}//checksum is good, read in the values stored in EEPROM
+        else {Logger::info("Using existing EEPROM values");}//checksum is good, read in the values stored in EEPROM
 
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
 	Logger::setLoglevel((Logger::LogLevel)loglevel);
-	Logger::setLoglevel((Logger::LogLevel)1);
+	//Logger::setLoglevel((Logger::LogLevel)1);
 	sys_early_setup();     
 	tickHandler = TickHandler::getInstance();
 	canHandlerEV = CanHandler::getInstanceEV();
@@ -282,7 +283,7 @@ void setup() {
 	canHandlerEV->initialize();
 	canHandlerCar->initialize();
 	setup_sys_io(); //get calibration data for system IO
-	Logger::info("SYSIO init ok");
+	Logger::info("SYSIO init ok");	
 
 	initializeDevices();
     serialConsole = new SerialConsole(memCache, heartbeat);
@@ -290,7 +291,7 @@ void setup() {
 	wifiDevice = DeviceManager::getInstance()->getDeviceByID(ICHIP2128);
 	btDevice = DeviceManager::getInstance()->getDeviceByID(ELM327EMU);
     DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); //Load configuration variables into WiFi Web Configuration screen
-	Logger::info("System Ready");
+	Logger::info("System Ready");	
 }
 
 void loop() {

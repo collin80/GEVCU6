@@ -48,7 +48,7 @@ void Throttle::handleTick() {
 	if (validateSignal(rawSignals)) { // validate the raw data
 		uint16_t position = calculatePedalPosition(rawSignals); // bring the raw data into a range of 0-1000 (without mapping)
 		level = mapPedalPosition(position); // apply mapping of the 0-1000 range to the user defined settings
-	} else
+	} else 
 		level = 0;
 }
 

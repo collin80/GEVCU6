@@ -110,8 +110,13 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EETH_ADC_2				54 //1 byte - which ADC port to use for second throttle input
 
 //System Data
-#define EESYS_SYSTEM_TYPE        10  //1 byte - 1 = Old school protoboards 2 = GEVCU2/DUED 3 = GEVCU3 - Defaults to 2 if invalid or not set up
+#define EESYS_SYSTEM_TYPE        10  //1 byte - 1 = Old school protoboards 2 = GEVCU2/DUED 3 = GEVCU3, 4 = GEVCU4 or 5, 6 = GEVCU6 - Defaults to 2 if invalid or not set up
 #define EESYS_RAWADC			 20  //1 byte - if not zero then use raw ADC mode (no preconditioning or buffering or differential).
+//Newer GEVCU boards use a 24 bit ADC so the resolution is far higher. But, offset and gain are still using the 16 bit values so offset is limited.
+//Gain is still with 1024 being 1 to 1 so there is still ability to tweak the gain just the same way. Also, noting here again,
+//The code was never meant for 24 bit resolution so too many places in code are using 16 bit values for ADC readings and related stuff
+//Thus, the 24 bit value is knocked down to 16 bits before being sent out of the sys_io code. Thus, all remaining code works and it looks like
+//the ADC is 16 bit. we just basically throw the lower 8 bits away.
 #define EESYS_ADC0_GAIN          30  //2 bytes - ADC gain centered at 1024 being 1 to 1 gain, thus 512 is 0.5 gain, 2048 is double, etc
 #define EESYS_ADC0_OFFSET        32  //2 bytes - ADC offset from zero - ADC reads 12 bit so the offset will be [0,4095] - Offset is subtracted from read ADC value
 #define EESYS_ADC1_GAIN          34  //2 bytes - ADC gain centered at 1024 being 1 to 1 gain, thus 512 is 0.5 gain, 2048 is double, etc
@@ -120,6 +125,12 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EESYS_ADC2_OFFSET        40  //2 bytes - ADC offset from zero - ADC reads 12 bit so the offset will be [0,4095] - Offset is subtracted from read ADC value
 #define EESYS_ADC3_GAIN          42  //2 bytes - ADC gain centered at 1024 being 1 to 1 gain, thus 512 is 0.5 gain, 2048 is double, etc
 #define EESYS_ADC3_OFFSET        44  //2 bytes - ADC offset from zero - ADC reads 12 bit so the offset will be [0,4095] - Offset is subtracted from read ADC value
+#define EESYS_ADC_PACKH_GAIN	   46  //2 bytes - GAIN for Pack High to Mid voltage reading
+#define EESYS_ADC_PACKH_OFFSET	 48  //2 bytes - Offset for Pack high to mid voltage reading
+#define EESYS_ADC_PACKL_GAIN	   50  //2 bytes - GAIN for Pack Mid to Low voltage reading
+#define EESYS_ADC_PACKL_OFFSET	 52  //2 bytes - Offset for Pack Mid to Low voltage reading
+#define EESYS_ADC_PACKC_GAIN	   54  //2 bytes - GAIN for Pack current reading
+#define EESYS_ADC_PACKC_OFFSET	 56  //2 bytes - Offset for Pack current reading
 
 #define EESYS_CAN0_BAUD          100 //2 bytes - Baud rate of CAN0 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN0
 #define EESYS_CAN1_BAUD          102 //2 bytes - Baud rate of CAN1 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN1

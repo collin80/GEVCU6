@@ -31,6 +31,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Heartbeat.h"
 #include "MemCache.h"
 #include "config.h"
+#include "eeprom_layout.h"
 #include "sys_io.h"
 #include "PotThrottle.h"
 #include "DeviceManager.h"
