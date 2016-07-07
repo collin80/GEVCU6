@@ -45,31 +45,31 @@ public:
 
 class CodaMotorController: public MotorController, CanObserver {
 
-	
+
 
 public:
-	virtual void handleTick();
-	virtual void handleCanFrame(CAN_FRAME *frame);
-	virtual void setup();
-	
-	CodaMotorController();
-        void timestamp();
-	DeviceId getId();
-	uint32_t getTickInterval();
-       
+    virtual void handleTick();
+    virtual void handleCanFrame(CAN_FRAME *frame);
+    virtual void setup();
 
-	virtual void loadConfiguration();
-	virtual void saveConfiguration();
+    CodaMotorController();
+    void timestamp();
+    DeviceId getId();
+    uint32_t getTickInterval();
+
+
+    virtual void loadConfiguration();
+    virtual void saveConfiguration();
 
 private:
-	byte online; //counter for whether DMOC appears to be operating
-	byte alive;
-	int activityCount;
-	byte sequence;
-        uint16_t torqueCommand;
-        void sendCmd1();
-	void sendCmd2();
-        uint8_t genCodaCRC(uint8_t cmd, uint8_t torq_lsb, uint8_t torq_msb);
+    byte online; //counter for whether DMOC appears to be operating
+    byte alive;
+    int activityCount;
+    byte sequence;
+    uint16_t torqueCommand;
+    void sendCmd1();
+    void sendCmd2();
+    uint8_t genCodaCRC(uint8_t cmd, uint8_t torq_lsb, uint8_t torq_msb);
 
 };
 

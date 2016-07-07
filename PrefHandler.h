@@ -45,31 +45,31 @@ extern MemCache *memCache;
 class PrefHandler {
 public:
 
-	PrefHandler();
-	PrefHandler(DeviceId id);
-        ~PrefHandler();
-	void LKG_mode(bool mode);
-	bool write(uint16_t address, uint8_t val);
-	bool write(uint16_t address, uint16_t val);
-	bool write(uint16_t address, uint32_t val);
-	bool read(uint16_t address, uint8_t *val);
-	bool read(uint16_t address, uint16_t *val);
-	bool read(uint16_t address, uint32_t *val);
-	uint8_t calcChecksum();
-	void saveChecksum();
-	bool checksumValid();
+    PrefHandler();
+    PrefHandler(DeviceId id);
+    ~PrefHandler();
+    void LKG_mode(bool mode);
+    bool write(uint16_t address, uint8_t val);
+    bool write(uint16_t address, uint16_t val);
+    bool write(uint16_t address, uint32_t val);
+    bool read(uint16_t address, uint8_t *val);
+    bool read(uint16_t address, uint16_t *val);
+    bool read(uint16_t address, uint32_t *val);
+    uint8_t calcChecksum();
+    void saveChecksum();
+    bool checksumValid();
     void forceCacheWrite();
-	bool isEnabled();
-	void setEnabledStatus(bool en);
-	static bool setDeviceStatus(uint16_t device, bool enabled);
+    bool isEnabled();
+    void setEnabledStatus(bool en);
+    static bool setDeviceStatus(uint16_t device, bool enabled);
 
 private:
-	uint32_t base_address; //base address for the parent device
-	uint32_t lkg_address;
-	bool use_lkg; //use last known good config?
-	bool enabled;
-	int position; //position within the device table
-	void initDevTable();
+    uint32_t base_address; //base address for the parent device
+    uint32_t lkg_address;
+    bool use_lkg; //use last known good config?
+    bool enabled;
+    int position; //position within the device table
+    void initDevTable();
 };
 
 #endif

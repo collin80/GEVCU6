@@ -59,129 +59,129 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class BrusaMotorControllerConfiguration : public MotorControllerConfiguration {
 public:
-	// DMC_CTRL2
-	uint16_t maxMechanicalPowerMotor; // maximal mechanical power of motor in 4W steps
-	uint16_t maxMechanicalPowerRegen; // maximal mechanical power of regen in 4W steps
+    // DMC_CTRL2
+    uint16_t maxMechanicalPowerMotor; // maximal mechanical power of motor in 4W steps
+    uint16_t maxMechanicalPowerRegen; // maximal mechanical power of regen in 4W steps
 
-	// DMC_LIM
-	uint16_t dcVoltLimitMotor; // minimum DC voltage limit for motoring in 0.1V
-	uint16_t dcVoltLimitRegen; //  maximum DC voltage limit for regen in 0.1V
-	uint16_t dcCurrentLimitMotor; // current limit for motoring in 0.1A
-	uint16_t dcCurrentLimitRegen; // current limit for regen in 0.1A
+    // DMC_LIM
+    uint16_t dcVoltLimitMotor; // minimum DC voltage limit for motoring in 0.1V
+    uint16_t dcVoltLimitRegen; //  maximum DC voltage limit for regen in 0.1V
+    uint16_t dcCurrentLimitMotor; // current limit for motoring in 0.1A
+    uint16_t dcCurrentLimitRegen; // current limit for regen in 0.1A
 
-	bool enableOscillationLimiter; // this will enable the DMC5 oscillation limiter (if also enabled by parameter)
+    bool enableOscillationLimiter; // this will enable the DMC5 oscillation limiter (if also enabled by parameter)
 };
 
 class BrusaMotorController: public MotorController, CanObserver {
 public:
-	// Message id=0x258, DMC_TRQS
-	// The value is composed of 2 bytes: (data[1] << 0) | (data[0] << 8)
-	enum Status {
-		motorModelLimitation		= 1 << 0,  // 0x0001
-		mechanicalPowerLimitation	= 1 << 1,  // 0x0002
-		maxTorqueLimitation			= 1 << 2,  // 0x0004
-		acCurrentLimitation			= 1 << 3,  // 0x0008
-		temperatureLimitation		= 1 << 4,  // 0x0010
-		speedLimitation				= 1 << 5,  // 0x0020
-		voltageLimitation			= 1 << 6,  // 0x0040
-		currentLimitation			= 1 << 7,  // 0x0080
-		torqueLimitation			= 1 << 8,  // 0x0100
-		errorFlag					= 1 << 9,  // 0x0200, see DMC_ERR
-		warningFlag					= 1 << 10, // 0x0400, see DMC_ERR
-		slewRateLimitation			= 1 << 12, // 0x1000
-		motorTemperatureLimitation	= 1 << 13, // 0x2000
-		stateRunning				= 1 << 14, // 0x4000
-		stateReady					= 1 << 15  // 0x8000
-	};
+    // Message id=0x258, DMC_TRQS
+    // The value is composed of 2 bytes: (data[1] << 0) | (data[0] << 8)
+    enum Status {
+        motorModelLimitation		= 1 << 0,  // 0x0001
+        mechanicalPowerLimitation	= 1 << 1,  // 0x0002
+        maxTorqueLimitation			= 1 << 2,  // 0x0004
+        acCurrentLimitation			= 1 << 3,  // 0x0008
+        temperatureLimitation		= 1 << 4,  // 0x0010
+        speedLimitation				= 1 << 5,  // 0x0020
+        voltageLimitation			= 1 << 6,  // 0x0040
+        currentLimitation			= 1 << 7,  // 0x0080
+        torqueLimitation			= 1 << 8,  // 0x0100
+        errorFlag					= 1 << 9,  // 0x0200, see DMC_ERR
+        warningFlag					= 1 << 10, // 0x0400, see DMC_ERR
+        slewRateLimitation			= 1 << 12, // 0x1000
+        motorTemperatureLimitation	= 1 << 13, // 0x2000
+        stateRunning				= 1 << 14, // 0x4000
+        stateReady					= 1 << 15  // 0x8000
+    };
 
-	// Message id=0x25a, DMC_ERR
-	// The value is composed of 2 bytes: (data[7] << 0) | (data[6] << 8)
-	enum Warning {
-		systemCheckActive					= 1 << 0,  // 0x0001
-		externalShutdownPathAw2Off			= 1 << 1,  // 0x0002
-		externalShutdownPathAw1Off			= 1 << 2,  // 0x0004
-		oscillationLimitControllerActive	= 1 << 3,  // 0x0008
-		driverShutdownPathActive			= 1 << 10, // 0x0400
-		powerMismatchDetected				= 1 << 11, // 0x0800
-		speedSensorSignal					= 1 << 12, // 0x1000
-		hvUndervoltage						= 1 << 13, // 0x2000
-		maximumModulationLimiter			= 1 << 14, // 0x4000
-		temperatureSensor					= 1 << 15, // 0x8000
-	};
+    // Message id=0x25a, DMC_ERR
+    // The value is composed of 2 bytes: (data[7] << 0) | (data[6] << 8)
+    enum Warning {
+        systemCheckActive					= 1 << 0,  // 0x0001
+        externalShutdownPathAw2Off			= 1 << 1,  // 0x0002
+        externalShutdownPathAw1Off			= 1 << 2,  // 0x0004
+        oscillationLimitControllerActive	= 1 << 3,  // 0x0008
+        driverShutdownPathActive			= 1 << 10, // 0x0400
+        powerMismatchDetected				= 1 << 11, // 0x0800
+        speedSensorSignal					= 1 << 12, // 0x1000
+        hvUndervoltage						= 1 << 13, // 0x2000
+        maximumModulationLimiter			= 1 << 14, // 0x4000
+        temperatureSensor					= 1 << 15, // 0x8000
+    };
 
-	// Message id=0x25a, DMC_ERR
-	// The error value is composed of 4 bytes : (data[1] << 0) | (data[0] << 8) | (data[5] << 16) | (data[4] << 24)
-	enum Error {
-		speedSensorSupply			= 1 << 0,  // 0x00000001, data[1]
-		speedSensor					= 1 << 1,  // 0x00000002, data[1]
-		canLimitMessageInvalid		= 1 << 2,  // 0x00000004, data[1]
-		canControlMessageInvalid	= 1 << 3,  // 0x00000008, data[1]
-		canLimitMessageLost			= 1 << 4,  // 0x00000010, data[1]
-		overvoltageSkyConverter		= 1 << 5,  // 0x00000020, data[1]
-		voltageMeasurement			= 1 << 6,  // 0x00000040, data[1]
-		shortCircuit				= 1 << 7,  // 0x00000080, data[1]
-		canControlMessageLost		= 1 << 8,  // 0x00000100, data[0]
-		overtemp					= 1 << 9,  // 0x00000200, data[0]
-		overtempMotor				= 1 << 10, // 0x00000400, data[0]
-		overspeed					= 1 << 11, // 0x00000800, data[0]
-		undervoltage				= 1 << 12, // 0x00001000, data[0]
-		overvoltage					= 1 << 13, // 0x00002000, data[0]
-		overcurrent					= 1 << 14, // 0x00004000, data[0]
-		initalisation				= 1 << 15, // 0x00008000, data[0]
-		analogInput					= 1 << 16, // 0x00010000, data[5]
-		driverShutdown				= 1 << 22, // 0x00400000, data[5]
-		powerMismatch				= 1 << 23, // 0x00800000, data[5]
-		canControl2MessageLost		= 1 << 24, // 0x01000000, data[4]
-		motorEeprom					= 1 << 25, // 0x02000000, data[4]
-		storage						= 1 << 26, // 0x04000000, data[4]
-		enablePinSignalLost			= 1 << 27, // 0x08000000, data[4]
-		canCommunicationStartup		= 1 << 28, // 0x10000000, data[4]
-		internalSupply				= 1 << 29, // 0x20000000, data[4]
-		acOvercurrent				= 1 << 30, // 0x40000000, data[4]
-		osTrap						= 1 << 31  // 0x80000000, data[4]
-	};
-	
-	// Message id=0x210, DMC_CTRL
-	// The value is composed of 1 byte : data[0]
-	enum Control {
-		enablePositiveTorqueSpeed	= 1 << 0, // 0x01
-		enableNegativeTorqueSpeed	= 1 << 1, // 0x02
-		clearErrorLatch				= 1 << 3, // 0x08
-		enableOscillationLimiter	= 1 << 5, // 0x20
-		enableSpeedMode				= 1 << 6, // 0x40
-		enablePowerStage			= 1 << 7  // 0x80
-	};
+    // Message id=0x25a, DMC_ERR
+    // The error value is composed of 4 bytes : (data[1] << 0) | (data[0] << 8) | (data[5] << 16) | (data[4] << 24)
+    enum Error {
+        speedSensorSupply			= 1 << 0,  // 0x00000001, data[1]
+        speedSensor					= 1 << 1,  // 0x00000002, data[1]
+        canLimitMessageInvalid		= 1 << 2,  // 0x00000004, data[1]
+        canControlMessageInvalid	= 1 << 3,  // 0x00000008, data[1]
+        canLimitMessageLost			= 1 << 4,  // 0x00000010, data[1]
+        overvoltageSkyConverter		= 1 << 5,  // 0x00000020, data[1]
+        voltageMeasurement			= 1 << 6,  // 0x00000040, data[1]
+        shortCircuit				= 1 << 7,  // 0x00000080, data[1]
+        canControlMessageLost		= 1 << 8,  // 0x00000100, data[0]
+        overtemp					= 1 << 9,  // 0x00000200, data[0]
+        overtempMotor				= 1 << 10, // 0x00000400, data[0]
+        overspeed					= 1 << 11, // 0x00000800, data[0]
+        undervoltage				= 1 << 12, // 0x00001000, data[0]
+        overvoltage					= 1 << 13, // 0x00002000, data[0]
+        overcurrent					= 1 << 14, // 0x00004000, data[0]
+        initalisation				= 1 << 15, // 0x00008000, data[0]
+        analogInput					= 1 << 16, // 0x00010000, data[5]
+        driverShutdown				= 1 << 22, // 0x00400000, data[5]
+        powerMismatch				= 1 << 23, // 0x00800000, data[5]
+        canControl2MessageLost		= 1 << 24, // 0x01000000, data[4]
+        motorEeprom					= 1 << 25, // 0x02000000, data[4]
+        storage						= 1 << 26, // 0x04000000, data[4]
+        enablePinSignalLost			= 1 << 27, // 0x08000000, data[4]
+        canCommunicationStartup		= 1 << 28, // 0x10000000, data[4]
+        internalSupply				= 1 << 29, // 0x20000000, data[4]
+        acOvercurrent				= 1 << 30, // 0x40000000, data[4]
+        osTrap						= 1 << 31  // 0x80000000, data[4]
+    };
 
-	BrusaMotorController();
-	void handleTick();
-	void handleCanFrame(CAN_FRAME *frame);
-	void setup();
-	DeviceId getId();
-	uint32_t getTickInterval();
+    // Message id=0x210, DMC_CTRL
+    // The value is composed of 1 byte : data[0]
+    enum Control {
+        enablePositiveTorqueSpeed	= 1 << 0, // 0x01
+        enableNegativeTorqueSpeed	= 1 << 1, // 0x02
+        clearErrorLatch				= 1 << 3, // 0x08
+        enableOscillationLimiter	= 1 << 5, // 0x20
+        enableSpeedMode				= 1 << 6, // 0x40
+        enablePowerStage			= 1 << 7  // 0x80
+    };
 
-	void loadConfiguration();
-	void saveConfiguration();
+    BrusaMotorController();
+    void handleTick();
+    void handleCanFrame(CAN_FRAME *frame);
+    void setup();
+    DeviceId getId();
+    uint32_t getTickInterval();
+
+    void loadConfiguration();
+    void saveConfiguration();
 
 private:
-	// DMC_TRQS2
-	int16_t maxPositiveTorque; // max positive available torque in 0.01Nm -> divide by 100 to get Nm
-	int16_t minNegativeTorque; // minimum negative available torque in 0.01Nm
-	uint8_t limiterStateNumber; // state number of active limiter
+    // DMC_TRQS2
+    int16_t maxPositiveTorque; // max positive available torque in 0.01Nm -> divide by 100 to get Nm
+    int16_t minNegativeTorque; // minimum negative available torque in 0.01Nm
+    uint8_t limiterStateNumber; // state number of active limiter
 
-	int tickCounter; // count how many times handleTick() was called
-	PowerMode powerMode; // the desired power mode
-	uint8_t controlBitField; // the control bit field to send via DMC_CTRL in data[0]
-	CAN_FRAME outputFrame; // the output CAN frame;
+    int tickCounter; // count how many times handleTick() was called
+    PowerMode powerMode; // the desired power mode
+    uint8_t controlBitField; // the control bit field to send via DMC_CTRL in data[0]
+    CAN_FRAME outputFrame; // the output CAN frame;
 
-	void sendControl();
-	void sendControl2();
-	void sendLimits();
-	void prepareOutputFrame(uint32_t);
-	void processStatus(uint8_t data[]);
-	void processActualValues(uint8_t data[]);
-	void processErrors(uint8_t data[]);
-	void processTorqueLimit(uint8_t data[]);
-	void processTemperature(uint8_t data[]);
+    void sendControl();
+    void sendControl2();
+    void sendLimits();
+    void prepareOutputFrame(uint32_t);
+    void processStatus(uint8_t data[]);
+    void processActualValues(uint8_t data[]);
+    void processErrors(uint8_t data[]);
+    void processTorqueLimit(uint8_t data[]);
+    void processTemperature(uint8_t data[]);
 };
 
 #endif /* BRUSAMOTORCONTROLLER_H_ */

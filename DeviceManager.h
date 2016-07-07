@@ -38,41 +38,41 @@ class MotorController; // cyclic reference between MotorController and DeviceMan
 
 class DeviceManager {
 public:
-	static DeviceManager *getInstance();
-	void addDevice(Device *device);
-	void removeDevice(Device *device);
+    static DeviceManager *getInstance();
+    void addDevice(Device *device);
+    void removeDevice(Device *device);
 //	void addTickObserver(TickObserver *observer, uint32_t frequency);
 //	void addCanObserver(CanObserver *observer, uint32_t id, uint32_t mask, bool extended, CanHandler::CanBusNode canBus);
-	void sendMessage(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, void* message);
-	void setParameter(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, char *key, char *value);
-	void setParameter(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, char *key, uint32_t value);
-	uint8_t getNumThrottles();
-	uint8_t getNumControllers();
-	uint8_t getNumBMS();
-	uint8_t getNumChargers();
-	uint8_t getNumDisplays();
-	Throttle *getAccelerator();
-	Throttle *getBrake();
-	MotorController *getMotorController();
-	Device *getDeviceByID(DeviceId);
-	Device *getDeviceByType(DeviceType);
-	void printDeviceList();
-        void updateWifi();
-       Device *updateWifiByID(DeviceId);
+    void sendMessage(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, void* message);
+    void setParameter(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, char *key, char *value);
+    void setParameter(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, char *key, uint32_t value);
+    uint8_t getNumThrottles();
+    uint8_t getNumControllers();
+    uint8_t getNumBMS();
+    uint8_t getNumChargers();
+    uint8_t getNumDisplays();
+    Throttle *getAccelerator();
+    Throttle *getBrake();
+    MotorController *getMotorController();
+    Device *getDeviceByID(DeviceId);
+    Device *getDeviceByType(DeviceType);
+    void printDeviceList();
+    void updateWifi();
+    Device *updateWifiByID(DeviceId);
 
 protected:
 
 private:
-	DeviceManager();	// private constructor
-	static DeviceManager *deviceManager;
+    DeviceManager();	// private constructor
+    static DeviceManager *deviceManager;
 
-	Device *devices[CFG_DEV_MGR_MAX_DEVICES];
-	Throttle *throttle;
-	Throttle *brake;
-	MotorController *motorController;
+    Device *devices[CFG_DEV_MGR_MAX_DEVICES];
+    Throttle *throttle;
+    Throttle *brake;
+    MotorController *motorController;
 
-	int8_t findDevice(Device *device);
-	uint8_t countDeviceType(DeviceType deviceType);
+    int8_t findDevice(Device *device);
+    uint8_t countDeviceType(DeviceType deviceType);
 };
 
 #endif

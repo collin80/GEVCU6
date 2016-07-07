@@ -31,8 +31,8 @@
  * Constructor
  */
 Throttle::Throttle() : Device() {
-	level = 0;
-	status = OK;
+    level = 0;
+    status = OK;
 }
 
 /*
@@ -42,14 +42,14 @@ Throttle::Throttle() : Device() {
  * Get's called by the sub-class which is triggered by the tick handler
  */
 void Throttle::handleTick() {
-	Device::handleTick();
+    Device::handleTick();
 
-	RawSignalData *rawSignals = acquireRawSignal(); // get raw data from the throttle device
-	if (validateSignal(rawSignals)) { // validate the raw data
-		uint16_t position = calculatePedalPosition(rawSignals); // bring the raw data into a range of 0-1000 (without mapping)
-		level = mapPedalPosition(position); // apply mapping of the 0-1000 range to the user defined settings
-	} else 
-		level = 0;
+    RawSignalData *rawSignals = acquireRawSignal(); // get raw data from the throttle device
+    if (validateSignal(rawSignals)) { // validate the raw data
+        uint16_t position = calculatePedalPosition(rawSignals); // bring the raw data into a range of 0-1000 (without mapping)
+        level = mapPedalPosition(position); // apply mapping of the 0-1000 range to the user defined settings
+    } else
+        level = 0;
 }
 
 /*
@@ -80,47 +80,47 @@ void Throttle::handleTick() {
  * 0 <= positionRegenMaximum <= positionRegenMinimum <= positionForwardMotionStart <= positionHalfPower
  */
 int16_t Throttle::mapPedalPosition(int16_t pedalPosition) {
-	int16_t throttleLevel, range, value;
-	ThrottleConfiguration *config = (ThrottleConfiguration *) getConfiguration();
+    int16_t throttleLevel, range, value;
+    ThrottleConfiguration *config = (ThrottleConfiguration *) getConfiguration();
 
-	throttleLevel = 0;
+    throttleLevel = 0;
 
-	if (pedalPosition == 0 && config->creep > 0) {
-		throttleLevel = 10 * config->creep;
-	} else if (pedalPosition <= config->positionRegenMinimum) {
-		if (pedalPosition >= config->positionRegenMaximum) {
-			range = config->positionRegenMinimum - config->positionRegenMaximum;
-			value = pedalPosition - config->positionRegenMaximum;
-			if (range != 0) // prevent div by zero, should result in 0 throttle if min==max
-				throttleLevel = -10 * config->minimumRegen + (config->maximumRegen - config->minimumRegen) * (100 - value * 100 / range) / -10;
-		} else {
-			// no ramping yet below positionRegenMaximum, just drop to 0
+    if (pedalPosition == 0 && config->creep > 0) {
+        throttleLevel = 10 * config->creep;
+    } else if (pedalPosition <= config->positionRegenMinimum) {
+        if (pedalPosition >= config->positionRegenMaximum) {
+            range = config->positionRegenMinimum - config->positionRegenMaximum;
+            value = pedalPosition - config->positionRegenMaximum;
+            if (range != 0) // prevent div by zero, should result in 0 throttle if min==max
+                throttleLevel = -10 * config->minimumRegen + (config->maximumRegen - config->minimumRegen) * (100 - value * 100 / range) / -10;
+        } else {
+            // no ramping yet below positionRegenMaximum, just drop to 0
 //			range = config->positionRegenMaximum;
 //			value = pedalPosition;
 //			throttleLevel = -10 * config->maximumRegen * value / range;
-		}
-	}
+        }
+    }
 
-	if (pedalPosition >= config->positionForwardMotionStart) {
-		if (pedalPosition <= config->positionHalfPower) {
-			range = config->positionHalfPower - config->positionForwardMotionStart;
-			value = pedalPosition - config->positionForwardMotionStart;
-			if (range != 0) // prevent div by zero, should result in 0 throttle if half==startFwd
-				throttleLevel = 500 * value / range;
-		} else {
-			range = 1000 - config->positionHalfPower;
-			value = pedalPosition - config->positionHalfPower;
-			throttleLevel = 500 + 500 * value / range;
-		}
-	}
-	//Logger::debug("throttle level: %d", throttleLevel);
+    if (pedalPosition >= config->positionForwardMotionStart) {
+        if (pedalPosition <= config->positionHalfPower) {
+            range = config->positionHalfPower - config->positionForwardMotionStart;
+            value = pedalPosition - config->positionForwardMotionStart;
+            if (range != 0) // prevent div by zero, should result in 0 throttle if half==startFwd
+                throttleLevel = 500 * value / range;
+        } else {
+            range = 1000 - config->positionHalfPower;
+            value = pedalPosition - config->positionHalfPower;
+            throttleLevel = 500 + 500 * value / range;
+        }
+    }
+    //Logger::debug("throttle level: %d", throttleLevel);
 
-	//A bit of a kludge. Normally it isn't really possible to ever get to
-	//100% output. This next line just fudges the numbers a bit to make it
-	//more likely to get that last bit of power
-	if (throttleLevel > 979) throttleLevel = 1000;
+    //A bit of a kludge. Normally it isn't really possible to ever get to
+    //100% output. This next line just fudges the numbers a bit to make it
+    //more likely to get that last bit of power
+    if (throttleLevel > 979) throttleLevel = 1000;
 
-	return throttleLevel;
+    return throttleLevel;
 }
 
 /*
@@ -128,108 +128,108 @@ int16_t Throttle::mapPedalPosition(int16_t pedalPosition) {
  * level linearly to a value from 0 to 1000.
  */
 uint16_t Throttle::normalizeAndConstrainInput(int32_t input, int32_t min, int32_t max) {
-	return constrain(normalizeInput(input, min, max), (int32_t) 0, (int32_t) 1000);
+    return constrain(normalizeInput(input, min, max), (int32_t) 0, (int32_t) 1000);
 }
 
 /*
  * Map the constrained level linearly to a signed value from 0 to 1000.
  */
 int32_t Throttle::normalizeInput(int32_t input, int32_t min, int32_t max) {
-	return map(input, min, max, (int32_t) 0, (int32_t) 1000);
+    return map(input, min, max, (int32_t) 0, (int32_t) 1000);
 }
 
 /*
  * Returns the currently calculated/mapped throttle level (from -1000 to 1000).
  */
 int16_t Throttle::getLevel() {
-	return level;
+    return level;
 }
 
 /*
  * Return the throttle's current status
  */
 Throttle::ThrottleStatus Throttle::getStatus() {
-	return status;
+    return status;
 }
 
 /*
  * Is the throttle faulted?
  */
 bool Throttle::isFaulted() {
-	return status != OK;
+    return status != OK;
 }
 
 /*
  * Return the device type
  */
 DeviceType Throttle::getType() {
-	return DEVICE_THROTTLE;
+    return DEVICE_THROTTLE;
 }
 
 RawSignalData* Throttle::acquireRawSignal() {
-	return NULL;
+    return NULL;
 }
 
 bool Throttle::validateSignal(RawSignalData*) {
-	return false;
+    return false;
 }
 
 uint16_t Throttle::calculatePedalPosition(RawSignalData*) {
-	return 0;
+    return 0;
 }
 
 /*
  * Load the config parameters which are required by all throttles
  */
 void Throttle::loadConfiguration() {
-	ThrottleConfiguration *config = (ThrottleConfiguration *) getConfiguration();
+    ThrottleConfiguration *config = (ThrottleConfiguration *) getConfiguration();
 
-	Device::loadConfiguration(); // call parent
+    Device::loadConfiguration(); // call parent
 
 #ifdef USE_HARD_CODED
-	if (false) {
+    if (false) {
 #else
-	if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
+    if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
 #endif
-		prefsHandler->read(EETH_REGEN_MIN, &config->positionRegenMinimum);
-		prefsHandler->read(EETH_REGEN_MAX, &config->positionRegenMaximum);
-		prefsHandler->read(EETH_FWD, &config->positionForwardMotionStart);
-		prefsHandler->read(EETH_MAP, &config->positionHalfPower);
-		prefsHandler->read(EETH_CREEP, &config->creep);
-		prefsHandler->read(EETH_MIN_ACCEL_REGEN, &config->minimumRegen);
-		prefsHandler->read(EETH_MAX_ACCEL_REGEN, &config->maximumRegen);
-	} else { //checksum invalid. Reinitialize values, leave storing them to the subclasses
-		config->positionRegenMinimum = ThrottleRegenMinValue;
-		config->positionRegenMaximum = ThrottleRegenMaxValue;
-		config->positionForwardMotionStart = ThrottleFwdValue;
-		config->positionHalfPower = ThrottleMapValue;
-		config->creep = ThrottleCreepValue;
-		config->minimumRegen = ThrottleMinRegenValue; //percentage of minimal power to use when regen starts
-		config->maximumRegen = ThrottleMaxRegenValue; //percentage of full power to use for regen at throttle
-	}
-	Logger::debug(THROTTLE, "RegenMax: %l RegenMin: %l Fwd: %l Map: %l", config->positionRegenMaximum, config->positionRegenMinimum,
-			config->positionForwardMotionStart, config->positionHalfPower);
-	Logger::debug(THROTTLE, "MinRegen: %d MaxRegen: %d", config->minimumRegen, config->maximumRegen);
+        prefsHandler->read(EETH_REGEN_MIN, &config->positionRegenMinimum);
+        prefsHandler->read(EETH_REGEN_MAX, &config->positionRegenMaximum);
+        prefsHandler->read(EETH_FWD, &config->positionForwardMotionStart);
+        prefsHandler->read(EETH_MAP, &config->positionHalfPower);
+        prefsHandler->read(EETH_CREEP, &config->creep);
+        prefsHandler->read(EETH_MIN_ACCEL_REGEN, &config->minimumRegen);
+        prefsHandler->read(EETH_MAX_ACCEL_REGEN, &config->maximumRegen);
+    } else { //checksum invalid. Reinitialize values, leave storing them to the subclasses
+        config->positionRegenMinimum = ThrottleRegenMinValue;
+        config->positionRegenMaximum = ThrottleRegenMaxValue;
+        config->positionForwardMotionStart = ThrottleFwdValue;
+        config->positionHalfPower = ThrottleMapValue;
+        config->creep = ThrottleCreepValue;
+        config->minimumRegen = ThrottleMinRegenValue; //percentage of minimal power to use when regen starts
+        config->maximumRegen = ThrottleMaxRegenValue; //percentage of full power to use for regen at throttle
+    }
+    Logger::debug(THROTTLE, "RegenMax: %l RegenMin: %l Fwd: %l Map: %l", config->positionRegenMaximum, config->positionRegenMinimum,
+                  config->positionForwardMotionStart, config->positionHalfPower);
+    Logger::debug(THROTTLE, "MinRegen: %d MaxRegen: %d", config->minimumRegen, config->maximumRegen);
 }
 
 /*
  * Store the current configuration to EEPROM
  */
 void Throttle::saveConfiguration() {
-	ThrottleConfiguration *config = (ThrottleConfiguration *) getConfiguration();
+    ThrottleConfiguration *config = (ThrottleConfiguration *) getConfiguration();
 
-	Device::saveConfiguration(); // call parent
+    Device::saveConfiguration(); // call parent
 
-	prefsHandler->write(EETH_REGEN_MIN, config->positionRegenMinimum);
-	prefsHandler->write(EETH_REGEN_MAX, config->positionRegenMaximum);
-	prefsHandler->write(EETH_FWD, config->positionForwardMotionStart);
-	prefsHandler->write(EETH_MAP, config->positionHalfPower);
-	prefsHandler->write(EETH_CREEP, config->creep);
-	prefsHandler->write(EETH_MIN_ACCEL_REGEN, config->minimumRegen);
-	prefsHandler->write(EETH_MAX_ACCEL_REGEN, config->maximumRegen);
-	prefsHandler->saveChecksum();
+    prefsHandler->write(EETH_REGEN_MIN, config->positionRegenMinimum);
+    prefsHandler->write(EETH_REGEN_MAX, config->positionRegenMaximum);
+    prefsHandler->write(EETH_FWD, config->positionForwardMotionStart);
+    prefsHandler->write(EETH_MAP, config->positionHalfPower);
+    prefsHandler->write(EETH_CREEP, config->creep);
+    prefsHandler->write(EETH_MIN_ACCEL_REGEN, config->minimumRegen);
+    prefsHandler->write(EETH_MAX_ACCEL_REGEN, config->maximumRegen);
+    prefsHandler->saveChecksum();
 
-	Logger::console("Throttle configuration saved");
+    Logger::console("Throttle configuration saved");
 }
 
 

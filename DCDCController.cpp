@@ -29,48 +29,51 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 #include "DCDCController.h"
-template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } 
-
-
-	
-DCDCController::DCDCController() : Device()
-{
-    prefsHandler = new PrefHandler(DCDC);
-    //prefsHandler->setEnabledStatus(true);
-   
-    commonName = "Delphi DC-DC Converter";
-    
+template<class T> inline Print &operator <<(Print &obj, T arg) {
+    obj.print(arg);
+    return obj;
 }
 
 
 
-void DCDCController::handleCanFrame(CAN_FRAME *frame) 
+DCDCController::DCDCController() : Device()
 {
-        Logger::debug("DCDC msg: %X", frame->id);
-        Logger::debug("DCDC data: %X%X%X%X%X%X%X%X", frame->data.bytes[0],frame->data.bytes[1],frame->data.bytes[2],frame->data.bytes[3],frame->data.bytes[4],frame->data.bytes[5],frame->data.bytes[6],frame->data.bytes[7]);	
+    prefsHandler = new PrefHandler(DCDC);
+    //prefsHandler->setEnabledStatus(true);
+
+    commonName = "Delphi DC-DC Converter";
+
+}
+
+
+
+void DCDCController::handleCanFrame(CAN_FRAME *frame)
+{
+    Logger::debug("DCDC msg: %X", frame->id);
+    Logger::debug("DCDC data: %X%X%X%X%X%X%X%X", frame->data.bytes[0],frame->data.bytes[1],frame->data.bytes[2],frame->data.bytes[3],frame->data.bytes[4],frame->data.bytes[5],frame->data.bytes[6],frame->data.bytes[7]);
 }
 
 
 
 void DCDCController::setup()
 {
-	TickHandler::getInstance()->detach(this);
+    TickHandler::getInstance()->detach(this);
 
-	loadConfiguration();
-	Device::setup(); // run the parent class version of this function
+    loadConfiguration();
+    Device::setup(); // run the parent class version of this function
 
-	     CanHandler::getInstanceCar()->attach(this, 0x1D5, 0x7ff, false);
-        //Watch for 0x1D5 messages from Delphi converter
-	TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_DCDC);
+    CanHandler::getInstanceCar()->attach(this, 0x1D5, 0x7ff, false);
+    //Watch for 0x1D5 messages from Delphi converter
+    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_DCDC);
 }
 
 
 void DCDCController::handleTick() {
 
-	Device::handleTick(); //kick the ball up to papa
+    Device::handleTick(); //kick the ball up to papa
 
-        sendCmd();   //Send our Delphi voltage control command
- 
+    sendCmd();   //Send our Delphi voltage control command
+
 }
 
 
@@ -87,59 +90,59 @@ To request 14.0 vdc, the message was:
 
 void DCDCController::sendCmd()
 {
-	DCDCConfiguration *config = (DCDCConfiguration *)getConfiguration();
-	
-	CAN_FRAME output;
-	output.length = 8;
-	output.id = 0x1D7;
-	output.extended = 0; //standard frame
-	output.rtr = 0;  
-        output.fid = 0; 
-        output.data.bytes[0] = 0x80;
-        output.data.bytes[1] = 0x8E;
-        output.data.bytes[2] = 0;
-        output.data.bytes[3] = 0;
-        output.data.bytes[4] = 0;
-        output.data.bytes[5] = 0;
-        output.data.bytes[6] = 0;
-        output.data.bytes[7] = 0x00;       
-          
-	CanHandler::getInstanceCar()->sendFrame(output);
-        timestamp();
-        Logger::debug("Delphi DC-DC cmd: %X %X %X %X %X %X %X %X %X  %d:%d:%d.%d",output.id, output.data.bytes[0],
-        output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],output.data.bytes[5],output.data.bytes[6],output.data.bytes[7], hours, minutes, seconds, milliseconds);           
+    DCDCConfiguration *config = (DCDCConfiguration *)getConfiguration();
+
+    CAN_FRAME output;
+    output.length = 8;
+    output.id = 0x1D7;
+    output.extended = 0; //standard frame
+    output.rtr = 0;
+    output.fid = 0;
+    output.data.bytes[0] = 0x80;
+    output.data.bytes[1] = 0x8E;
+    output.data.bytes[2] = 0;
+    output.data.bytes[3] = 0;
+    output.data.bytes[4] = 0;
+    output.data.bytes[5] = 0;
+    output.data.bytes[6] = 0;
+    output.data.bytes[7] = 0x00;
+
+    CanHandler::getInstanceCar()->sendFrame(output);
+    timestamp();
+    Logger::debug("Delphi DC-DC cmd: %X %X %X %X %X %X %X %X %X  %d:%d:%d.%d",output.id, output.data.bytes[0],
+                  output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],output.data.bytes[5],output.data.bytes[6],output.data.bytes[7], hours, minutes, seconds, milliseconds);
 }
 
 DeviceId DCDCController::getId() {
-	return (DCDC);
+    return (DCDC);
 }
 
 uint32_t DCDCController::getTickInterval()
 {
-	return CFG_TICK_INTERVAL_DCDC;
+    return CFG_TICK_INTERVAL_DCDC;
 }
 
 void DCDCController::loadConfiguration() {
-	DCDCConfiguration *config = (DCDCConfiguration *)getConfiguration();
+    DCDCConfiguration *config = (DCDCConfiguration *)getConfiguration();
 
-	if (!config) {
-		config = new DCDCConfiguration();
-		setConfiguration(config);
-	}
+    if (!config) {
+        config = new DCDCConfiguration();
+        setConfiguration(config);
+    }
 
-	Device::loadConfiguration(); // call parent
+    Device::loadConfiguration(); // call parent
 }
 
 void DCDCController::saveConfiguration() {
-	Device::saveConfiguration();
+    Device::saveConfiguration();
 }
 
 void DCDCController::timestamp()
 {
-   milliseconds = (int) (millis()/1) %1000 ;
-   seconds = (int) (millis() / 1000) % 60 ;
+    milliseconds = (int) (millis()/1) %1000 ;
+    seconds = (int) (millis() / 1000) % 60 ;
     minutes = (int) ((millis() / (1000*60)) % 60);
-    hours   = (int) ((millis() / (1000*60*60)) % 24);  
+    hours   = (int) ((millis() / (1000*60*60)) % 24);
 }
 
 

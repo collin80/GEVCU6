@@ -28,11 +28,11 @@
 #include "DeviceManager.h"
 
 Device::Device() {
-	deviceConfiguration = NULL;
-	prefsHandler = NULL;
-	//since all derived classes eventually call this base method this will cause every device to auto register itself with the device manager
-	DeviceManager::getInstance()->addDevice(this); 
-	commonName = "Generic Device";
+    deviceConfiguration = NULL;
+    prefsHandler = NULL;
+    //since all derived classes eventually call this base method this will cause every device to auto register itself with the device manager
+    DeviceManager::getInstance()->addDevice(this);
+    commonName = "Generic Device";
 }
 
 //Empty functions to handle these callbacks if the derived classes don't
@@ -41,35 +41,35 @@ void Device::setup() {
 }
 
 char* Device::getCommonName() {
-	return commonName;
+    return commonName;
 }
 
 void Device::handleTick() {
 }
 
 uint32_t Device::getTickInterval() {
-	return 0;
+    return 0;
 }
 
 //just bubbles up the value from the preference handler.
 bool Device::isEnabled() {
-	return prefsHandler->isEnabled();
+    return prefsHandler->isEnabled();
 }
 
 void Device::handleMessage(uint32_t msgType, void* message) {
-	switch (msgType) {
-	case MSG_STARTUP:
-		this->setup();
-		break;
-	}
+    switch (msgType) {
+    case MSG_STARTUP:
+        this->setup();
+        break;
+    }
 }
 
 DeviceType Device::getType() {
-	return DEVICE_NONE;
+    return DEVICE_NONE;
 }
 
 DeviceId Device::getId() {
-	return INVALID;
+    return INVALID;
 }
 
 void Device::loadConfiguration() {
@@ -79,11 +79,11 @@ void Device::saveConfiguration() {
 }
 
 DeviceConfiguration *Device::getConfiguration() {
-	return this->deviceConfiguration;
+    return this->deviceConfiguration;
 }
 
 void Device::setConfiguration(DeviceConfiguration *configuration) {
-	this->deviceConfiguration = configuration;
+    this->deviceConfiguration = configuration;
 }
 
 

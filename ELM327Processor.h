@@ -10,13 +10,13 @@
 
 class ELM327Processor {
 public:
-	ELM327Processor();
-	String processELMCmd(char *cmd);
+    ELM327Processor();
+    String processELMCmd(char *cmd);
 private:
-	OBD2Handler *obd2Handler;
-	char buffer[30]; // a buffer for various string conversions
-	bool bLineFeed;
-	bool bHeader;
+    OBD2Handler *obd2Handler;
+    char buffer[30]; // a buffer for various string conversions
+    bool bLineFeed;
+    bool bHeader;
 };
 
 #endif

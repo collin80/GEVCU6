@@ -34,19 +34,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class Heartbeat: public TickObserver {
 public:
-	Heartbeat();
-	void setup();
-	void handleTick();
-        void setThrottleDebug(bool debug);
-        bool getThrottleDebug();
+    Heartbeat();
+    void setup();
+    void handleTick();
+    void setThrottleDebug(bool debug);
+    bool getThrottleDebug();
 
 protected:
 
 private:
-	bool led;
-        bool throttleDebug;
-        int dotCount;
-        uint32_t lastTickTime;
+    bool led;
+    bool throttleDebug;
+    int dotCount;
+    uint32_t lastTickTime;
 };
 
 #endif /* HEARTBEAT_H_ */

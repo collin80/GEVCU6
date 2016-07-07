@@ -35,12 +35,12 @@ uint32_t Logger::lastLogTime = 0;
  *
  */
 void Logger::debug(char *message, ...) {
-	if (logLevel > Debug)
-		return;
-	va_list args;
-	va_start(args, message);
-	Logger::log((DeviceId) NULL, Debug, message, args);
-	va_end(args);
+    if (logLevel > Debug)
+        return;
+    va_list args;
+    va_start(args, message);
+    Logger::log((DeviceId) NULL, Debug, message, args);
+    va_end(args);
 }
 
 /*
@@ -48,12 +48,12 @@ void Logger::debug(char *message, ...) {
  * printf() style, see Logger::log()
  */
 void Logger::debug(DeviceId deviceId, char *message, ...) {
-	if (logLevel > Debug)
-		return;
-	va_list args;
-	va_start(args, message);
-	Logger::log(deviceId, Debug, message, args);
-	va_end(args);
+    if (logLevel > Debug)
+        return;
+    va_list args;
+    va_start(args, message);
+    Logger::log(deviceId, Debug, message, args);
+    va_end(args);
 }
 
 /*
@@ -61,12 +61,12 @@ void Logger::debug(DeviceId deviceId, char *message, ...) {
  * printf() style, see Logger::log()
  */
 void Logger::info(char *message, ...) {
-	if (logLevel > Info)
-		return;
-	va_list args;
-	va_start(args, message);
-	Logger::log((DeviceId) NULL, Info, message, args);
-	va_end(args);
+    if (logLevel > Info)
+        return;
+    va_list args;
+    va_start(args, message);
+    Logger::log((DeviceId) NULL, Info, message, args);
+    va_end(args);
 }
 
 /*
@@ -74,12 +74,12 @@ void Logger::info(char *message, ...) {
  * printf() style, see Logger::log()
  */
 void Logger::info(DeviceId deviceId, char *message, ...) {
-	if (logLevel > Info)
-		return;
-	va_list args;
-	va_start(args, message);
-	Logger::log(deviceId, Info, message, args);
-	va_end(args);
+    if (logLevel > Info)
+        return;
+    va_list args;
+    va_start(args, message);
+    Logger::log(deviceId, Info, message, args);
+    va_end(args);
 }
 
 /*
@@ -87,12 +87,12 @@ void Logger::info(DeviceId deviceId, char *message, ...) {
  * printf() style, see Logger::log()
  */
 void Logger::warn(char *message, ...) {
-	if (logLevel > Warn)
-		return;
-	va_list args;
-	va_start(args, message);
-	Logger::log((DeviceId) NULL, Warn, message, args);
-	va_end(args);
+    if (logLevel > Warn)
+        return;
+    va_list args;
+    va_start(args, message);
+    Logger::log((DeviceId) NULL, Warn, message, args);
+    va_end(args);
 }
 
 /*
@@ -100,12 +100,12 @@ void Logger::warn(char *message, ...) {
  * printf() style, see Logger::log()
  */
 void Logger::warn(DeviceId deviceId, char *message, ...) {
-	if (logLevel > Warn)
-		return;
-	va_list args;
-	va_start(args, message);
-	Logger::log(deviceId, Warn, message, args);
-	va_end(args);
+    if (logLevel > Warn)
+        return;
+    va_list args;
+    va_start(args, message);
+    Logger::log(deviceId, Warn, message, args);
+    va_end(args);
 }
 
 /*
@@ -113,12 +113,12 @@ void Logger::warn(DeviceId deviceId, char *message, ...) {
  * printf() style, see Logger::log()
  */
 void Logger::error(char *message, ...) {
-	if (logLevel > Error)
-		return;
-	va_list args;
-	va_start(args, message);
-	Logger::log((DeviceId) NULL, Error, message, args);
-	va_end(args);
+    if (logLevel > Error)
+        return;
+    va_list args;
+    va_start(args, message);
+    Logger::log((DeviceId) NULL, Error, message, args);
+    va_end(args);
 }
 
 /*
@@ -126,12 +126,12 @@ void Logger::error(char *message, ...) {
  * printf() style, see Logger::log()
  */
 void Logger::error(DeviceId deviceId, char *message, ...) {
-	if (logLevel > Error)
-		return;
-	va_list args;
-	va_start(args, message);
-	Logger::log(deviceId, Error, message, args);
-	va_end(args);
+    if (logLevel > Error)
+        return;
+    va_list args;
+    va_start(args, message);
+    Logger::log(deviceId, Error, message, args);
+    va_end(args);
 }
 
 /*
@@ -139,31 +139,31 @@ void Logger::error(DeviceId deviceId, char *message, ...) {
  * printf() style, see Logger::logMessage()
  */
 void Logger::console(char *message, ...) {
-	va_list args;
-	va_start(args, message);
-	Logger::logMessage(message, args);
-	va_end(args);
+    va_list args;
+    va_start(args, message);
+    Logger::logMessage(message, args);
+    va_end(args);
 }
 
 /*
  * Set the log level. Any output below the specified log level will be omitted.
  */
 void Logger::setLoglevel(LogLevel level) {
-	logLevel = level;
+    logLevel = level;
 }
 
 /*
  * Retrieve the current log level.
  */
 Logger::LogLevel Logger::getLogLevel() {
-	return logLevel;
+    return logLevel;
 }
 
 /*
  * Return a timestamp when the last log entry was made.
  */
 uint32_t Logger::getLastLogTime() {
-	return lastLogTime;
+    return lastLogTime;
 }
 
 /*
@@ -177,7 +177,7 @@ uint32_t Logger::getLastLogTime() {
  * }
  */
 boolean Logger::isDebug() {
-	return logLevel == Debug;
+    return logLevel == Debug;
 }
 
 /*
@@ -199,30 +199,30 @@ boolean Logger::isDebug() {
  * %T - prints the next parameter as boolean ('true' or 'false')
  */
 void Logger::log(DeviceId deviceId, LogLevel level, char *format, va_list args) {
-	lastLogTime = millis();
-	SerialUSB.print(lastLogTime);
-	SerialUSB.print(" - ");
+    lastLogTime = millis();
+    SerialUSB.print(lastLogTime);
+    SerialUSB.print(" - ");
 
-	switch (level) {
-	case Debug:
-		SerialUSB.print("DEBUG");
-		break;
-	case Info:
-		SerialUSB.print("INFO");
-		break;
-	case Warn:
-		SerialUSB.print("WARNING");
-		break;
-	case Error:
-		SerialUSB.print("ERROR");
-		break;
-	}
-	SerialUSB.print(": ");
+    switch (level) {
+    case Debug:
+        SerialUSB.print("DEBUG");
+        break;
+    case Info:
+        SerialUSB.print("INFO");
+        break;
+    case Warn:
+        SerialUSB.print("WARNING");
+        break;
+    case Error:
+        SerialUSB.print("ERROR");
+        break;
+    }
+    SerialUSB.print(": ");
 
-	if (deviceId)
-		printDeviceName(deviceId);
+    if (deviceId)
+        printDeviceName(deviceId);
 
-	logMessage(format, args);
+    logMessage(format, args);
 }
 
 /*
@@ -244,76 +244,76 @@ void Logger::log(DeviceId deviceId, LogLevel level, char *format, va_list args) 
  * %T - prints the next parameter as boolean ('true' or 'false')
  */
 void Logger::logMessage(char *format, va_list args) {
-	for (; *format != 0; ++format) {
-		if (*format == '%') {
-			++format;
-			if (*format == '\0')
-				break;
-			if (*format == '%') {
-				SerialUSB.print(*format);
-				continue;
-			}
-			if (*format == 's') {
-				register char *s = (char *) va_arg( args, int );
-				SerialUSB.print(s);
-				continue;
-			}
-			if (*format == 'd' || *format == 'i') {
-				SerialUSB.print(va_arg( args, int ), DEC);
-				continue;
-			}
-			if (*format == 'f') {
-				SerialUSB.print(va_arg( args, double ), 2);
-				continue;
-			}
-			if (*format == 'x') {
-				SerialUSB.print(va_arg( args, int ), HEX);
-				continue;
-			}
-			if (*format == 'X') {
-				SerialUSB.print("0x");
-				SerialUSB.print(va_arg( args, int ), HEX);
-				continue;
-			}
-			if (*format == 'b') {
-				SerialUSB.print(va_arg( args, int ), BIN);
-				continue;
-			}
-			if (*format == 'B') {
-				SerialUSB.print("0b");
-				SerialUSB.print(va_arg( args, int ), BIN);
-				continue;
-			}
-			if (*format == 'l') {
-				SerialUSB.print(va_arg( args, long ), DEC);
-				continue;
-			}
+    for (; *format != 0; ++format) {
+        if (*format == '%') {
+            ++format;
+            if (*format == '\0')
+                break;
+            if (*format == '%') {
+                SerialUSB.print(*format);
+                continue;
+            }
+            if (*format == 's') {
+                register char *s = (char *) va_arg( args, int );
+                SerialUSB.print(s);
+                continue;
+            }
+            if (*format == 'd' || *format == 'i') {
+                SerialUSB.print(va_arg( args, int ), DEC);
+                continue;
+            }
+            if (*format == 'f') {
+                SerialUSB.print(va_arg( args, double ), 2);
+                continue;
+            }
+            if (*format == 'x') {
+                SerialUSB.print(va_arg( args, int ), HEX);
+                continue;
+            }
+            if (*format == 'X') {
+                SerialUSB.print("0x");
+                SerialUSB.print(va_arg( args, int ), HEX);
+                continue;
+            }
+            if (*format == 'b') {
+                SerialUSB.print(va_arg( args, int ), BIN);
+                continue;
+            }
+            if (*format == 'B') {
+                SerialUSB.print("0b");
+                SerialUSB.print(va_arg( args, int ), BIN);
+                continue;
+            }
+            if (*format == 'l') {
+                SerialUSB.print(va_arg( args, long ), DEC);
+                continue;
+            }
 
-			if (*format == 'c') {
-				SerialUSB.print(va_arg( args, int ));
-				continue;
-			}
-			if (*format == 't') {
-				if (va_arg( args, int ) == 1) {
-					SerialUSB.print("T");
-				} else {
-					SerialUSB.print("F");
-				}
-				continue;
-			}
-			if (*format == 'T') {
-				if (va_arg( args, int ) == 1) {
-					SerialUSB.print(Constants::trueStr);
-				} else {
-					SerialUSB.print(Constants::falseStr);
-				}
-				continue;
-			}
+            if (*format == 'c') {
+                SerialUSB.print(va_arg( args, int ));
+                continue;
+            }
+            if (*format == 't') {
+                if (va_arg( args, int ) == 1) {
+                    SerialUSB.print("T");
+                } else {
+                    SerialUSB.print("F");
+                }
+                continue;
+            }
+            if (*format == 'T') {
+                if (va_arg( args, int ) == 1) {
+                    SerialUSB.print(Constants::trueStr);
+                } else {
+                    SerialUSB.print(Constants::falseStr);
+                }
+                continue;
+            }
 
-		}
-		SerialUSB.print(*format);
-	}
-	SerialUSB.println();
+        }
+        SerialUSB.print(*format);
+    }
+    SerialUSB.println();
 }
 
 /*
@@ -323,51 +323,51 @@ void Logger::logMessage(char *format, va_list args) {
  * NOTE: Should be kept in synch with the defined devices.
  */
 void Logger::printDeviceName(DeviceId deviceId) {
-	switch (deviceId) {
-	case DMOC645:
-		SerialUSB.print("DMOC645");
-		break;
-	case BRUSA_DMC5:
-		SerialUSB.print("DMC5");
-		break;
-	case BRUSACHARGE:
-		SerialUSB.print("NLG5");
-		break;
-	case TCCHCHARGE:
-		SerialUSB.print("TCCH");
-		break;
-	case THROTTLE:
-		SerialUSB.print("THROTTLE");
-		break;
-	case POTACCELPEDAL:
-		SerialUSB.print("POTACCEL");
-		break;
-	case POTBRAKEPEDAL:
-		SerialUSB.print("POTBRAKE");
-		break;
-	case CANACCELPEDAL:
-		SerialUSB.print("CANACCEL");
-		break;
-	case CANBRAKEPEDAL:
-		SerialUSB.print("CANBRAKE");
-		break;
-	case ICHIP2128:
-		SerialUSB.print("ICHIP");
-		break;
-	case THINKBMS:
-		SerialUSB.print("THINKBMS");
-		break;
-	case SYSTEM:
-		SerialUSB.print("SYSTEM");
-		break;
-	case HEARTBEAT:
-		SerialUSB.print("HEARTBEAT");
-		break;
-	case MEMCACHE:
-		SerialUSB.print("MEMCACHE");
-		break;
-	}
-	SerialUSB.print(" - ");
+    switch (deviceId) {
+    case DMOC645:
+        SerialUSB.print("DMOC645");
+        break;
+    case BRUSA_DMC5:
+        SerialUSB.print("DMC5");
+        break;
+    case BRUSACHARGE:
+        SerialUSB.print("NLG5");
+        break;
+    case TCCHCHARGE:
+        SerialUSB.print("TCCH");
+        break;
+    case THROTTLE:
+        SerialUSB.print("THROTTLE");
+        break;
+    case POTACCELPEDAL:
+        SerialUSB.print("POTACCEL");
+        break;
+    case POTBRAKEPEDAL:
+        SerialUSB.print("POTBRAKE");
+        break;
+    case CANACCELPEDAL:
+        SerialUSB.print("CANACCEL");
+        break;
+    case CANBRAKEPEDAL:
+        SerialUSB.print("CANBRAKE");
+        break;
+    case ICHIP2128:
+        SerialUSB.print("ICHIP");
+        break;
+    case THINKBMS:
+        SerialUSB.print("THINKBMS");
+        break;
+    case SYSTEM:
+        SerialUSB.print("SYSTEM");
+        break;
+    case HEARTBEAT:
+        SerialUSB.print("HEARTBEAT");
+        break;
+    case MEMCACHE:
+        SerialUSB.print("MEMCACHE");
+        break;
+    }
+    SerialUSB.print(" - ");
 
 }
 

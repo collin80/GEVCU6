@@ -24,7 +24,7 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
- */ 
+ */
 
 #ifndef MEM_CACHE_H_
 #define MEM_CACHE_H_
@@ -46,7 +46,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // if dirty. For instance, 128 levels * 500 aging period * 10ms (100Hz tick) = 640 seconds
 // EEPROM handles about 1 million write cycles. So, a flush time of 100 seconds means that
 // continuous writing would last 100M seconds which is 3.17 years
-// Another way to look at it is that 128 aging levels * 40ms tick is 5.12 seconds to flush for 
+// Another way to look at it is that 128 aging levels * 40ms tick is 5.12 seconds to flush for
 // each aging period below. Adjust acccordingly.
 */
 #define AGING_PERIOD       60
@@ -54,48 +54,48 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //Current parameters as of Sept 7 2014 = 128 * 40ms * 60 = 307.2 seconds to flush = about 10 years EEPROM life
 
 class MemCache: public TickObserver {
-  public:
-  void setup();
-  void handleTick();
-  void FlushSinglePage();
-  void FlushAllPages();
-  void FlushPage(uint8_t page);
-  void FlushAddress(uint32_t address);
-  void InvalidatePage(uint8_t page);
-  void InvalidateAddress(uint32_t address);
-  void InvalidateAll();
-  void AgeFullyPage(uint8_t page);
-  void AgeFullyAddress(uint32_t address);
-  
-  boolean Write(uint32_t address, uint8_t valu);
-  boolean Write(uint32_t address, uint16_t valu);
-  boolean Write(uint32_t address, uint32_t valu);
-  boolean Write(uint32_t address, void* data, uint16_t len);
-  
-  //It's sort of weird to make the read function take a reference but it allows for overloading
-  boolean Read(uint32_t address, uint8_t* valu);
-  boolean Read(uint32_t address, uint16_t* valu);
-  boolean Read(uint32_t address, uint32_t* valu);
-  boolean Read(uint32_t address, void* data, uint16_t len);
-  
-  MemCache();
-  
-  private:
-  typedef struct {
-    uint8_t data[256];
-    uint32_t address; //address of start of page
-    uint8_t age; //
-    boolean dirty;
-  } PageCache;
+public:
+    void setup();
+    void handleTick();
+    void FlushSinglePage();
+    void FlushAllPages();
+    void FlushPage(uint8_t page);
+    void FlushAddress(uint32_t address);
+    void InvalidatePage(uint8_t page);
+    void InvalidateAddress(uint32_t address);
+    void InvalidateAll();
+    void AgeFullyPage(uint8_t page);
+    void AgeFullyAddress(uint32_t address);
 
-  PageCache pages[NUM_CACHED_PAGES];
-  boolean isWriting();
-  uint8_t cache_hit(uint32_t address);
-  void cache_age();
-  uint8_t cache_findpage();
-  uint8_t cache_readpage(uint32_t addr);
-  boolean cache_writepage(uint8_t page);
-  uint8_t agingTimer;
+    boolean Write(uint32_t address, uint8_t valu);
+    boolean Write(uint32_t address, uint16_t valu);
+    boolean Write(uint32_t address, uint32_t valu);
+    boolean Write(uint32_t address, void* data, uint16_t len);
+
+    //It's sort of weird to make the read function take a reference but it allows for overloading
+    boolean Read(uint32_t address, uint8_t* valu);
+    boolean Read(uint32_t address, uint16_t* valu);
+    boolean Read(uint32_t address, uint32_t* valu);
+    boolean Read(uint32_t address, void* data, uint16_t len);
+
+    MemCache();
+
+private:
+    typedef struct {
+        uint8_t data[256];
+        uint32_t address; //address of start of page
+        uint8_t age; //
+        boolean dirty;
+    } PageCache;
+
+    PageCache pages[NUM_CACHED_PAGES];
+    boolean isWriting();
+    uint8_t cache_hit(uint32_t address);
+    void cache_age();
+    uint8_t cache_findpage();
+    uint8_t cache_readpage(uint32_t addr);
+    boolean cache_writepage(uint8_t page);
+    uint8_t agingTimer;
 };
 
 #endif /* MEM_CACHE_H_ */

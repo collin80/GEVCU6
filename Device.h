@@ -49,27 +49,27 @@ class DeviceConfiguration {
  */
 class Device: public TickObserver {
 public:
-	Device();
-	virtual void setup();
-	virtual void handleMessage(uint32_t, void* );
-	virtual DeviceType getType();
-	virtual DeviceId getId();
-	void handleTick();
-	bool isEnabled();
-	virtual uint32_t getTickInterval();
-	char* getCommonName();
+    Device();
+    virtual void setup();
+    virtual void handleMessage(uint32_t, void* );
+    virtual DeviceType getType();
+    virtual DeviceId getId();
+    void handleTick();
+    bool isEnabled();
+    virtual uint32_t getTickInterval();
+    char* getCommonName();
 
-	virtual void loadConfiguration();
-	virtual void saveConfiguration();
-	DeviceConfiguration *getConfiguration();
-	void setConfiguration(DeviceConfiguration *);
+    virtual void loadConfiguration();
+    virtual void saveConfiguration();
+    DeviceConfiguration *getConfiguration();
+    void setConfiguration(DeviceConfiguration *);
 
 protected:
-	PrefHandler *prefsHandler;
-	char *commonName;
+    PrefHandler *prefsHandler;
+    char *commonName;
 
 private:
-	DeviceConfiguration *deviceConfiguration; // reference to the currently active configuration
+    DeviceConfiguration *deviceConfiguration; // reference to the currently active configuration
 };
 
 #endif /* DEVICE_H_ */

@@ -1,7 +1,7 @@
 /*
  * DCDCController.h
  *
- * 
+ *
  *
  Copyright (c) 2014 Jack Rickard
 
@@ -45,24 +45,24 @@ public:
 
 class DCDCController: public Device, CanObserver {
 public:
-	virtual void handleTick();
-	virtual void handleCanFrame(CAN_FRAME *frame);
-	virtual void setup();
+    virtual void handleTick();
+    virtual void handleCanFrame(CAN_FRAME *frame);
+    virtual void setup();
 
-	DCDCController();
-        void timestamp();
-	DeviceId getId();
-	uint32_t getTickInterval();
-       
-	virtual void loadConfiguration();
-	virtual void saveConfiguration();
+    DCDCController();
+    void timestamp();
+    DeviceId getId();
+    uint32_t getTickInterval();
+
+    virtual void loadConfiguration();
+    virtual void saveConfiguration();
 
 private:
-        int milliseconds  ;
-        int seconds;
-        int minutes;
-        int hours;
-	void sendCmd();
+    int milliseconds  ;
+    int seconds;
+    int minutes;
+    int hours;
+    void sendCmd();
 };
 
 #endif /* DCDC_H_ */

@@ -24,22 +24,22 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
- */ 
+ */
 
 #include "BatteryManager.h"
- 
-BatteryManager::BatteryManager() : Device() 
+
+BatteryManager::BatteryManager() : Device()
 {
-	packVoltage = 0;
-	packCurrent = 0;
+    packVoltage = 0;
+    packCurrent = 0;
 }
 
-BatteryManager::~BatteryManager() 
+BatteryManager::~BatteryManager()
 {
 }
 
 DeviceType BatteryManager::getType() {
-	return (DEVICE_BMS);
+    return (DEVICE_BMS);
 }
 
 void BatteryManager::handleTick() {
@@ -47,11 +47,11 @@ void BatteryManager::handleTick() {
 
 void BatteryManager::setup() {
 #ifndef USE_HARD_CODED
-	if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
-	}
-	else { //checksum invalid. Reinitialize values and store to EEPROM
-		//prefsHandler->saveChecksum();
-	}
+    if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
+    }
+    else { //checksum invalid. Reinitialize values and store to EEPROM
+        //prefsHandler->saveChecksum();
+    }
 #else
 #endif
 
@@ -62,12 +62,12 @@ void BatteryManager::setup() {
 
 int BatteryManager::getPackVoltage()
 {
-	return packVoltage;
+    return packVoltage;
 }
 
 signed int BatteryManager::getPackCurrent()
 {
-	return packCurrent;
+    return packCurrent;
 }
 
 

@@ -47,23 +47,23 @@ extern PrefHandler *sysPrefs;
 
 class EVICConfiguration: public DeviceConfiguration {
 public:
-  //uint8_t capacity;
+    //uint8_t capacity;
 };
 
 
 class EVIC: public Device, CanObserver {
-    public:
-    
+public:
+
     EVIC();
     //EVIC(USARTClass *which);
     virtual void handleTick();
     virtual void handleCanFrame(CAN_FRAME *frame);
-	
+
     virtual void setup(); //initialization on start up
     void timestamp();
     DeviceType getType();
     DeviceId getId();
-    
+
     char *getTimeRunning();
     void loadConfiguration();
     void saveConfiguration();
@@ -84,55 +84,55 @@ class EVIC: public Device, CanObserver {
     uint8_t getCellTemp4();
     uint8_t getCellHi();
     uint8_t getCello();
-    
-        unsigned long timemark;
-	unsigned long timemark2;
-	int16_t torqueActual;
-	int16_t speedActual;
-	int16_t dcVoltage;
-        int16_t dcCurrent;
-        uint16_t nominalVolt;
-        uint16_t AH;
-        uint8_t capacity;
-        uint8_t SOC;
-        int16_t Power;
-        int16_t kWh;
-	int16_t temperatureMotor;
-	int16_t temperatureInverter;
-        int16_t rpm;
-        uint8_t celltemp1;
-        uint8_t celltemp2;
-        uint8_t celltemp3;
-        uint8_t celltemp4;
-        uint8_t CellHi;
-        uint8_t Cello;
-  
-    private:
-    void sendTestCmdCurtis();
-    void sendTestCmdOrion(); 
-    void sendCmdCurtis();
-    void sendCmdOrion(); 
 
-        double AHf;
-        double milliAH;
-        float  SOCf;
-        int milliseconds  ;
-        int seconds;
-        int minutes;
-        int hours ;
-  	unsigned long elapsedtime;
-        int16_t DCV;
-        int16_t DCA;
-        int8_t TEMPM;
-        int8_t TEMPI;
-  	
+    unsigned long timemark;
+    unsigned long timemark2;
+    int16_t torqueActual;
+    int16_t speedActual;
+    int16_t dcVoltage;
+    int16_t dcCurrent;
+    uint16_t nominalVolt;
+    uint16_t AH;
+    uint8_t capacity;
+    uint8_t SOC;
+    int16_t Power;
+    int16_t kWh;
+    int16_t temperatureMotor;
+    int16_t temperatureInverter;
+    int16_t rpm;
+    uint8_t celltemp1;
+    uint8_t celltemp2;
+    uint8_t celltemp3;
+    uint8_t celltemp4;
+    uint8_t CellHi;
+    uint8_t Cello;
+
+private:
+    void sendTestCmdCurtis();
+    void sendTestCmdOrion();
+    void sendCmdCurtis();
+    void sendCmdOrion();
+
+    double AHf;
+    double milliAH;
+    float  SOCf;
+    int milliseconds  ;
+    int seconds;
+    int minutes;
+    int hours ;
+    unsigned long elapsedtime;
+    int16_t DCV;
+    int16_t DCA;
+    int8_t TEMPM;
+    int8_t TEMPI;
+
     int tickCounter;
     char buffer[30]; // a buffer for various string conversions
     uint32_t lastSentTime;
     boolean weHave505;
     boolean testMode;
-    
-	      
+
+
 };
 
 #endif

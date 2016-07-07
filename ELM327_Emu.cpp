@@ -37,24 +37,24 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * Constructor. Assign serial interface to use for comm with bluetooth adapter we're emulating with
  */
 ELM327Emu::ELM327Emu() {
-	prefsHandler = new PrefHandler(ELM327EMU);
+    prefsHandler = new PrefHandler(ELM327EMU);
 
-	uint8_t sys_type;
-	sysPrefs->read(EESYS_SYSTEM_TYPE, &sys_type);
-	if (sys_type == 3 || sys_type == 4)
-		serialInterface = &Serial2;
-	else //older hardware used this instead
-		serialInterface = &Serial3; 
+    uint8_t sys_type;
+    sysPrefs->read(EESYS_SYSTEM_TYPE, &sys_type);
+    if (sys_type == 3 || sys_type == 4)
+        serialInterface = &Serial2;
+    else //older hardware used this instead
+        serialInterface = &Serial3;
 
-	commonName = "ELM327 Emulator over Bluetooth";
+    commonName = "ELM327 Emulator over Bluetooth";
 }
 
 /*
  * Constructor. Pass serial interface to use
  */
 ELM327Emu::ELM327Emu(USARTClass *which) {
-	prefsHandler = new PrefHandler(ELM327EMU);
-	serialInterface = which;
+    prefsHandler = new PrefHandler(ELM327EMU);
+    serialInterface = which;
 }
 
 
@@ -63,29 +63,29 @@ ELM327Emu::ELM327Emu(USARTClass *which) {
  */
 void ELM327Emu::setup() {
 
-	Logger::info("add device: ELM327 emulator (id: %X, %X", ELM327EMU, this);
+    Logger::info("add device: ELM327 emulator (id: %X, %X", ELM327EMU, this);
 
-	TickHandler::getInstance()->detach(this);
+    TickHandler::getInstance()->detach(this);
 
-	tickCounter = 0;
-	ibWritePtr = 0;
-	serialInterface->begin(9600);
+    tickCounter = 0;
+    ibWritePtr = 0;
+    serialInterface->begin(9600);
 
-	elmProc = new ELM327Processor();
+    elmProc = new ELM327Processor();
 
-	//this isn't a wifi link but the timer interval can be the same
-	//because it serves a similar function and has similar timing requirements
-	TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_WIFI);
+    //this isn't a wifi link but the timer interval can be the same
+    //because it serves a similar function and has similar timing requirements
+    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_WIFI);
 }
 
 /*
  * Send a command to ichip. The "AT+i" part will be added.
  */
 void ELM327Emu::sendCmd(String cmd) {
-	serialInterface->write("AT");
-	serialInterface->print(cmd);
-	serialInterface->write(13);
-	loop(); // parse the response
+    serialInterface->write("AT");
+    serialInterface->print(cmd);
+    serialInterface->write(13);
+    loop(); // parse the response
 }
 
 /*
@@ -99,18 +99,18 @@ void ELM327Emu::handleTick() {
  * Handle a message sent by the DeviceManager.
  */
 void ELM327Emu::handleMessage(uint32_t messageType, void* message) {
-	Device::handleMessage(messageType, message);
+    Device::handleMessage(messageType, message);
 
-	switch (messageType) {
-	case MSG_SET_PARAM: {
-		break;
-	}
-	case MSG_CONFIG_CHANGE:
-		break;
-	case MSG_COMMAND:
-		sendCmd((char *)message);
-		break;
-	}
+    switch (messageType) {
+    case MSG_SET_PARAM: {
+        break;
+    }
+    case MSG_CONFIG_CHANGE:
+        break;
+    case MSG_COMMAND:
+        sendCmd((char *)message);
+        break;
+    }
 }
 
 /*
@@ -121,25 +121,25 @@ void ELM327Emu::handleMessage(uint32_t messageType, void* message) {
  */
 
 void ELM327Emu::loop() {
-	int incoming;
-	while (serialInterface->available()) {
-		incoming = serialInterface->read();
-		if (incoming != -1) { //and there is no reason it should be -1
-			if (incoming == 13 || ibWritePtr > 126) { // on CR or full buffer, process the line
-				incomingBuffer[ibWritePtr] = 0; //null terminate the string
-				ibWritePtr = 0; //reset the write pointer
-				
-				if (Logger::isDebug())
-					Logger::debug(ELM327EMU, incomingBuffer);
-				processCmd();
-					
-			} else { // add more characters
-				if (incoming != 10 && incoming != ' ') // don't add a LF character or spaces. Strip them right out
-					incomingBuffer[ibWritePtr++] = (char)tolower(incoming); //force lowercase to make processing easier
-			}
-		} else
-		return;
-	}
+    int incoming;
+    while (serialInterface->available()) {
+        incoming = serialInterface->read();
+        if (incoming != -1) { //and there is no reason it should be -1
+            if (incoming == 13 || ibWritePtr > 126) { // on CR or full buffer, process the line
+                incomingBuffer[ibWritePtr] = 0; //null terminate the string
+                ibWritePtr = 0; //reset the write pointer
+
+                if (Logger::isDebug())
+                    Logger::debug(ELM327EMU, incomingBuffer);
+                processCmd();
+
+            } else { // add more characters
+                if (incoming != 10 && incoming != ' ') // don't add a LF character or spaces. Strip them right out
+                    incomingBuffer[ibWritePtr++] = (char)tolower(incoming); //force lowercase to make processing easier
+            }
+        } else
+            return;
+    }
 }
 
 /*
@@ -147,42 +147,42 @@ void ELM327Emu::loop() {
 *	But, for reference, this cmd processes the command in incomingBuffer
 */
 void ELM327Emu::processCmd() {
-	String retString = elmProc->processELMCmd(incomingBuffer);
+    String retString = elmProc->processELMCmd(incomingBuffer);
 
-	serialInterface->print(retString);
-	if (Logger::isDebug()) {
-		char buff[30];
-		retString.toCharArray(buff, 30);
-		Logger::debug(ELM327EMU, buff);
-	}
-	
+    serialInterface->print(retString);
+    if (Logger::isDebug()) {
+        char buff[30];
+        retString.toCharArray(buff, 30);
+        Logger::debug(ELM327EMU, buff);
+    }
+
 }
 
 DeviceType ELM327Emu::getType() {
-	return DEVICE_MISC;
+    return DEVICE_MISC;
 }
 
 DeviceId ELM327Emu::getId() {
-	return (ELM327EMU);
+    return (ELM327EMU);
 }
 
 void ELM327Emu::loadConfiguration() {
-	ELM327Configuration *config = (ELM327Configuration *)getConfiguration();
+    ELM327Configuration *config = (ELM327Configuration *)getConfiguration();
 
-	if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
-		Logger::debug(ELM327EMU, "Valid checksum so using stored elm327 emulator config values");
-		//TODO: implement processing of config params for WIFI
+    if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
+        Logger::debug(ELM327EMU, "Valid checksum so using stored elm327 emulator config values");
+        //TODO: implement processing of config params for WIFI
 //		prefsHandler->read(EESYS_WIFI0_SSID, &config->ssid);
-	}
+    }
 }
 
 void ELM327Emu::saveConfiguration() {
-	ELM327Configuration *config = (ELM327Configuration *) getConfiguration();
+    ELM327Configuration *config = (ELM327Configuration *) getConfiguration();
 
-	//TODO: implement processing of config params for WIFI
+    //TODO: implement processing of config params for WIFI
 //	prefsHandler->write(EESYS_WIFI0_SSID, config->ssid);
 //	prefsHandler->saveChecksum();
 }
- 
+
 
 

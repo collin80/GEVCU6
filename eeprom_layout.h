@@ -2,9 +2,9 @@
  * eeprom_layout.h
  *
 *EEPROM Map. There is support for up to 6 devices: A motor controller, display, charger, BMS, Throttle,  and a misc device (EPAS, WOC, etc)
-* 
+*
 *There is a 256KB eeprom chip which stores these settings. The 4K is allocated to primary storage and 4K is allocated to a "known good"
-* storage location. This leaves most of EEPROM free for something else, probably logging. 
+* storage location. This leaves most of EEPROM free for something else, probably logging.
 
 Copyright (c) 2013 Collin Kidder, Michael Neuweiler, Charles Galpin
 
@@ -138,7 +138,7 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EESYS_TWI_BAUD           106 //2 bytes - Baud for TWI in 1000's just like CAN bauds. So 100k baud is set as 100
 #define EESYS_TICK_RATE          108 //2 bytes - # of system ticks per second. Can range the full 16 bit value [1, 65536] which yields ms rate of [15us, 1000ms]
 
-//We store the current system time from the RTC in EEPROM every so often. 
+//We store the current system time from the RTC in EEPROM every so often.
 //RTC is not battery backed up on the Due so a power failure will reset it.
 //These storage spaces let the firmware reload the last knowm time to bootstrap itself
 //as much as possible. The hope is that we'll be able to get access to internet eventually
@@ -148,7 +148,7 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 
 //Technically there are two different canbus systems in use. The MCP2515 has 2 masks and 5 filters. The Arduino DUE
 //Has 8 masks and 8 filters potentially (not really, you do need transmit boxes too). So, the most masks and filters
-//we could ever set is 7 (using one mb as transmit) so support accordingly. 
+//we could ever set is 7 (using one mb as transmit) so support accordingly.
 
 #define EESYS_CAN_RX_COUNT       199 //1 byte - how many mailboxes to use for RX on the Due. On the Macchina it is always 5.
 #define EESYS_CAN_MASK0          200 //4 bytes - first canbus mask - bit 31 sets whether it is extended or not (set = extended)
@@ -168,7 +168,7 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EESYS_CAPACITY           256 // 1 byte - battery pack capacity in AH
 #define EESYS_AH                257 // 2 bytes - current cumulative ampere hours 
 
-//Allow for a few defined WIFI SSIDs that the GEVCU will try to automatically connect to. 
+//Allow for a few defined WIFI SSIDs that the GEVCU will try to automatically connect to.
 #define EESYS_WIFI0_SSID	 300 //32 bytes - the SSID to create or use (prefixed with ! if create ad-hoc)
 #define EESYS_WIFI0_CHAN         332 //1 byte - the wifi channel (1 - 11) to use
 #define EESYS_WIFI0_DHCP         333 //1 byte - DHCP mode, 0 = off, 1 = server, 2 = client

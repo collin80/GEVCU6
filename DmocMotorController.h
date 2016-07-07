@@ -46,49 +46,49 @@ public:
 class DmocMotorController: public MotorController, CanObserver {
 public:
 
-	enum Step {
-		SPEED_TORQUE,
-		CHAL_RESP
-	};
+    enum Step {
+        SPEED_TORQUE,
+        CHAL_RESP
+    };
 
-	enum KeyState {
-		OFF = 0,
-		ON = 1,
-		RESERVED = 2,
-		NOACTION = 3
-	};
+    enum KeyState {
+        OFF = 0,
+        ON = 1,
+        RESERVED = 2,
+        NOACTION = 3
+    };
 
-	
+
 
 public:
-	virtual void handleTick();
-	virtual void handleCanFrame(CAN_FRAME *frame);
-	virtual void setup();
-	void setGear(Gears gear);
+    virtual void handleTick();
+    virtual void handleCanFrame(CAN_FRAME *frame);
+    virtual void setup();
+    void setGear(Gears gear);
 
-	DmocMotorController();
-	DeviceId getId();
-	uint32_t getTickInterval();
+    DmocMotorController();
+    DeviceId getId();
+    uint32_t getTickInterval();
 
-	virtual void loadConfiguration();
-	virtual void saveConfiguration();
+    virtual void loadConfiguration();
+    virtual void saveConfiguration();
 
 private:
-	
-	OperationState actualState; //what the controller is reporting it is
-	int step;
-	byte online; //counter for whether DMOC appears to be operating
-	byte alive;
-	int activityCount;
-        uint16_t torqueCommand;
-        void timestamp();
 
-	void sendCmd1();
-	void sendCmd2();
-	void sendCmd3();
-	void sendCmd4();
-	void sendCmd5();
-	byte calcChecksum(CAN_FRAME thisFrame);
+    OperationState actualState; //what the controller is reporting it is
+    int step;
+    byte online; //counter for whether DMOC appears to be operating
+    byte alive;
+    int activityCount;
+    uint16_t torqueCommand;
+    void timestamp();
+
+    void sendCmd1();
+    void sendCmd2();
+    void sendCmd3();
+    void sendCmd4();
+    void sendCmd5();
+    byte calcChecksum(CAN_FRAME thisFrame);
 
 };
 
