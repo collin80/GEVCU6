@@ -40,6 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "MotorController.h"
 #include "DmocMotorController.h"
 #include "BrusaMotorController.h"
+#include "CKMotorController.h"
 #include "Heartbeat.h"
 #include "sys_io.h"
 #include "CanHandler.h"

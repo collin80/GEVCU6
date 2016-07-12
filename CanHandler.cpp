@@ -28,6 +28,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "CanHandler.h"
+#include "FirmwareReceiver.h"
 
 CanHandler *CanHandler::canHandlerEV = NULL;
 CanHandler *CanHandler::canHandlerCar = NULL;
@@ -83,6 +84,8 @@ void CanHandler::initialize() {
 
     //Mailboxes are default set up initialized with one MB for TX and the rest for RX
     //That's OK with us so no need to initialize those things there.
+	
+	//bus->setRXFilter(0x100, 0x7C0, false); //filter to allow firmware upgrade frames to come in.
 
     Logger::info("CAN%d init ok", (canBusNode == CAN_BUS_EV ? 0 : 1));
 }
@@ -205,7 +208,7 @@ void CanHandler::process() {
             }
 
             if(frame.id==CAN_SWITCH)CANIO(frame);
-
+			//fwGotFrame(&frame);
         }
     }
 }

@@ -55,6 +55,7 @@ Random comments on things that should be coded up soon:
 // identify the required libraries for the build.
 #include <due_rtc.h>
 #include <due_can.h>
+#include <FirmwareReceiver.h>
 #include <due_wire.h>
 #include <DueTimer.h>
 #include <SPI.h>
@@ -217,12 +218,13 @@ void createObjects() {
 	CanBrake *cbrake = new CanBrake();
 	DmocMotorController *dmotorController = new DmocMotorController();
     CodaMotorController *cmotorController = new CodaMotorController();
-        DCDCController *dcdcController = new DCDCController();
+	CKMotorController *ckMotorController = new CKMotorController();
+    DCDCController *dcdcController = new DCDCController();
 	BrusaMotorController *bmotorController = new BrusaMotorController();
 	ThinkBatteryManager *BMS = new ThinkBatteryManager();
 	ELM327Emu *emu = new ELM327Emu();
 	ICHIPWIFI *iChip = new ICHIPWIFI();	
-        EVIC *eVIC = new EVIC();
+    EVIC *eVIC = new EVIC();
 }
      void initializeDevices() {
 	DeviceManager *deviceManager = DeviceManager::getInstance();

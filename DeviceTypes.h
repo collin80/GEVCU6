@@ -44,6 +44,7 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     DMOC645 = 0x1000,
     BRUSA_DMC5 = 0x1001,
     CODAUQM = 0x1002,
+	CKINVERTER = 0x1003,
     BRUSACHARGE = 0x1010,
     TCCHCHARGE = 0x1011,
     LEAR=0x1012,
