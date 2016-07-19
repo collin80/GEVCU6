@@ -56,7 +56,7 @@ void CKMotorController::setup() {
 
     running = false;
     setSelectedGear(NEUTRAL);
-    setOpState(DISABLED );
+    setOpState(DISABLED);
     CK_milli = millis();
 
     TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC);
@@ -69,7 +69,6 @@ void CKMotorController::setup() {
  and also the checksum must match the one we calculate. Right now we'll just assume
  everything has gone according to plan.
  */
-
 void CKMotorController::handleCanFrame(CAN_FRAME *frame) {
     int RotorTemp, invTemp, StatorTemp;
     int temp;

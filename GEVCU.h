@@ -50,6 +50,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "SerialConsole.h"
 #include "ELM327_Emu.h"
 #include "ichip_2128.h"
+#include "adafruitBLE.h"
 #include "Sys_Messages.h"
 #include "CodaMotorController.h"
 #include "FaultHandler.h"

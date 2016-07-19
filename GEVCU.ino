@@ -79,7 +79,7 @@ byte i = 0;
 
 void sendWiReach(char* message)
 {
-  Serial2.println(message);
+    Serial2.println(message);
     delay(700);
     while (Serial2.available()) {SerialUSB.write(Serial2.read());}
 }
@@ -223,7 +223,8 @@ void createObjects() {
 	BrusaMotorController *bmotorController = new BrusaMotorController();
 	ThinkBatteryManager *BMS = new ThinkBatteryManager();
 	ELM327Emu *emu = new ELM327Emu();
-	ICHIPWIFI *iChip = new ICHIPWIFI();	
+	ICHIPWIFI *iChip = new ICHIPWIFI();
+    ADAFRUITBLE *ble = new ADAFRUITBLE();
     EVIC *eVIC = new EVIC();
 }
      void initializeDevices() {
