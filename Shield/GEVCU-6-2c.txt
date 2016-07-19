@@ -1,0 +1,253 @@
+Partlist
+
+Exported from GEVCU-6-2c.brd at 7/18/16 8:27 PM
+
+EAGLE Version 6.6.0 Copyright (c) 1988-2014 CadSoft
+
+Assembly variant: 
+
+Part     Value                    Package                                            Library                     Position (mil)        Orientation
+
++3.3V                             CHIPLED_0805                                       microbuilder                (4002 2361)           R270
++5V                               CHIPLED_0805                                       microbuilder                (226 323.5)           R90
++12V                              CHIPLED_0805                                       microbuilder                (760 3470)            R270
+C1       10u                      C0805                                              rcl                         (3902 2618)           MR180
+C2       0.1u                     C0805                                              rcl                         (3902 2518)           MR180
+C3       0.1u                     C0805                                              rcl                         (3902 2718)           MR180
+C4       0.1u                     C0805                                              rcl                         (3902 2418)           MR180
+C5       0.1u                     C0805                                              rcl                         (3055 3398)           MR90
+C6       0.1u                     C0805                                              rcl                         (2567.5 2786)         MR0
+C7       0.1u                     C0805                                              rcl                         (2754 2270)           MR0
+C8       0.1u                     C0805                                              rcl                         (3928.5 3115)         R270
+C9       10u                      C0805                                              rcl                         (4017 3114)           R270
+C10      0.1u                     C0805                                              rcl                         (3332 2475)           R90
+C11      10u                      C0805                                              rcl                         (3199.5 2475)         R90
+C12      10u                      C0805                                              rcl                         (3037 3433)           R180
+C13      0.1u                     C0805                                              rcl                         (3038 3343)           R180
+C14      0.1u                     C0805                                              rcl                         (2993 3008.5)         R90
+C15      0.1u                     C0805                                              rcl                         (3056 2687)           R90
+C16      0.1u                     C0805                                              rcl                         (3332 2669)           R270
+C17      0.1u                     C0805                                              rcl                         (3477 2669)           R270
+C18      0.1u                     C0805                                              rcl                         (3415 2843.5)         R90
+C19      0.1u                     C0805                                              rcl                         (4324.5 3502)         R180
+C20      0.1u                     C0805                                              rcl                         (3539 2219)           MR180
+C21      0.1u                     C0805                                              rcl                         (3352 3465)           R90
+C22      10u                      C0805                                              rcl                         (3260.5 3465)         R90
+C23      22p                      C1206                                              rcl                         (3502 3618)           MR180
+C24      22p                      C1206                                              rcl                         (3670 3499)           MR90
+C25      22p                      C0805                                              rcl                         (3977 2825)           MR180
+C26      22p                      C0805                                              rcl                         (3976 2932)           MR180
+C27      22p                      C0805                                              rcl                         (3473 3040)           R270
+C28      0.01u                    C0805                                              rcl                         (3785 2893)           R90
+C29      0.1u                     C0805                                              rcl                         (1880.5 2369.5)       R270
+C30      10u                      C0805                                              rcl                         (1783.5 2371)         R270
+C31      0.1u                     C0805                                              rcl                         (2542.5 3313.5)       MR0
+C32      0.1u                     C0805                                              rcl                         (1880.5 3035.5)       MR0
+C33      10u                      C0805                                              rcl                         (1895 3321)           MR0
+C34      0.1u                     C0805                                              rcl                         (2539 3338.5)         R180
+C35      0.1u                     C0805                                              rcl                         (1882 3240.5)         R180
+C36      10u                      C0805                                              rcl                         (1882 3320.5)         R180
+C37      0.1u                     C0805                                              rcl                         (2495 2972.5)         MR90
+C38      0.1u                     C0805                                              rcl                         (1880 3044)           R180
+C39      10u                      C0805                                              rcl                         (1880.5 2956)         MR0
+C40      0.1u                     C0805                                              rcl                         (2494 3000.5)         R90
+C41      0.1u                     C0805                                              rcl                         (1894.5 3241)         MR0
+C42      10u                      C0805                                              rcl                         (1880.5 2964)         R180
+C43      .1u                      C0805                                              rcl                         (2825 2151)           R180
+C44      .1u                      C0805                                              rcl                         (1777.5 2031)         MR180
+C45      .1u                      C0805                                              rcl                         (1370.5 1938)         R180
+C46      0.1u                     C0805                                              rcl                         (1611.5 1890.5)       R270
+C47      4.7u                     C0805                                              rcl                         (1531.5 1889.5)       R270
+C48      4.7u                     C0805                                              rcl                         (1752 1887.5)         R270
+C49      0.1u                     C0805                                              rcl                         (1831.5 1887.5)       R270
+C50      0.033u                   C0805                                              rcl                         (894.5 1218)          R0
+C51      0.033u                   C0805                                              rcl                         (1223 1155.5)         R90
+C52      0.1u                     C0805                                              rcl                         (2581 2329)           R0
+C53      10u                      C0805                                              rcl                         (2581 2251)           R0
+C54      22p                      C1206                                              rcl                         (2593 2149)           R0
+C55      0.1u                     C0805                                              rcl                         (2597 1896)           R0
+C56      0.1u                     C0805                                              rcl                         (1829.5 1712.5)       R270
+C57      10u                      C0805                                              rcl                         (1750 1712)           R270
+C58      .1u                      C0805                                              rcl                         (2563 1745)           R270
+C59      0.1u                     C0805                                              rcl                         (1803 1575.5)         R0
+C60      .1u                      C0805                                              rcl                         (1401 1540)           R180
+C61      0.1u                     C0805                                              rcl                         (2634 1404)           R270
+C62      4.7u                     C0805                                              rcl                         (2551 1404)           R270
+C63      4.7u                     C0805                                              rcl                         (1879 1359)           R270
+C64      0.1u                     C0805                                              rcl                         (1797 1359)           R270
+C65      0.1u                     C0805                                              rcl                         (1996 1553)           MR180
+C66      10u                      C0805                                              rcl                         (1997 1449)           MR180
+C67      0.1u                     C0805                                              rcl                         (2488.5 2483)         MR90
+C68      0.1u                     C0805                                              rcl                         (1863 2783.5)         MR270
+C69      47n                      C0805                                              rcl                         (1026.5 1772)         R0
+C70      0.1u                     C0805                                              rcl                         (2427 2333)           MR90
+C71      0.1u                     C0805                                              rcl                         (1860 2534)           R90
+C72      47n                      C0805                                              rcl                         (1005 1381)           R270
+C73      0.1u                     C0805                                              rcl                         (4386 2900)           MR90
+C74      100u                     E2,5-6                                             rcl                         (1360 3546)           R0
+C75      1u                       C0805                                              rcl                         (1023 3470)           R180
+C76      0.1u                     C0805                                              rcl                         (1023 3570)           R180
+C77      2u                       C0805                                              rcl                         (2554 3966)           MR0
+C78      0.01u                    C1812                                              rcl                         (2200 4092)           MR180
+C79      0.1u                     C0805                                              rcl                         (2553 1569)           R90
+C80      10u                      C0805                                              rcl                         (2635 1569)           R90
+C81      0.1u                     C0805                                              rcl                         (3458 1435)           MR270
+C82      10uF                     C0805                                              rcl                         (3536 4046)           MR90
+C83      10uF                     C0805                                              rcl                         (3713 4045)           MR90
+C84      .1u                      C0805                                              rcl                         (964 1449)            MR0
+C85      10u                      C0805                                              rcl                         (3564 1436)           MR270
+C86      .1u                      C0805                                              rcl                         (982 1617)            MR0
+C87      0.1u                     C0805                                              rcl                         (2039 2289)           MR90
+C88      4.7u                     C0805                                              rcl                         (2128 2288)           MR90
+C89      4.7u                     C0805                                              rcl                         (2219 2288)           MR90
+C90      0.1u                     C0805                                              rcl                         (2312 2288)           MR90
+C91      0.1u                     C0805                                              rcl                         (2341 1458)           MR180
+C92      10u                      C0805                                              rcl                         (2341 1545)           MR180
+C93      1u                       C0805                                              rcl                         (1800 502)            MR180
+C94      10u                      C0805                                              rcl                         (1796 1167.5)         R270
+C95      0.1u                     C0805                                              rcl                         (1707.5 1167.5)       R270
+C96      680u                     E5-10,5                                            rcl                         (1616 652)            R90
+C97      0.1u                     C0805                                              rcl                         (1130 1155)           R270
+D1       MBR0520LT                SOD123                                             diode                       (1006 3283)           R90
+D2       MBR0520LT                SOD123                                             diode                       (1011 3000)           R90
+D3       MBR0520LT                SOD123                                             diode                       (1011 2689)           R90
+D4       MBR0520LT                SOD123                                             diode                       (1010 2403)           R90
+D5       MBR0520LT                SOD123                                             diode                       (1570 3025)           MR270
+D6       MBR0520LT                SOD123                                             diode                       (1570 2725)           MR270
+D7       MBR0520LT                SOD123                                             diode                       (1570 2426)           MR270
+D8       MBR0520LT                SOD123                                             diode                       (1570 2128)           MR270
+D9       B360B-13-F               SMB                                                diode                       (752 3873)            R270
+D10      BAS70XY                  SOT363_PHILIPS                                     diode                       (1558 1577)           R0
+D11      BAS70XY                  SOT363_PHILIPS                                     diode                       (1640 1430)           R180
+D12      BAS70XY                  SOT363_PHILIPS                                     diode                       (1138 1489)           MR90
+D13      BAS70XY                  SOT363_PHILIPS                                     diode                       (1154 1767)           MR270
+D14      BAS70XY                  SOT363_PHILIPS                                     diode                       (1193 1355)           R90
+D20      BAS70XY                  SOT363_PHILIPS                                     diode                       (1778 2082)           R90
+D36      BAS70XY                  SOT363_PHILIPS                                     diode                       (1854 2239)           R270
+ERASE    PUCHBUTTON               PUCHBUTTON                                         PushButton                  (2604 2989.25)        R270
+IC9      ISO1050DW                DUB-R-PDSO-G8                                      texas                       (2189 2642)           MR270
+IC10     ISO1050DW                DUB-R-PDSO-G8                                      texas                       (2204 2738)           R90
+JP1                               1X18                                               pinhead                     (3293 460)            R0
+JP2                               1X18                                               pinhead                     (3293 1160)           R0
+JTAG                              PINHEAD_2X05_127                                   Arduino_Wifi_shield_v018_tG (4234 3361)           R270
+L1       MH2029-300Y              0805                                               wuerth-elektronik           (3482 2484)           R270
+L2       MH2029-300Y              0805                                               wuerth-elektronik           (3797 3193)           R270
+L3       MH2029-300Y              0805                                               wuerth-elektronik           (3502 2093)           MR90
+L4       MH2029-300Y              0805                                               wuerth-elektronik           (3304 3344)           R0
+L5       MH2029-300Y              0805                                               wuerth-elektronik           (808.5 2225.5)        R0
+L6       MH2029-300Y              0805                                               wuerth-elektronik           (808.5 2143.5)        R0
+L7       MH2029-300Y              0805                                               wuerth-elektronik           (706.5 1185.5)        R180
+L8       MH2029-300Y              0805                                               wuerth-elektronik           (702.5 1071.5)        R180
+L9       MH2029-300Y              0805                                               wuerth-elektronik           (808.5 2058)          R0
+L10      MH2029-300Y              0805                                               wuerth-elektronik           (809 1972.5)          R0
+L11      MH2029-300Y              0805                                               wuerth-elektronik           (781.5 1792)          MR180
+L12      MH2029-300Y              0805                                               wuerth-elektronik           (777.5 1251)          MR180
+L13      MH2029-300Y              0805                                               wuerth-elektronik           (762 1544.5)          MR180
+LED                               CHIPLED_0805                                       microbuilder                (4002 2493)           R270
+OK1      ILD213                   SOIC08                                             optocoupler                 (1033 862)            MR90
+OK2      ILD213                   SOIC08                                             optocoupler                 (1030 592)            MR90
+PTC      2.5A                     PTC1812                                            microbuilder                (1352 3873)           R90
+PTC0     2.5A                     PTC1812                                            microbuilder                (808 3210)            R0
+PTC1     2.5A                     PTC1812                                            microbuilder                (808 2923)            R0
+PTC2     2.5A                     PTC1812                                            microbuilder                (812 2619)            R0
+PTC3     2.5A                     PTC1812                                            microbuilder                (812 2366)            R0
+PTC4     2.5A                     PTC1812                                            microbuilder                (928 3100)            MR180
+PTC5     2.5A                     PTC1812                                            microbuilder                (928 2800)            MR180
+PTC6     2.5A                     PTC1812                                            microbuilder                (928 2501)            MR180
+PTC7     2.5A                     PTC1812                                            microbuilder                (928 2202)            MR180
+R1       100k                     R0805                                              rcl                         (3502.5 2843)         R90
+R2       39R 1%                   R0805                                              rcl                         (3908 3110)           MR270
+R3       39R 1%                   R0805                                              rcl                         (3800 3149)           MR270
+R4       6k8 1%                   R0805                                              rcl                         (3366.5 3040.5)       R90
+R5       402R                     R0805                                              rcl                         (3802 2493)           R180
+R6       10                       R0805                                              rcl                         (1697.5 2758.5)       MR90
+R7       10                       R0805                                              rcl                         (1681 2370)           MR270
+R8       10                       R0805                                              rcl                         (1664 2988)           MR270
+R9       10                       R0805                                              rcl                         (1575 3242)           MR270
+R10      14k .1%                  R0805                                              rcl                         (2807 2272)           R180
+R11      1k .1%                   R0805                                              rcl                         (2825 2068)           R0
+R12      0R                       R0805                                              rcl                         (1777.5 2110)         MR0
+R13      1k .1%                   R0805                                              rcl                         (1370.5 2017.5)       R180
+R14      14k .1%                  R0805                                              rcl                         (1370.5 2098)         R180
+R15      1k .1%                   R0805                                              rcl                         (894.5 1077.5)        R180
+R16      750R .1%                 R0805                                              rcl                         (1043.5 1155)         R270
+R17      14k .1%                  R0805                                              rcl                         (2728 1745)           R90
+R18      1k .1%                   R0805                                              rcl                         (2645 1745)           R90
+R19      0R                       R0805                                              rcl                         (1803 1495)           R180
+R20      1k .1%                   R0805                                              rcl                         (1401 1462)           R180
+R21      14k .1%                  R0805                                              rcl                         (1401 1383)           R180
+R22      1M 0.1%                  R1206                                              rcl                         (965 1248)            MR180
+R23      1.5K 0.1%                R0805                                              rcl                         (965 1354)            MR180
+R24      100k                     R0805                                              rcl                         (4280 3194)           R0
+R25      1.5K 0.1%                R0805                                              rcl                         (981 1702)            MR0
+R26      1M 0.1%                  R1206                                              rcl                         (980 1789)            MR0
+R27      10k                      R0805                                              rcl                         (2717 1569)           R270
+R28      100k                     R0805                                              rcl                         (4279 3085)           R0
+R29      100k                     R0805                                              rcl                         (4278 2974)           R0
+R30      100k                     R0805                                              rcl                         (4276 2863)           R0
+R38      60R                      R0805                                              rcl                         (856 1824.5)          R180
+R39      60R                      R0805                                              rcl                         (855 1710.5)          R180
+R40      60R                      R0805                                              rcl                         (855.5 1511)          R180
+R41      60R                      R0805                                              rcl                         (859.5 1361)          R180
+R42      10k                      R0805                                              rcl                         (1206 764)            R180
+R43      10k                      R0805                                              rcl                         (1209 483)            R180
+R44      1k                       R0805                                              rcl                         (734 945)             MR180
+R45      1k                       R0805                                              rcl                         (1206 678)            R0
+R46      1k                       R0805                                              rcl                         (739 793)             MR180
+R47      1k                       R0805                                              rcl                         (1208 571)            R0
+R48      10k                      R0805                                              rcl                         (1393 357)            R0
+R49      10k                      R0805                                              rcl                         (1520 240)            R0
+R50      1k                       R0805                                              rcl                         (735 659)             MR180
+R51      1k                       R0805                                              rcl                         (1207 382)            R0
+R52      1k                       R0805                                              rcl                         (731 522)             MR180
+R53      1k                       R0805                                              rcl                         (1206 271)            R0
+R54      4.7k                     R0805                                              rcl                         (4281 2901.05007)     MR270
+R55      4.7k                     R0805                                              rcl                         (4183 2901)           MR270
+R56      3k3                      R0805                                              rcl                         (756 3569)            R0
+R57      1k                       R0805                                              rcl                         (470 324.5)           R0
+R58      402R                     R0805                                              rcl                         (3804 2361)           R180
+R65      1k                       R0805                                              rcl                         (3504 3781)           R180
+R66      10k                      R0805                                              rcl                         (2896.5 3008.5)       R270
+R67      10k                      R0805                                              rcl                         (2774.5 3206.5)       R270
+R68      10k                      R0805                                              rcl                         (2526 2642)           MR90
+R69      10k                      R0805                                              rcl                         (2631 2641)           MR90
+R70      10k                      R0805                                              rcl                         (2610 2975)           MR90
+R71      10k                      R0805                                              rcl                         (2631.5 2473.5)       MR180
+R72      10k                      R0805                                              rcl                         (2938 2817)           R90
+R73      10k                      R0805                                              rcl                         (3134 2867)           R90
+R74      10                       R0805                                              rcl                         (1550 2273)           R90
+R75      10                       R0805                                              rcl                         (1542 2565)           R90
+R76      10                       R0805                                              rcl                         (1550 3171)           R90
+R77      10                       R0805                                              rcl                         (1549 2852)           R90
+RESET    PUCHBUTTON               PUCHBUTTON                                         PushButton                  (4001.25 2780.5)      R270
+SJ5      SOLDERJUMPERNO           SJ_2S-NO                                           SparkFun-Passives           (4213 2759)           R270
+T2                                SOT223                                             zetex                       (1263 2898)           R90
+T4                                SOT223                                             zetex                       (1264 2605)           R90
+T5                                SOT223                                             zetex                       (1270 3100)           MR270
+T6                                SOT223                                             zetex                       (1270 2800)           MR270
+T7                                SOT223                                             zetex                       (1270 2501)           MR270
+T8                                SOT223                                             zetex                       (1270 2202)           MR270
+T10                               SOT223                                             zetex                       (1261 3226)           R90
+T12                               SOT223                                             zetex                       (1262 2294)           R90
+TVS      SMBJ15A-TR               SMBJ                                               diode                       (1152 3873)           R270
+U$1      CINCON5V                 CINCON5V                                           collin                      (1857 1241)           R270
+U$2      581_01_48_005_S          581_01_48_005_S                                    CINCH                       (4500 0)              R90
+U$3      ASE                      ASE                                                crystal                     (2597 2022)           R90
+U$4      BLE_SPI                  BLE_SPI                                            collin                      (3239 1286)           R0
+U1       ATSAM3X8EA-AU            LQFP144                                            SmartPrj                    (3202 2768)           MR180
+U3       ADUM3221BRZ              SOIC127P600X175-8N                                 adum3221                    (2203 2964)           MR0
+U4       ADUM3221BRZ              SOIC127P600X175-8N                                 adum3221                    (2201.5 3253.5)       MR0
+U5       ADUM3221BRZ              SOIC127P600X175-8N                                 adum3221                    (2204 3094)           R180
+U6       ADUM3221BRZ              SOIC127P600X175-8N                                 adum3221                    (2202.5 3317.5)       R180
+U7       CK_CUSTOM_M24M02-DRMN6TP CK_CUSTOM_SOIC8                                    EPROM                       (4299 2590)           MR0
+U8       TRACO                    TRACO                                              Traco                       (2200 3839)           R0
+U9       TSR-1                    TSR-1                                              Traco                       (247 2613)            R0
+U10                               SOT223-W                                           microbuilder                (3261 4006)           MR270
+U11      ADE7913                  SOIC20                                             collin                      (2043 2449)           R270
+U12      ADE7913                  SOIC20                                             collin                      (2050 1829)           R270
+U24      ADE7913                  SOIC20                                             collin                      (2038 1639)           MR90
+USB2                              CHIPLED_0805                                       microbuilder                (3687 3782)           R270
+X1       PN61729-S                PN61729-S                                          con-berg                    (4095 3847)           R90
+Y1       12MHz KX-7 20pF          CRYSTAL-3.2-2.5                                    SmartPrj                    (3502 3417)           MR0
+Y2       32.768Khz                ARDUINO_WIFI_SHIELD_V018_TG_RESONATOR_EPSON_FC_145 Arduino_Wifi_shield_v018_tG (3854 2879)           MR90
+ZEN      1SMB5929BT3G             SMB                                                diode                       (952 3873)            R270
