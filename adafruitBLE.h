@@ -64,6 +64,7 @@ public:
 struct Characteristic {
     int minSize;
     int maxSize;
+    uint8_t properties;
     const char *descript;
     GattPresentationFormat present;
 };
