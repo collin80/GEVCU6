@@ -39,43 +39,63 @@ uint8_t BLETYPE=1;  //Type 1 is SPI type 2 is UART
 //but instead this array is null terminated sort of like a C string.
 Characteristic characteristics[] = 
 {
-    {4, 4, "TimeRunning"},
-    {2, 2, "TorqueRequest"},
-    {2, 2, "TorqueActual"},
-    {2, 2, "ThrottleLevel"},
-    {2, 2, "BrakeLevel"},
-    {2, 2, "SpeedRequested"},
-    {2, 2, "SpeedActual"},
-    {1, 1, "PowerMode"},
-    {1, 1, "Gear"},
-    {2, 2, "BusVoltage"},
-    {2, 2, "BusCurrent"},
-    {2, 2, "MotorCurrent"},
-    {2, 2, "NomVoltage"},
-    {2, 2, "KWHours"},
-    {4, 4, "Bitfield1"},
-    {4, 4, "Bitfield2"},
-    {4, 4, "Bitfield3"},
-    {4, 4, "Bitfield4"},
-    {1, 1, "IsRunning"},
-    {1, 1, "IsFaulted"},
-    {1, 1, "IsWarning"},
-    {1, 1, "MotorTemperature"},
-    {1, 1, "InverterTemp"},
-    {1, 1, "SystemTemp"},
-    {2, 2, "MechPower"},
-    {2, 2, "PrechargeResist"},
-    {1, 1, "PrechargeRelay"},
-    {1, 1, "MainContRelay"},
-    {1, 1, "CoolFanRelay"},
-    {1, 1, "CoolOnTemp"},
-    {1, 1, "CoolOffTemp"},
-    {1, 1, "BrakeLightOut"},
-    {1, 1, "ReverseLightOut"},
-    {1, 1, "EnableInput"},
-    {1, 1, "ReverseInput"},    
-    
-    {0, 0, "END"} //leave this at the end - null terminator
+    {4, 4, "TimeRunning", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_TIME_SECOND, 1, 0}}, //MeasureCharId[0]
+    {2, 2, "TorqueRequest", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //1
+    {2, 2, "TorqueActual", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //2
+    {2, 2, "ThrottleLevel", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //3
+    {2, 2, "BrakeLevel", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //4
+    {2, 2, "SpeedRequested", {GATT_PRESENT_FORMAT_SINT16, 0, GATT_PRESENT_UNIT_ANGULAR_VELOCITY_REVOLUTION_PER_MINUTE, 1, 0}}, //5
+    {2, 2, "SpeedActual", {GATT_PRESENT_FORMAT_SINT16, 0, GATT_PRESENT_UNIT_ANGULAR_VELOCITY_REVOLUTION_PER_MINUTE, 1, 0}}, //6
+    {1, 1, "PowerMode", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[7]
+    {1, 1, "Gear", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //8
+    {2, 2, "BusVoltage", {GATT_PRESENT_FORMAT_UINT16, -1, GATT_PRESENT_UNIT_ELECTRIC_POTENTIAL_DIFFERENCE_VOLT, 1, 0}}, //9
+    {2, 2, "BusCurrent", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_ELECTRIC_CURRENT_AMPERE, 1, 0}}, //10
+    {2, 2, "MotorCurrent", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_ELECTRIC_CURRENT_AMPERE, 1, 0}}, //11
+    {2, 2, "NomVoltage", {GATT_PRESENT_FORMAT_UINT16, -1, GATT_PRESENT_UNIT_ELECTRIC_POTENTIAL_DIFFERENCE_VOLT, 1, 0}}, //12
+    {2, 2, "KWHours", {GATT_PRESENT_FORMAT_UINT16, -1, GATT_PRESENT_UNIT_ENERGY_KILOWATT_HOUR, 1, 0}}, //13
+    {4, 4, "Bitfield1", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[14]
+    {4, 4, "Bitfield2", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //15
+    {4, 4, "Bitfield3", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //16
+    {4, 4, "Bitfield4", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //17
+    {1, 1, "IsRunning", {GATT_PRESENT_FORMAT_BOOLEAN, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //18
+    {1, 1, "IsFaulted", {GATT_PRESENT_FORMAT_BOOLEAN, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //19
+    {1, 1, "IsWarning", {GATT_PRESENT_FORMAT_BOOLEAN, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[20]
+    {2, 2, "MotorTemperature", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //21
+    {2, 2, "InverterTemp", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //22
+    {2, 2, "SystemTemp", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //23
+    {2, 2, "MechPower", {GATT_PRESENT_FORMAT_SINT16, 2, GATT_PRESENT_UNIT_POWER_WATT, 1, 0}}, //24
+    {2, 2, "PrechargeResist", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_ELECTRIC_RESISTANCE_OHM, 1, 0}}, //25
+    {1, 1, "PrechargeRelay", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //26
+    {1, 1, "MainContRelay", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //27
+    {1, 1, "CoolFanRelay", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[28]
+    {1, 1, "CoolOnTemp", {GATT_PRESENT_FORMAT_SINT8, 0, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //29
+    {1, 1, "CoolOffTemp", {GATT_PRESENT_FORMAT_SINT8, 0, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //30
+    {1, 1, "BrakeLightOut", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //31
+    {1, 1, "ReverseLightOut", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //32
+    {1, 1, "EnableInput", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //33
+    {1, 1, "ReverseInput", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //34
+    {1, 1, "NumThrottlePots", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //35
+    {1, 1, "ThrottleSubType", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //36
+    {1, 1, "ThrottleMin1", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[37]
+    {1, 1, "ThrottleMin2", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //38
+    {1, 1, "ThrottleMax1", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //39
+    {1, 1, "ThrottleMax2", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //40
+    {2, 2, "ThrRegenMax", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //41
+    {2, 2, "ThrRegenMin", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //42
+    {2, 2, "ThrottleFwd", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //43
+    {2, 2, "ThrottleMap", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //44
+    {1, 1, "TRegenMin", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //45
+    {1, 1, "TRegenMax", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[46]
+    {1, 1, "TCreep", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //47
+    {1, 1, "BrakeMin", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //48
+    {1, 1, "BrakeMax", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //49
+    {1, 1, "BRegenMin", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //50
+    {1, 1, "BRegenMax", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //51
+    {2, 2, "MaxRPM", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_ANGULAR_VELOCITY_REVOLUTION_PER_MINUTE, 1, 0}}, //52 
+    {2, 2, "TorqueMax", {GATT_PRESENT_FORMAT_UINT16, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //53
+    {1, 1, "LogLevel", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //54
+ 
+    {0, 0, "END", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}} //leave this at the end - null terminator
 };
    
 /*
@@ -189,7 +209,7 @@ void ADAFRUITBLE::setupBLEservice()
     Characteristic charact = characteristics[charCounter];
     while (charact.minSize != 0)
     {
-        MeasureCharId[charCounter] = gatt.addCharacteristic(0x3101 + charCounter, 0x10, charact.minSize, charact.maxSize, BLE_DATATYPE_INTEGER, charact.descript);
+        MeasureCharId[charCounter] = gatt.addCharacteristic(0x3101 + charCounter, 0x10, charact.minSize, charact.maxSize, BLE_DATATYPE_INTEGER, charact.descript, &charact.present);
         if (MeasureCharId[charCounter] == 0) 
         {
             Logger::error(ADABLUE, "Could not add characteristic %x", 0x3101 + charCounter);
@@ -210,21 +230,6 @@ void ADAFRUITBLE::setupBLEservice()
     ble.reset();
   
     Logger::info(ADABLUE, "Service ID: %i", ServiceId);
-}
-
-void ADAFRUITBLE::updateBLE(int CharacteristicID, int MeasuredValue)
-{
-  /* Command is sent when \n (\r) or println is called */
-  /* AT+GATTCHAR=CharacteristicID,value */
-  
-  ble.print( F("AT+GATTCHAR=") );
-  ble.print(CharacteristicID);
-  ble.print( F(",") );
-  ble.println(MeasuredValue);
-  
-  /* Check if command executed OK */
-  if (!ble.waitForOK()) Logger::error(ADABLUE, "Failed to get response....");
-  
 }
 
 /*
@@ -250,11 +255,10 @@ void ADAFRUITBLE::handleTick() {
         loadParameters();
         Logger::console("Wifi Parameters loaded...");
         paramCache.bitfield1 = motorController->getStatusBitfield1();
-        //setParam(Constants::bitfield1, paramCache.bitfield1);
+        gatt.setChar(MeasureCharId[14], paramCache.bitfield1);
         paramCache.bitfield2 = motorController->getStatusBitfield2();
-        //setParam(Constants::bitfield2, paramCache.bitfield2);
+        gatt.setChar(MeasureCharId[15], paramCache.bitfield1);
         // DeviceManager::getInstance()->updateWifiByID(BRUSA_DMC5);
-
         didParamLoad = true;
     }
 
@@ -264,27 +268,22 @@ void ADAFRUITBLE::handleTick() {
             //Logger::console("Wifi tick counter 1...");
 
             paramCache.timeRunning = ms;
-            //setParam(Constants::timeRunning, getTimeRunning());
+            gatt.setChar(MeasureCharId[1], getTimeRunning());
 
             if ( paramCache.torqueRequested != motorController->getTorqueRequested() ) {
                 paramCache.torqueRequested = motorController->getTorqueRequested();
-                //setParam(Constants::torqueRequested, paramCache.torqueRequested / 10.0f, 1);
+                gatt.setChar(MeasureCharId[1], paramCache.torqueRequested);
             }
             if ( paramCache.torqueActual != motorController->getTorqueActual() ) {
                 paramCache.torqueActual = motorController->getTorqueActual();
-                //setParam(Constants::torqueActual, paramCache.torqueActual / 10.0f, 1);
+                gatt.setChar(MeasureCharId[2], paramCache.torqueActual);
             }
         }
         if (accelerator) {
             RawSignalData *rawSignal = accelerator->acquireRawSignal();
             if ( paramCache.throttle !=  rawSignal->input1) {
                 paramCache.throttle = rawSignal->input1;
-                //setParam(Constants::throttle, paramCache.throttle);
-
-                /*if ( paramCache.throttle != accelerator->getLevel() ) {
-                	paramCache.throttle = accelerator->getLevel();
-                                    if (paramCache.throttle<-600){paramCache.throttle=-600;}
-                	setParam(Constants::throttle, paramCache.throttle / 10.0f, 1);*/
+                gatt.setChar(MeasureCharId[3], paramCache.throttle);
             }
         }
         if (brake) {
@@ -292,17 +291,12 @@ void ADAFRUITBLE::handleTick() {
             if ( paramCache.brake !=  rawSignal->input1) {
                 paramCache.brake = rawSignal->input1;
                 paramCache.brakeNotAvailable = false;
-                //setParam(Constants::brake, paramCache.brake);
-
-                /*if ( paramCache.brake != brake->getLevel() ) {
-                	paramCache.brake = brake->getLevel();
-                	paramCache.brakeNotAvailable = false;
-                	setParam(Constants::brake, paramCache.brake / 10.0f, 1);*/
+                gatt.setChar(MeasureCharId[4], paramCache.brake);
             }
         } else {
             if ( paramCache.brakeNotAvailable == true ) {
                 paramCache.brakeNotAvailable = false; // no need to keep sending this
-                //setParam(Constants::brake, Constants::notAvailable);
+                gatt.setChar(MeasureCharId[4], (int16_t)0);                
             }
         }
     } else if (tickCounter == 2) {
@@ -310,40 +304,39 @@ void ADAFRUITBLE::handleTick() {
             //Logger::console("Wifi tick counter 2...");
             if ( paramCache.speedRequested != motorController->getSpeedRequested() ) {
                 paramCache.speedRequested = motorController->getSpeedRequested();
-                //setParam(Constants::speedRequested, paramCache.speedRequested);
+                gatt.setChar(MeasureCharId[5], paramCache.speedRequested);
             }
             if ( paramCache.speedActual != motorController->getSpeedActual() ) {
                 paramCache.speedActual = motorController->getSpeedActual();
                 if (paramCache.speedActual<0) paramCache.speedActual=0;
                 if (paramCache.speedActual>10000) paramCache.speedActual=10000;
-                //setParam(Constants::speedActual, paramCache.speedActual);
+                gatt.setChar(MeasureCharId[6], paramCache.speedActual);
             }
             if ( paramCache.dcVoltage != motorController->getDcVoltage() ) {
                 paramCache.dcVoltage = motorController->getDcVoltage();
                 if(paramCache.dcVoltage<1000) paramCache.dcVoltage=1000;  //Limits of the gage display
                 if(paramCache.dcVoltage>4500) paramCache.dcVoltage=4500;
-
-                //setParam(Constants::dcVoltage, paramCache.dcVoltage / 10.0f, 1);
+                gatt.setChar(MeasureCharId[9], paramCache.dcVoltage);
             }
             if ( paramCache.dcCurrent != motorController->getDcCurrent() ) {
                 paramCache.dcCurrent = motorController->getDcCurrent();
-                //setParam(Constants::dcCurrent, paramCache.dcCurrent / 10.0f, 1);
+                gatt.setChar(MeasureCharId[10], paramCache.dcCurrent);
             }
             if ( paramCache.prechargeR != motorController->getprechargeR() ) {
                 paramCache.prechargeR = motorController->getprechargeR();
-                //setParam(Constants::prechargeR, (uint16_t)paramCache.prechargeR);
+                gatt.setChar(MeasureCharId[25], (uint16_t)paramCache.prechargeR);
             }
 
             if ( paramCache.prechargeRelay != motorController->getprechargeRelay() ) {
                 paramCache.prechargeRelay = motorController->getprechargeRelay();
-                //setParam(Constants::prechargeRelay, (uint8_t) paramCache.prechargeRelay);
+                gatt.setChar(MeasureCharId[26], paramCache.prechargeRelay);
                 //Logger::console("Precharge Relay %i", paramCache.prechargeRelay);
                 //Logger::console("motorController:prechargeRelay:%d, paramCache.prechargeRelay:%d, Constants:prechargeRelay:%s", motorController->getprechargeRelay(),paramCache.prechargeRelay, Constants::prechargeRelay);
             }
 
             if ( paramCache.mainContactorRelay != motorController->getmainContactorRelay() ) {
                 paramCache.mainContactorRelay = motorController->getmainContactorRelay();
-                //setParam(Constants::mainContactorRelay, (uint8_t) paramCache.mainContactorRelay);
+                gatt.setChar(MeasureCharId[27], paramCache.mainContactorRelay);
             }
             //DeviceManager::getInstance()->updateWifi();
         }
@@ -352,120 +345,118 @@ void ADAFRUITBLE::handleTick() {
             //Logger::console("Wifi tick counter 2...");
             if ( paramCache.acCurrent != motorController->getAcCurrent() ) {
                 paramCache.acCurrent = motorController->getAcCurrent();
-                //setParam(Constants::acCurrent, paramCache.acCurrent / 10.0f, 1);
+                gatt.setChar(MeasureCharId[11], paramCache.acCurrent);
             }
 
             //if ( paramCache.kiloWattHours != motorController->getkiloWattHours()/3600000 ) {
             paramCache.kiloWattHours = motorController->getKiloWattHours()/3600000;
             if(paramCache.kiloWattHours<0)paramCache.kiloWattHours = 0;
             if(paramCache.kiloWattHours>300)paramCache.kiloWattHours = 300;
-            //setParam(Constants::kiloWattHours, paramCache.kiloWattHours / 10.0f, 1);
+            gatt.setChar(MeasureCharId[13], paramCache.kiloWattHours);
             //}
 
-            if ( paramCache.nominalVolt != motorController->getnominalVolt()/10 ) {
-                paramCache.nominalVolt = motorController->getnominalVolt()/10;
-                //setParam(Constants::nominalVolt, paramCache.nominalVolt);
+            if ( paramCache.nominalVolt != motorController->getnominalVolt() ) {
+                paramCache.nominalVolt = motorController->getnominalVolt();
+                gatt.setChar(MeasureCharId[12], paramCache.nominalVolt);
             }
 
             if ( paramCache.bitfield1 != motorController->getStatusBitfield1() ) {
                 paramCache.bitfield1 = motorController->getStatusBitfield1();
-                //setParam(Constants::bitfield1, paramCache.bitfield1);
+                gatt.setChar(MeasureCharId[14], paramCache.bitfield1);
             }
             if ( paramCache.bitfield2 != motorController->getStatusBitfield2() ) {
                 paramCache.bitfield2 = motorController->getStatusBitfield2();
-                //setParam(Constants::bitfield2, paramCache.bitfield2);
+                gatt.setChar(MeasureCharId[15], paramCache.bitfield2);
             }
             if ( paramCache.bitfield3 != motorController->getStatusBitfield3() ) {
                 paramCache.bitfield3 = motorController->getStatusBitfield3();
-                //setParam(Constants::bitfield3, paramCache.bitfield3);
+                gatt.setChar(MeasureCharId[16], paramCache.bitfield3);
             }
             if ( paramCache.bitfield4 != motorController->getStatusBitfield4() ) {
                 paramCache.bitfield4 = motorController->getStatusBitfield4();
-                //setParam(Constants::bitfield4, paramCache.bitfield4);
+                gatt.setChar(MeasureCharId[17], paramCache.bitfield4);
             }
-
         }
     } else if (tickCounter == 4) {
         if (motorController) {
             // Logger::console("Wifi tick counter 4...");
             if ( paramCache.running != motorController->isRunning() ) {
                 paramCache.running = motorController->isRunning();
-                //setParam(Constants::running, (paramCache.running ? Constants::trueStr : Constants::falseStr));
+                gatt.setChar(MeasureCharId[18], (uint8_t)(paramCache.running ? 1 : 0));
             }
             if ( paramCache.faulted != motorController->isFaulted() ) {
                 paramCache.faulted = motorController->isFaulted();
-                //setParam(Constants::faulted, (paramCache.faulted ? Constants::trueStr : Constants::falseStr));
+                gatt.setChar(MeasureCharId[19], (uint8_t)(paramCache.faulted ? 1 : 0));
             }
             if ( paramCache.warning != motorController->isWarning() ) {
                 paramCache.warning = motorController->isWarning();
-                //setParam(Constants::warning, (paramCache.warning ? Constants::trueStr : Constants::falseStr));
+                gatt.setChar(MeasureCharId[20], (uint8_t)(paramCache.warning ? 1 : 0));
             }
             if ( paramCache.gear != motorController->getSelectedGear() ) {
                 paramCache.gear = motorController->getSelectedGear();
-                //setParam(Constants::gear, (uint16_t)paramCache.gear);
+                gatt.setChar(MeasureCharId[8], (uint8_t)paramCache.gear);
             }
 
             if ( paramCache.coolFan != motorController->getCoolFan() ) {
                 paramCache.coolFan = motorController->getCoolFan();
-                //setParam(Constants::coolFan, (uint8_t) paramCache.coolFan);
+                gatt.setChar(MeasureCharId[28], (uint8_t)paramCache.coolFan);
             }
 
             if ( paramCache.coolOn != motorController->getCoolOn() ) {
                 paramCache.coolOn = motorController->getCoolOn();
-                //setParam(Constants::coolOn, (uint8_t) paramCache.coolOn);
+                gatt.setChar(MeasureCharId[29], (uint8_t)paramCache.coolOn);
             }
 
             if ( paramCache.coolOff != motorController->getCoolOff() ) {
                 paramCache.coolOff = motorController->getCoolOff();
-                //setParam(Constants::coolOff, (uint8_t) paramCache.coolOff);
+                gatt.setChar(MeasureCharId[30], (uint8_t)paramCache.coolOff);
             }
 
             if ( paramCache.brakeLight != motorController->getBrakeLight() ) {
                 paramCache.brakeLight = motorController->getBrakeLight();
-               // setParam(Constants::brakeLight, (uint8_t) paramCache.brakeLight);
+                gatt.setChar(MeasureCharId[31], (uint8_t) paramCache.brakeLight);
             }
 
             if ( paramCache.revLight != motorController->getRevLight() ) {
                 paramCache.revLight = motorController->getRevLight();
-                //setParam(Constants::revLight, (uint8_t) paramCache.revLight);
+                gatt.setChar(MeasureCharId[32], (uint8_t)paramCache.revLight);
             }
 
             if ( paramCache.enableIn != motorController->getEnableIn() ) {
                 paramCache.enableIn = motorController->getEnableIn();
-                //setParam(Constants::enableIn, (uint8_t) paramCache.enableIn);
+                gatt.setChar(MeasureCharId[33], (uint8_t)paramCache.enableIn);
             }
             if ( paramCache.reverseIn != motorController->getReverseIn() ) {
                 paramCache.reverseIn = motorController->getReverseIn();
-                //setParam(Constants::reverseIn, (uint8_t) paramCache.reverseIn);
+                gatt.setChar(MeasureCharId[34], (uint8_t)paramCache.reverseIn);
             }
-
         }
     } else if (tickCounter > 4) {
         if (motorController) {
             // Logger::console("Wifi tick counter 5...");
             if ( paramCache.tempMotor != motorController->getTemperatureMotor() ) {
                 paramCache.tempMotor = motorController->getTemperatureMotor();
-                //setParam(Constants::tempMotor, paramCache.tempMotor / 10.0f, 1);
+                gatt.setChar(MeasureCharId[21], paramCache.tempMotor);
             }
             if ( paramCache.tempInverter != motorController->getTemperatureInverter() ) {
                 paramCache.tempInverter = motorController->getTemperatureInverter();
-                //setParam(Constants::tempInverter, paramCache.tempInverter / 10.0f, 1);
+                gatt.setChar(MeasureCharId[22], paramCache.tempInverter);
             }
             if ( paramCache.tempSystem != motorController->getTemperatureSystem() ) {
                 paramCache.tempSystem = motorController->getTemperatureSystem();
-                //setParam(Constants::tempSystem, paramCache.tempSystem / 10.0f, 1);
+                gatt.setChar(MeasureCharId[23], paramCache.tempSystem);
             }
 
             if (paramCache.powerMode != motorController->getPowerMode() ) {
                 paramCache.powerMode = motorController->getPowerMode();
-                //setParam(Constants::motorMode, (uint8_t)paramCache.powerMode);
+                gatt.setChar(MeasureCharId[7], (uint8_t)paramCache.powerMode);
             }
 
             //if ( paramCache.mechPower != motorController->getMechanicalPower() ) {
             paramCache.mechPower = motorController->getMechanicalPower();
             if (paramCache.mechPower<-250)paramCache.mechPower=-250;
             if (paramCache.mechPower>1500)paramCache.mechPower=1500;
-            //setParam(Constants::mechPower, paramCache.mechPower / 10.0f, 1);
+            gatt.setChar(MeasureCharId[24], paramCache.mechPower);
             //}
         }
         tickCounter = 0;
@@ -507,11 +498,11 @@ void ADAFRUITBLE::handleMessage(uint32_t messageType, void* message) {
         //setParam((char *)params[0], (char *)params[1]);
         break;
     }
-    case MSG_CONFIG_CHANGE: { //Loads all parameters to web site
+    case MSG_CONFIG_CHANGE: { //Loads all characteristics to BLE module
         loadParameters();
         break;
     }
-    case MSG_COMMAND:  //Sends a message to the WiReach module in the form of AT+imessage
+    case MSG_COMMAND:  //Sends a message to the BLE module in the form of AT command
         //sendCmd((char *)message);
         break;
     }
@@ -834,54 +825,45 @@ void ADAFRUITBLE::loadParameters() {
     if (brake)
         brakeConfig = (PotThrottleConfiguration *)brake->getConfiguration();
     if (motorController)
-        motorConfig = (MotorControllerConfiguration *)motorController->getConfiguration();
-
+        motorConfig = (MotorControllerConfiguration *)motorController->getConfiguration();    
+    
     if (acceleratorConfig) {
-        /*
-        setParam(Constants::numThrottlePots, acceleratorConfig->numberPotMeters);
-        setParam(Constants::throttleSubType, acceleratorConfig->throttleSubType);
-        setParam(Constants::throttleMin1, acceleratorConfig->minimumLevel1);
-        setParam(Constants::throttleMin2, acceleratorConfig->minimumLevel2);
-        setParam(Constants::throttleMax1, acceleratorConfig->maximumLevel1);
-        setParam(Constants::throttleMax2, acceleratorConfig->maximumLevel2);
-        setParam(Constants::throttleRegenMax, (uint16_t)(acceleratorConfig->positionRegenMaximum / 10));
-        setParam(Constants::throttleRegenMin, (uint16_t)(acceleratorConfig->positionRegenMinimum / 10));
-        setParam(Constants::throttleFwd, (uint16_t)(acceleratorConfig->positionForwardMotionStart / 10));
-        setParam(Constants::throttleMap, (uint16_t)(acceleratorConfig->positionHalfPower / 10));
-        setParam(Constants::throttleMinRegen, acceleratorConfig->minimumRegen);
-        setParam(Constants::throttleMaxRegen, acceleratorConfig->maximumRegen);
-        setParam(Constants::throttleCreep, acceleratorConfig->creep);
-        */
+        gatt.setChar(MeasureCharId[35], acceleratorConfig->numberPotMeters);
+        gatt.setChar(MeasureCharId[36], acceleratorConfig->throttleSubType);
+        gatt.setChar(MeasureCharId[37], acceleratorConfig->minimumLevel1);
+        gatt.setChar(MeasureCharId[38], acceleratorConfig->minimumLevel2);
+        gatt.setChar(MeasureCharId[39], acceleratorConfig->maximumLevel1);
+        gatt.setChar(MeasureCharId[40], acceleratorConfig->maximumLevel2);
+        gatt.setChar(MeasureCharId[41], (uint16_t)(acceleratorConfig->positionRegenMaximum / 10));
+        gatt.setChar(MeasureCharId[42], (uint16_t)(acceleratorConfig->positionRegenMinimum / 10));
+        gatt.setChar(MeasureCharId[43], (uint16_t)(acceleratorConfig->positionForwardMotionStart / 10));
+        gatt.setChar(MeasureCharId[44], (uint16_t)(acceleratorConfig->positionHalfPower / 10));
+        gatt.setChar(MeasureCharId[45], acceleratorConfig->minimumRegen);
+        gatt.setChar(MeasureCharId[46], acceleratorConfig->maximumRegen);
+        gatt.setChar(MeasureCharId[47], acceleratorConfig->creep);                
     }
     if (brakeConfig) {
-        /*
-        setParam(Constants::brakeMin, brakeConfig->minimumLevel1);
-        setParam(Constants::brakeMax, brakeConfig->maximumLevel1);
-        setParam(Constants::brakeMinRegen, brakeConfig->minimumRegen);
-        setParam(Constants::brakeMaxRegen, brakeConfig->maximumRegen);
-        */
+        gatt.setChar(MeasureCharId[48], brakeConfig->minimumLevel1);
+        gatt.setChar(MeasureCharId[49], brakeConfig->maximumLevel1);
+        gatt.setChar(MeasureCharId[50], brakeConfig->minimumRegen);
+        gatt.setChar(MeasureCharId[51], brakeConfig->maximumRegen);
     }
     if (motorConfig) {
-        /*
-        setParam(Constants::speedMax, motorConfig->speedMax);
-        setParam(Constants::coolFan, motorConfig->coolFan);
-        setParam(Constants::coolOn, motorConfig->coolOn);
-        setParam(Constants::coolOff, motorConfig->coolOff);
-        setParam(Constants::brakeLight, motorConfig->brakeLight);
-        setParam(Constants::revLight, motorConfig->revLight);
-        setParam(Constants::enableIn, motorConfig->enableIn);
-        setParam(Constants::reverseIn, motorConfig->reverseIn);
-        setParam(Constants::prechargeR, motorConfig->prechargeR);
-        setParam(Constants::prechargeRelay, motorConfig->prechargeRelay);
-        setParam(Constants::mainContactorRelay, motorConfig->mainContactorRelay);
-        uint16_t nmvlt = motorConfig->nominalVolt/10;
-        setParam(Constants::nominalVolt, nmvlt);
-        setParam(Constants::torqueMax, (uint16_t)(motorConfig->torqueMax / 10)); // skip the tenth's
-        */
+        gatt.setChar(MeasureCharId[52], motorConfig->speedMax);
+        gatt.setChar(MeasureCharId[28], motorConfig->coolFan);
+        gatt.setChar(MeasureCharId[29], motorConfig->coolOn);
+        gatt.setChar(MeasureCharId[30], motorConfig->coolOff);
+        gatt.setChar(MeasureCharId[31], motorConfig->brakeLight);
+        gatt.setChar(MeasureCharId[32], motorConfig->revLight);
+        gatt.setChar(MeasureCharId[33], motorConfig->enableIn);
+        gatt.setChar(MeasureCharId[34], motorConfig->reverseIn);
+        gatt.setChar(MeasureCharId[25], motorConfig->prechargeR);
+        gatt.setChar(MeasureCharId[26], motorConfig->prechargeRelay);
+        gatt.setChar(MeasureCharId[27], motorConfig->mainContactorRelay);
+        gatt.setChar(MeasureCharId[12], (uint16_t)(motorConfig->nominalVolt));
+        gatt.setChar(MeasureCharId[53], (uint16_t)(motorConfig->torqueMax));         
     }
-    //setParam(Constants::logLevel, (uint8_t)Logger::getLogLevel());
-
-
+    gatt.setChar(MeasureCharId[54], (uint8_t)Logger::getLogLevel());
 }
 
 DeviceType ADAFRUITBLE::getType() {
@@ -896,8 +878,7 @@ void ADAFRUITBLE::loadConfiguration() {
     BLEConfiguration *config = (BLEConfiguration *)getConfiguration();
 
     if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
-        Logger::debug(ADABLUE, "Valid checksum so using stored wifi config values");
-        //TODO: implement processing of config params for WIFI
+        Logger::debug(ADABLUE, "Valid checksum so using stored BLE config values");
 //		prefsHandler->read(EESYS_WIFI0_SSID, &config->ssid);
     }
 }
@@ -905,7 +886,6 @@ void ADAFRUITBLE::loadConfiguration() {
 void ADAFRUITBLE::saveConfiguration() {
     BLEConfiguration *config = (BLEConfiguration *) getConfiguration();
 
-    //TODO: implement processing of config params for WIFI
 //	prefsHandler->write(EESYS_WIFI0_SSID, config->ssid);
 //	prefsHandler->saveChecksum();
 }

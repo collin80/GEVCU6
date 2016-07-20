@@ -65,6 +65,7 @@ struct Characteristic {
     int minSize;
     int maxSize;
     const char *descript;
+    GattPresentationFormat present;
 };
 
 class ADAFRUITBLE : public Device {
@@ -88,7 +89,7 @@ private:
     ELM327Processor *elmProc;
     int tickCounter;
     int32_t ServiceId;
-    int32_t MeasureCharId[30];
+    int32_t MeasureCharId[55]; //Keep track and update this to be large enough.
     int32_t LocationCharId;
     boolean success;
     int counter;
@@ -97,7 +98,6 @@ private:
     boolean didParamLoad;
 
     void setupBLEservice();
-    void updateBLE(int CharacteristicID, int MeasuredValue);
     void processParameterChange(char *response);
 };
 
