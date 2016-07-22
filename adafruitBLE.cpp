@@ -37,65 +37,48 @@ uint8_t BLETYPE=1;  //Type 1 is SPI type 2 is UART
 //formed as a standard C array right now. Sort of dangerous in that there is no good way
 //to know the length... well, you can grab the sizeof operator with division
 //but instead this array is null terminated sort of like a C string.
+//Characteristics can be up to 20 bytes so stay under that.
 Characteristic characteristics[] = 
 {
-    {4, 4, 0x12, "TimeRunning", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_TIME_SECOND, 1, 0}}, //MeasureCharId[0]
-    {2, 2, 0x12,  "TorqueRequest", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //1
-    {2, 2, 0x12,  "TorqueActual", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //2
-    {2, 2, 0x12,  "ThrottleLevel", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //3
-    {2, 2, 0x12,  "BrakeLevel", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //4
-    {2, 2, 0x12,  "SpeedRequested", {GATT_PRESENT_FORMAT_SINT16, 0, GATT_PRESENT_UNIT_ANGULAR_VELOCITY_REVOLUTION_PER_MINUTE, 1, 0}}, //5
-    {2, 2, 0x12,  "SpeedActual", {GATT_PRESENT_FORMAT_SINT16, 0, GATT_PRESENT_UNIT_ANGULAR_VELOCITY_REVOLUTION_PER_MINUTE, 1, 0}}, //6
-    {1, 1, 0x1A,  "PowerMode", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[7]
-    {1, 1, 0x12,  "Gear", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //8
-    {2, 2, 0x12,  "BusVoltage", {GATT_PRESENT_FORMAT_UINT16, -1, GATT_PRESENT_UNIT_ELECTRIC_POTENTIAL_DIFFERENCE_VOLT, 1, 0}}, //9
-    {2, 2, 0x12,  "BusCurrent", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_ELECTRIC_CURRENT_AMPERE, 1, 0}}, //10
-    {2, 2, 0x12,  "MotorCurrent", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_ELECTRIC_CURRENT_AMPERE, 1, 0}}, //11
-    {2, 2, 0x1A,  "NomVoltage", {GATT_PRESENT_FORMAT_UINT16, -1, GATT_PRESENT_UNIT_ELECTRIC_POTENTIAL_DIFFERENCE_VOLT, 1, 0}}, //12
-    {2, 2, 0x12,  "KWHours", {GATT_PRESENT_FORMAT_UINT16, -1, GATT_PRESENT_UNIT_ENERGY_KILOWATT_HOUR, 1, 0}}, //13
-    {4, 4, 0x12,  "Bitfield1", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[14]
-    {4, 4, 0x12,  "Bitfield2", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //15
-    {4, 4, 0x12,  "Bitfield3", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //16
-    {4, 4, 0x12,  "Bitfield4", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //17
-    {1, 1, 0x12,  "IsRunning", {GATT_PRESENT_FORMAT_BOOLEAN, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //18
-    {1, 1, 0x12,  "IsFaulted", {GATT_PRESENT_FORMAT_BOOLEAN, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //19
-    {1, 1, 0x12,  "IsWarning", {GATT_PRESENT_FORMAT_BOOLEAN, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[20]
-    {2, 2, 0x12,  "MotorTemperature", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //21
-    {2, 2, 0x12,  "InverterTemp", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //22
-    {2, 2, 0x12,  "SystemTemp", {GATT_PRESENT_FORMAT_SINT16, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //23
-    {2, 2, 0x12,  "MechPower", {GATT_PRESENT_FORMAT_SINT16, 2, GATT_PRESENT_UNIT_POWER_WATT, 1, 0}}, //24
-    {2, 2, 0x1A,  "PrechargeResist", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_ELECTRIC_RESISTANCE_OHM, 1, 0}}, //25
-    {1, 1, 0x1A,  "PrechargeRelay", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //26
-    {1, 1, 0x1A,  "MainContRelay", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //27
-    {1, 1, 0x1A,  "CoolFanRelay", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[28]
-    {1, 1, 0x1A,  "CoolOnTemp", {GATT_PRESENT_FORMAT_SINT8, 0, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //29
-    {1, 1, 0x1A,  "CoolOffTemp", {GATT_PRESENT_FORMAT_SINT8, 0, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //30
-    {1, 1, 0x1A,  "BrakeLightOut", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //31
-    {1, 1, 0x1A,  "ReverseLightOut", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //32
-    {1, 1, 0x1A,  "EnableInput", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //33
-    {1, 1, 0x1A,  "ReverseInput", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //34
-    {1, 1, 0x1A,  "NumThrottlePots", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //35
-    {1, 1, 0x1A,  "ThrottleSubType", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //36
-    {1, 1, 0x1A,  "ThrottleMin1", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[37]
-    {1, 1, 0x1A,  "ThrottleMin2", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //38
-    {1, 1, 0x1A,  "ThrottleMax1", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //39
-    {1, 1, 0x1A,  "ThrottleMax2", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //40
-    {2, 2, 0x1A,  "ThrRegenMax", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //41
-    {2, 2, 0x1A,  "ThrRegenMin", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //42
-    {2, 2, 0x1A,  "ThrottleFwd", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //43
-    {2, 2, 0x1A,  "ThrottleMap", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //44
-    {1, 1, 0x1A,  "TRegenMin", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //45
-    {1, 1, 0x1A,  "TRegenMax", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[46]
-    {1, 1, 0x1A,  "TCreep", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //47
-    {1, 1, 0x1A,  "BrakeMin", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //48
-    {1, 1, 0x1A,  "BrakeMax", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //49
-    {1, 1, 0x1A,  "BRegenMin", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //50
-    {1, 1, 0x1A,  "BRegenMax", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //51
-    {2, 2, 0x1A,  "MaxRPM", {GATT_PRESENT_FORMAT_UINT16, 0, GATT_PRESENT_UNIT_ANGULAR_VELOCITY_REVOLUTION_PER_MINUTE, 1, 0}}, //52 
-    {2, 2, 0x1A,  "TorqueMax", {GATT_PRESENT_FORMAT_UINT16, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //53
-    {1, 1, 0x1A,  "LogLevel", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //54
- 
-    {0, 0, 0, "END", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}} //leave this at the end - null terminator
+    {BLE_DATATYPE_INTEGER, 4, 4, 0x12, "TimeRunning", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_TIME_SECOND, 1, 0}}, //MeasureCharId[0]
+    
+    //Requested torque followed by actual torque, both signed 16 bit
+    {BLE_DATATYPE_BYTEARRAY, 4, 4, 0x12,  "TrqReqAct", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //1
+    
+    //First the throttle level, then the brake level, both 16 bit values
+    {BLE_DATATYPE_BYTEARRAY, 4, 4, 0x12,  "ThrBrkLevels", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //2
+    
+    //First requested speed then actual speed, both 16 bit
+    {BLE_DATATYPE_BYTEARRAY, 4, 4, 0x12,  "Speed", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_ANGULAR_VELOCITY_REVOLUTION_PER_MINUTE, 1, 0}}, //3
+    
+    //PowerMode, then Gear, then IsRunning then isFaulted, then IsWarning, lastly LogLevel all 1 byte each
+    {BLE_DATATYPE_BYTEARRAY, 6, 6, 0x1A,  "Modes", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[4]
+
+    //Bus Voltage then Bus Current, then motor current, then kwhours, then mechanical power all 16 bit with currents being signed.
+    {BLE_DATATYPE_BYTEARRAY, 10, 10, 0x12,  "PowerStatus", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_NONE, 1, 0}}, //5
+        
+    //Bitfield 1 through 4 all in the same characteristic. All 32 bit
+    {BLE_DATATYPE_BYTEARRAY, 16, 16, 0x12,  "Bitfields", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[6]
+
+    //Temperatures - Motor, Inverter, System. All 16 bit
+    {BLE_DATATYPE_BYTEARRAY, 6, 6, 0x12,  "Temperatures", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //7
+    
+    //PrechargeResist(2), PrechargeRelay(1), MainContRelay(1), CoolFanRelay(1), CoolOnTemp(1), coolOffTemp(1), BrakeLightOut(1), ReverseLightOut(1), EnableIn(1), ReverseIn(1)
+    {BLE_DATATYPE_BYTEARRAY, 11, 11, 0x1A,  "DigIO", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //8
+    
+    //NumThrPots(1), ThrottleType(1), T1Min(2), T2Min(2), T1Max(2), T2Max(2)   
+    {BLE_DATATYPE_BYTEARRAY, 10, 10, 0x1A,  "ThrottleIO", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //9
+     
+    //ThrottleRegenMax(2), ThrRegenMin(2), ThrottleFwd(2), ThrottleMap(2), TRegenMin(1), TRegenMax(1), TCreep(1)
+    {BLE_DATATYPE_BYTEARRAY, 11, 11, 0x1A,  "ThrottleMap", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //10
+
+    //BrakeMin(2), BrakeMax(2), BRegenMin(1), BRegenMax(1)
+    {BLE_DATATYPE_BYTEARRAY, 6, 6, 0x1A,  "BrakeParam", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //11
+        
+    //NominalVoltage(2), MaxRPM(2), MaxTorque(2)
+    {BLE_DATATYPE_BYTEARRAY, 6, 6, 0x1A,  "MaxParams", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //12
+         
+    {BLE_DATATYPE_INTEGER, 0, 0, 0, "END", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}} //leave this at the end - null terminator
 };
    
 /*
@@ -139,10 +122,10 @@ void ADAFRUITBLE::setup() {
     ble.begin(false);  //True = verbose mode for debuggin.   
     ble.factoryReset();        
     Logger::debug(ADABLUE, "Retrieving Bluetooth module information...");
-    ble.info();     
+    //ble.info();     
     ble.echo(false);
     setupBLEservice();
-    Logger::debug(ADABLUE, "BluefruitLE Test Complete....");
+    Logger::debug(ADABLUE, "BluefruitLE Initialization Complete....");
 
     TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_WIFI);
 }
@@ -175,7 +158,7 @@ void ADAFRUITBLE::setupBLEservice()
  
 
     //Set peripheral name
-    if (! ble.sendCommandCheckOK(F("AT+GAPDEVNAME=GEVCU 6.2 Test Program")) ) 
+    if (! ble.sendCommandCheckOK(F("AT+GAPDEVNAME=GEVCU 6.2 ECU")) ) 
     {
         Logger::error(ADABLUE, "Could not set device name...");
         return;
@@ -189,6 +172,7 @@ void ADAFRUITBLE::setupBLEservice()
         Logger::error(ADABLUE, "Could not add service....");   
         return;
     }
+    else Logger::debug(ADABLUE, "Service ID: %i", ServiceId);
 
 /* 
     PROPERTIES: The 8-bit characteristic properties field, as defined by the Bluetooth SIG. The following values can be used:
@@ -209,11 +193,11 @@ void ADAFRUITBLE::setupBLEservice()
     Characteristic charact = characteristics[charCounter];
     while (charact.minSize != 0)
     {
-        MeasureCharId[charCounter] = gatt.addCharacteristic(0x3101 + charCounter, charact.properties, charact.minSize, charact.maxSize, BLE_DATATYPE_INTEGER, charact.descript, &charact.present);
+        MeasureCharId[charCounter] = gatt.addCharacteristic(0x3101 + charCounter, charact.properties, charact.minSize, charact.maxSize, charact.dataType, charact.descript, &charact.present);
         if (MeasureCharId[charCounter] == 0) 
         {
             Logger::error(ADABLUE, "Could not add characteristic %x", 0x3101 + charCounter);
-            return;            
+            //return;            
         }
         charact = characteristics[++charCounter];
     }           
@@ -231,6 +215,150 @@ void ADAFRUITBLE::setupBLEservice()
     ble.reset();
   
     Logger::info(ADABLUE, "Service ID: %i", ServiceId);
+}
+
+void ADAFRUITBLE::dumpRawData(uint8_t* data, int len)
+{
+    for (int i = 0; i < len; i++)
+    {
+        Logger::debug(ADABLUE, "Byte %i = %x", i, data[i]);
+    }
+}
+
+void ADAFRUITBLE::transferUpdates()
+{
+    if (bleTrqReqAct.doUpdate != 0)
+    {
+        bleTrqReqAct.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[1], (uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 2))
+        {
+            Logger::error("Could not update bleTrqReqAct");
+        }
+        else Logger::debug(ADABLUE, "Updated bleTrqReqAct");
+        dumpRawData((uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 2);
+    }
+    
+    if (bleThrBrkLevels.doUpdate != 0)
+    {
+        bleThrBrkLevels.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[2], (uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 2))
+        {
+            Logger::error("Could not update bleThrBrkLevels");
+        }
+
+        else Logger::debug(ADABLUE, "Updated bleThrBrkLevels");
+        dumpRawData((uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 2);
+    }
+    
+    if (bleSpeeds.doUpdate != 0)
+    {
+        bleSpeeds.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[3], (uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 2))
+        {
+            Logger::error("Could not update bleSpeeds");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleSpeeds");
+        dumpRawData((uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 2);
+    }
+    
+    if (bleModes.doUpdate != 0)
+    {
+        bleModes.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[4], (uint8_t *)&bleModes, sizeof(bleModes) - 2))
+        {
+            Logger::error("Could not update bleModes");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleModes");
+        dumpRawData((uint8_t *)&bleModes, sizeof(bleModes) - 2);
+    }
+    
+    if (blePowerStatus.doUpdate != 0)
+    {
+        blePowerStatus.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[5], (uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 2))
+        {
+            Logger::error("Could not update blePowerStatus");
+        }            
+        else Logger::debug(ADABLUE, "Updated blePowerStatus");
+        dumpRawData((uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 2);
+    }
+    
+    if (bleBitFields.doUpdate != 0)
+    {
+        bleBitFields.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[6], (uint8_t *)&bleBitFields, sizeof(bleBitFields) - 2))
+        {
+            Logger::error("Could not update bleBitFields");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleBitFields");
+        dumpRawData((uint8_t *)&bleBitFields, sizeof(bleBitFields) - 2);
+    }
+    
+    if (bleTemperatures.doUpdate != 0)
+    {
+        bleTemperatures.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[7], (uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 2))
+        {
+            Logger::error("Could not update bleTemperatures");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleTemperatures");
+        dumpRawData((uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 2);
+    }
+    
+    if (bleDigIO.doUpdate != 0)
+    {
+        bleDigIO.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[8], (uint8_t *)&bleDigIO, sizeof(bleDigIO) - 2))
+        {
+            Logger::error("Could not update bleDigIO");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleDigIO");
+        dumpRawData((uint8_t *)&bleDigIO, sizeof(bleDigIO) - 2);
+    }
+        
+    if (bleThrottleIO.doUpdate != 0)
+    {
+        bleThrottleIO.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[9], (uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 2))
+        {
+            Logger::error("Could not update bleThrottleIO");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleThrottleIO");
+        dumpRawData((uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 2);
+    }
+    
+    if (bleThrottleMap.doUpdate != 0)
+    {
+        bleThrottleMap.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[10], (uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 2))
+        {
+            Logger::error("Could not update bleThrottleMap");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleThrottleMap");
+        dumpRawData((uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 2);
+    }    
+
+    if (bleBrakeParam.doUpdate != 0)
+    {
+        bleBrakeParam.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[11], (uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 2))
+        {
+            Logger::error("Could not update bleBrakeParam");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleBrakeParam");
+        dumpRawData((uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 2);
+    }
+    
+    if (bleMaxParams.doUpdate != 0)
+    {
+        bleMaxParams.doUpdate = 0;
+        if (!gatt.setChar(MeasureCharId[12], (uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 2))
+        {
+            Logger::error("Could not update bleMaxParams");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleMaxParams");
+        dumpRawData((uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 2);
+    }    
 }
 
 /*
@@ -255,10 +383,9 @@ void ADAFRUITBLE::handleTick() {
     if (!didParamLoad && ms > 5000) {
         loadParameters();
         Logger::console("Wifi Parameters loaded...");
-        paramCache.bitfield1 = motorController->getStatusBitfield1();
-        gatt.setChar(MeasureCharId[14], paramCache.bitfield1);
-        paramCache.bitfield2 = motorController->getStatusBitfield2();
-        gatt.setChar(MeasureCharId[15], paramCache.bitfield1);
+        bleBitFields.bitfield1 = motorController->getStatusBitfield1();
+        bleBitFields.bitfield2 = motorController->getStatusBitfield2();
+        bleBitFields.doUpdate = 1;        
         // DeviceManager::getInstance()->updateWifiByID(BRUSA_DMC5);
         didParamLoad = true;
     }
@@ -268,200 +395,210 @@ void ADAFRUITBLE::handleTick() {
         if (motorController) {
             //Logger::console("Wifi tick counter 1...");
 
-            paramCache.timeRunning = ms;
-            gatt.setChar(MeasureCharId[1], getTimeRunning());
+            paramCache.timeRunning = ms / 1000;
+            gatt.setChar(MeasureCharId[0], getTimeRunning());
 
-            if ( paramCache.torqueRequested != motorController->getTorqueRequested() ) {
-                paramCache.torqueRequested = motorController->getTorqueRequested();
-                gatt.setChar(MeasureCharId[1], paramCache.torqueRequested);
+            if ( bleTrqReqAct.torqueRequested  != motorController->getTorqueRequested() ) {
+                bleTrqReqAct.torqueRequested = motorController->getTorqueRequested();
+                bleTrqReqAct.doUpdate = 1;
             }
-            if ( paramCache.torqueActual != motorController->getTorqueActual() ) {
-                paramCache.torqueActual = motorController->getTorqueActual();
-                gatt.setChar(MeasureCharId[2], paramCache.torqueActual);
+            if ( bleTrqReqAct.torqueActual != motorController->getTorqueActual() ) {
+                bleTrqReqAct.torqueActual = motorController->getTorqueActual();
+                bleTrqReqAct.doUpdate = 1;
             }
         }
         if (accelerator) {
             RawSignalData *rawSignal = accelerator->acquireRawSignal();
-            if ( paramCache.throttle !=  rawSignal->input1) {
-                paramCache.throttle = rawSignal->input1;
-                gatt.setChar(MeasureCharId[3], paramCache.throttle);
+            if ( bleThrBrkLevels.throttleLevel !=  rawSignal->input1) {
+                bleThrBrkLevels.throttleLevel = rawSignal->input1;
+                bleThrBrkLevels.doUpdate = 1;
             }
         }
         if (brake) {
             RawSignalData *rawSignal = brake->acquireRawSignal();
-            if ( paramCache.brake !=  rawSignal->input1) {
-                paramCache.brake = rawSignal->input1;
+            if (bleThrBrkLevels.brakeLevel !=  rawSignal->input1) {
+                bleThrBrkLevels.brakeLevel = rawSignal->input1;
                 paramCache.brakeNotAvailable = false;
-                gatt.setChar(MeasureCharId[4], paramCache.brake);
+                bleThrBrkLevels.doUpdate = 1;
             }
         } else {
             if ( paramCache.brakeNotAvailable == true ) {
                 paramCache.brakeNotAvailable = false; // no need to keep sending this
-                gatt.setChar(MeasureCharId[4], (int16_t)0);                
+                bleThrBrkLevels.brakeLevel = 0;
+                bleThrBrkLevels.doUpdate = 1;
             }
         }
     } else if (tickCounter == 2) {
         if (motorController) {
             //Logger::console("Wifi tick counter 2...");
-            if ( paramCache.speedRequested != motorController->getSpeedRequested() ) {
-                paramCache.speedRequested = motorController->getSpeedRequested();
-                gatt.setChar(MeasureCharId[5], paramCache.speedRequested);
+            if ( bleSpeeds.speedRequested != motorController->getSpeedRequested() ) {
+                bleSpeeds.speedRequested = motorController->getSpeedRequested();
+                bleSpeeds.doUpdate = 1;
             }
-            if ( paramCache.speedActual != motorController->getSpeedActual() ) {
-                paramCache.speedActual = motorController->getSpeedActual();
-                if (paramCache.speedActual<0) paramCache.speedActual=0;
-                if (paramCache.speedActual>10000) paramCache.speedActual=10000;
-                gatt.setChar(MeasureCharId[6], paramCache.speedActual);
+            
+            if ( bleSpeeds.speedActual != motorController->getSpeedActual() ) {
+                bleSpeeds.speedActual = motorController->getSpeedActual();
+                bleSpeeds.doUpdate = 1;
             }
-            if ( paramCache.dcVoltage != motorController->getDcVoltage() ) {
-                paramCache.dcVoltage = motorController->getDcVoltage();
-                if(paramCache.dcVoltage<1000) paramCache.dcVoltage=1000;  //Limits of the gage display
-                if(paramCache.dcVoltage>4500) paramCache.dcVoltage=4500;
-                gatt.setChar(MeasureCharId[9], paramCache.dcVoltage);
+            
+            if ( blePowerStatus.busVoltage != motorController->getDcVoltage() ) {
+                blePowerStatus.busVoltage = motorController->getDcVoltage();
+                if(blePowerStatus.busVoltage<1000) blePowerStatus.busVoltage=1000;  //Limits of the gage display
+                if(blePowerStatus.busVoltage>4500) blePowerStatus.busVoltage=4500;
+                blePowerStatus.doUpdate = 1;
             }
-            if ( paramCache.dcCurrent != motorController->getDcCurrent() ) {
-                paramCache.dcCurrent = motorController->getDcCurrent();
-                gatt.setChar(MeasureCharId[10], paramCache.dcCurrent);
+            
+            if ( blePowerStatus.busCurrent != motorController->getDcCurrent() ) {
+                blePowerStatus.busCurrent = motorController->getDcCurrent();
+                blePowerStatus.doUpdate = 1;
             }
-            if ( paramCache.prechargeR != motorController->getprechargeR() ) {
-                paramCache.prechargeR = motorController->getprechargeR();
-                gatt.setChar(MeasureCharId[25], (uint16_t)paramCache.prechargeR);
-            }
-
-            if ( paramCache.prechargeRelay != motorController->getprechargeRelay() ) {
-                paramCache.prechargeRelay = motorController->getprechargeRelay();
-                gatt.setChar(MeasureCharId[26], paramCache.prechargeRelay);
-                //Logger::console("Precharge Relay %i", paramCache.prechargeRelay);
-                //Logger::console("motorController:prechargeRelay:%d, paramCache.prechargeRelay:%d, Constants:prechargeRelay:%s", motorController->getprechargeRelay(),paramCache.prechargeRelay, Constants::prechargeRelay);
+            
+            if ( blePowerStatus.motorCurrent != motorController->getAcCurrent() ) {
+                blePowerStatus.motorCurrent = motorController->getAcCurrent();
+                blePowerStatus.doUpdate = 1;
             }
 
-            if ( paramCache.mainContactorRelay != motorController->getmainContactorRelay() ) {
-                paramCache.mainContactorRelay = motorController->getmainContactorRelay();
-                gatt.setChar(MeasureCharId[27], paramCache.mainContactorRelay);
+            if ( blePowerStatus.kwHours != motorController->getKiloWattHours()/3600000 ) {
+                blePowerStatus.kwHours = motorController->getKiloWattHours()/3600000;
+                if(blePowerStatus.kwHours<0)blePowerStatus.kwHours = 0;
+                if(blePowerStatus.kwHours>300)blePowerStatus.kwHours = 300;
+                blePowerStatus.doUpdate = 1;
             }
+            
+            if ( blePowerStatus.mechPower != motorController->getMechanicalPower() ) {
+                blePowerStatus.mechPower = motorController->getMechanicalPower();
+                if (blePowerStatus.mechPower<-250)blePowerStatus.mechPower=-250;
+                if (blePowerStatus.mechPower>1500)blePowerStatus.mechPower=1500;
+                blePowerStatus.doUpdate = 1;
+            }
+
             //DeviceManager::getInstance()->updateWifi();
         }
     } else if (tickCounter == 3) {
         if (motorController) {
-            //Logger::console("Wifi tick counter 2...");
-            if ( paramCache.acCurrent != motorController->getAcCurrent() ) {
-                paramCache.acCurrent = motorController->getAcCurrent();
-                gatt.setChar(MeasureCharId[11], paramCache.acCurrent);
+            //Logger::console("Wifi tick counter 3...");
+
+            if ( bleMaxParams.nomVoltage != motorController->getnominalVolt() ) {
+                bleMaxParams.nomVoltage = motorController->getnominalVolt();
+                bleMaxParams.doUpdate = 1;
             }
 
-            //if ( paramCache.kiloWattHours != motorController->getkiloWattHours()/3600000 ) {
-            paramCache.kiloWattHours = motorController->getKiloWattHours()/3600000;
-            if(paramCache.kiloWattHours<0)paramCache.kiloWattHours = 0;
-            if(paramCache.kiloWattHours>300)paramCache.kiloWattHours = 300;
-            gatt.setChar(MeasureCharId[13], paramCache.kiloWattHours);
-            //}
-
-            if ( paramCache.nominalVolt != motorController->getnominalVolt() ) {
-                paramCache.nominalVolt = motorController->getnominalVolt();
-                gatt.setChar(MeasureCharId[12], paramCache.nominalVolt);
+            if ( bleBitFields.bitfield1 != motorController->getStatusBitfield1() ) {
+                bleBitFields.bitfield1 = motorController->getStatusBitfield1();
+                bleBitFields.doUpdate = 1;
+            }
+            if ( bleBitFields.bitfield2 != motorController->getStatusBitfield2() ) {
+                bleBitFields.bitfield2 = motorController->getStatusBitfield2();
+                bleBitFields.doUpdate = 1;
+            }
+            if ( bleBitFields.bitfield3 != motorController->getStatusBitfield3() ) {
+                bleBitFields.bitfield3 = motorController->getStatusBitfield3();
+                bleBitFields.doUpdate = 1;
+            }
+            if ( bleBitFields.bitfield4 != motorController->getStatusBitfield4() ) {
+                bleBitFields.bitfield4 = motorController->getStatusBitfield4();
+                bleBitFields.doUpdate = 1;
+            }
+            
+            if ( bleModes.isRunning != motorController->isRunning() ) {
+                bleModes.isRunning = motorController->isRunning();
+                bleModes.doUpdate = 1;
+            }
+            if ( bleModes.isFaulted != motorController->isFaulted() ) {
+                bleModes.isFaulted = motorController->isFaulted();
+                bleModes.doUpdate = 1;
+            }
+            if ( bleModes.isWarning != motorController->isWarning() ) {
+                bleModes.isWarning = motorController->isWarning();
+                bleModes.doUpdate = 1;
+            }
+            if ( bleModes.gear != motorController->getSelectedGear() ) {
+                bleModes.gear = motorController->getSelectedGear();
+                bleModes.doUpdate = 1;
+            }
+            
+            if ( bleModes.powerMode != motorController->getPowerMode() ) {
+                bleModes.powerMode = motorController->getPowerMode();
+                bleModes.doUpdate = 1;
             }
 
-            if ( paramCache.bitfield1 != motorController->getStatusBitfield1() ) {
-                paramCache.bitfield1 = motorController->getStatusBitfield1();
-                gatt.setChar(MeasureCharId[14], paramCache.bitfield1);
-            }
-            if ( paramCache.bitfield2 != motorController->getStatusBitfield2() ) {
-                paramCache.bitfield2 = motorController->getStatusBitfield2();
-                gatt.setChar(MeasureCharId[15], paramCache.bitfield2);
-            }
-            if ( paramCache.bitfield3 != motorController->getStatusBitfield3() ) {
-                paramCache.bitfield3 = motorController->getStatusBitfield3();
-                gatt.setChar(MeasureCharId[16], paramCache.bitfield3);
-            }
-            if ( paramCache.bitfield4 != motorController->getStatusBitfield4() ) {
-                paramCache.bitfield4 = motorController->getStatusBitfield4();
-                gatt.setChar(MeasureCharId[17], paramCache.bitfield4);
-            }
         }
     } else if (tickCounter == 4) {
         if (motorController) {
-            // Logger::console("Wifi tick counter 4...");
-            if ( paramCache.running != motorController->isRunning() ) {
-                paramCache.running = motorController->isRunning();
-                gatt.setChar(MeasureCharId[18], (uint8_t)(paramCache.running ? 1 : 0));
-            }
-            if ( paramCache.faulted != motorController->isFaulted() ) {
-                paramCache.faulted = motorController->isFaulted();
-                gatt.setChar(MeasureCharId[19], (uint8_t)(paramCache.faulted ? 1 : 0));
-            }
-            if ( paramCache.warning != motorController->isWarning() ) {
-                paramCache.warning = motorController->isWarning();
-                gatt.setChar(MeasureCharId[20], (uint8_t)(paramCache.warning ? 1 : 0));
-            }
-            if ( paramCache.gear != motorController->getSelectedGear() ) {
-                paramCache.gear = motorController->getSelectedGear();
-                gatt.setChar(MeasureCharId[8], (uint8_t)paramCache.gear);
+            //Logger::console("Wifi tick counter 4...");
+            
+            if ( bleDigIO.prechargeR != motorController->getprechargeR() ) {
+                bleDigIO.prechargeR = motorController->getprechargeR();
+                bleDigIO.doUpdate = 1;
             }
 
-            if ( paramCache.coolFan != motorController->getCoolFan() ) {
-                paramCache.coolFan = motorController->getCoolFan();
-                gatt.setChar(MeasureCharId[28], (uint8_t)paramCache.coolFan);
+            if ( bleDigIO.prechargeRelay != motorController->getprechargeRelay() ) {
+                bleDigIO.prechargeRelay = motorController->getprechargeRelay();
+                bleDigIO.doUpdate = 1;
+                //Logger::console("Precharge Relay %i", paramCache.prechargeRelay);
+                //Logger::console("motorController:prechargeRelay:%d, paramCache.prechargeRelay:%d, Constants:prechargeRelay:%s", motorController->getprechargeRelay(),paramCache.prechargeRelay, Constants::prechargeRelay);
             }
 
-            if ( paramCache.coolOn != motorController->getCoolOn() ) {
-                paramCache.coolOn = motorController->getCoolOn();
-                gatt.setChar(MeasureCharId[29], (uint8_t)paramCache.coolOn);
+            if ( bleDigIO.mainContRelay != motorController->getmainContactorRelay() ) {
+                bleDigIO.mainContRelay = motorController->getmainContactorRelay();
+                bleDigIO.doUpdate = 1;
             }
 
-            if ( paramCache.coolOff != motorController->getCoolOff() ) {
-                paramCache.coolOff = motorController->getCoolOff();
-                gatt.setChar(MeasureCharId[30], (uint8_t)paramCache.coolOff);
+
+            if ( bleDigIO.coolingRelay != motorController->getCoolFan() ) {
+                bleDigIO.coolingRelay = motorController->getCoolFan();
+                bleDigIO.doUpdate = 1;
             }
 
-            if ( paramCache.brakeLight != motorController->getBrakeLight() ) {
-                paramCache.brakeLight = motorController->getBrakeLight();
-                gatt.setChar(MeasureCharId[31], (uint8_t) paramCache.brakeLight);
+            if ( bleDigIO.coolOnTemp != motorController->getCoolOn() ) {
+                bleDigIO.coolOnTemp = motorController->getCoolOn();
+                bleDigIO.doUpdate = 1;
             }
 
-            if ( paramCache.revLight != motorController->getRevLight() ) {
-                paramCache.revLight = motorController->getRevLight();
-                gatt.setChar(MeasureCharId[32], (uint8_t)paramCache.revLight);
+            if ( bleDigIO.coolOffTemp != motorController->getCoolOff() ) {
+                bleDigIO.coolOffTemp = motorController->getCoolOff();
+                bleDigIO.doUpdate = 1;
             }
 
-            if ( paramCache.enableIn != motorController->getEnableIn() ) {
-                paramCache.enableIn = motorController->getEnableIn();
-                gatt.setChar(MeasureCharId[33], (uint8_t)paramCache.enableIn);
+            if ( bleDigIO.brakeLightOut != motorController->getBrakeLight() ) {
+                bleDigIO.brakeLightOut = motorController->getBrakeLight();
+                bleDigIO.doUpdate = 1;
             }
-            if ( paramCache.reverseIn != motorController->getReverseIn() ) {
-                paramCache.reverseIn = motorController->getReverseIn();
-                gatt.setChar(MeasureCharId[34], (uint8_t)paramCache.reverseIn);
+
+            if ( bleDigIO.reverseLightOut != motorController->getRevLight() ) {
+                bleDigIO.reverseLightOut = motorController->getRevLight();
+                bleDigIO.doUpdate = 1;
+            }
+
+            if ( bleDigIO.enableIn != motorController->getEnableIn() ) {
+                bleDigIO.enableIn = motorController->getEnableIn();
+                bleDigIO.doUpdate = 1;
+            }
+            if ( bleDigIO.reverseIn != motorController->getReverseIn() ) {
+                bleDigIO.reverseIn = motorController->getReverseIn();
+                bleDigIO.doUpdate = 1;
             }
         }
     } else if (tickCounter > 4) {
         if (motorController) {
-            // Logger::console("Wifi tick counter 5...");
-            if ( paramCache.tempMotor != motorController->getTemperatureMotor() ) {
-                paramCache.tempMotor = motorController->getTemperatureMotor();
-                gatt.setChar(MeasureCharId[21], paramCache.tempMotor);
+            //Logger::console("Wifi tick counter 5...");
+            if ( bleTemperatures.motorTemperature != motorController->getTemperatureMotor() ) {
+                bleTemperatures.motorTemperature = motorController->getTemperatureMotor();
+                bleTemperatures.doUpdate = 1;
             }
-            if ( paramCache.tempInverter != motorController->getTemperatureInverter() ) {
-                paramCache.tempInverter = motorController->getTemperatureInverter();
-                gatt.setChar(MeasureCharId[22], paramCache.tempInverter);
+            if ( bleTemperatures.inverterTemperature != motorController->getTemperatureInverter() ) {
+                bleTemperatures.inverterTemperature = motorController->getTemperatureInverter();
+                bleTemperatures.doUpdate = 1;
             }
-            if ( paramCache.tempSystem != motorController->getTemperatureSystem() ) {
-                paramCache.tempSystem = motorController->getTemperatureSystem();
-                gatt.setChar(MeasureCharId[23], paramCache.tempSystem);
-            }
-
-            if (paramCache.powerMode != motorController->getPowerMode() ) {
-                paramCache.powerMode = motorController->getPowerMode();
-                gatt.setChar(MeasureCharId[7], (uint8_t)paramCache.powerMode);
+            if ( bleTemperatures.systemTemperature != motorController->getTemperatureSystem() ) {
+                bleTemperatures.systemTemperature = motorController->getTemperatureSystem();
+                bleTemperatures.doUpdate = 1;
             }
 
-            //if ( paramCache.mechPower != motorController->getMechanicalPower() ) {
-            paramCache.mechPower = motorController->getMechanicalPower();
-            if (paramCache.mechPower<-250)paramCache.mechPower=-250;
-            if (paramCache.mechPower>1500)paramCache.mechPower=1500;
-            gatt.setChar(MeasureCharId[24], paramCache.mechPower);
-            //}
         }
         tickCounter = 0;
     }
+    transferUpdates(); //send out any updates required
 }
 
 /*
@@ -829,42 +966,50 @@ void ADAFRUITBLE::loadParameters() {
         motorConfig = (MotorControllerConfiguration *)motorController->getConfiguration();    
     
     if (acceleratorConfig) {
-        gatt.setChar(MeasureCharId[35], acceleratorConfig->numberPotMeters);
-        gatt.setChar(MeasureCharId[36], acceleratorConfig->throttleSubType);
-        gatt.setChar(MeasureCharId[37], acceleratorConfig->minimumLevel1);
-        gatt.setChar(MeasureCharId[38], acceleratorConfig->minimumLevel2);
-        gatt.setChar(MeasureCharId[39], acceleratorConfig->maximumLevel1);
-        gatt.setChar(MeasureCharId[40], acceleratorConfig->maximumLevel2);
-        gatt.setChar(MeasureCharId[41], (uint16_t)(acceleratorConfig->positionRegenMaximum / 10));
-        gatt.setChar(MeasureCharId[42], (uint16_t)(acceleratorConfig->positionRegenMinimum / 10));
-        gatt.setChar(MeasureCharId[43], (uint16_t)(acceleratorConfig->positionForwardMotionStart / 10));
-        gatt.setChar(MeasureCharId[44], (uint16_t)(acceleratorConfig->positionHalfPower / 10));
-        gatt.setChar(MeasureCharId[45], acceleratorConfig->minimumRegen);
-        gatt.setChar(MeasureCharId[46], acceleratorConfig->maximumRegen);
-        gatt.setChar(MeasureCharId[47], acceleratorConfig->creep);                
+        bleThrottleIO.numThrottlePots = acceleratorConfig->numberPotMeters;
+        bleThrottleIO.throttleType = acceleratorConfig->throttleSubType;
+        bleThrottleIO.throttle1Min = acceleratorConfig->minimumLevel1;
+        bleThrottleIO.throttle2Min = acceleratorConfig->minimumLevel2;
+        bleThrottleIO.throttle1Max = acceleratorConfig->maximumLevel1;
+        bleThrottleIO.throttle2Max = acceleratorConfig->maximumLevel2;
+        bleThrottleIO.doUpdate = 1;
+        bleThrottleMap.throttleRegenMax = acceleratorConfig->positionRegenMaximum;
+        bleThrottleMap.throttleRegenMin = acceleratorConfig->positionRegenMinimum;
+        bleThrottleMap.throttleFwd = acceleratorConfig->positionForwardMotionStart;
+        bleThrottleMap.throttleMap = acceleratorConfig->positionHalfPower;
+        bleThrottleMap.throttleLowestRegen = acceleratorConfig->minimumRegen;
+        bleThrottleMap.throttleHighestRegen = acceleratorConfig->maximumRegen;
+        bleThrottleMap.throttleCreep = acceleratorConfig->creep;
+        bleThrottleMap.doUpdate = 1;
     }
     if (brakeConfig) {
-        gatt.setChar(MeasureCharId[48], brakeConfig->minimumLevel1);
-        gatt.setChar(MeasureCharId[49], brakeConfig->maximumLevel1);
-        gatt.setChar(MeasureCharId[50], brakeConfig->minimumRegen);
-        gatt.setChar(MeasureCharId[51], brakeConfig->maximumRegen);
+        bleBrakeParam.brakeMin = brakeConfig->minimumLevel1;
+        bleBrakeParam.brakeMax = brakeConfig->maximumLevel1;
+        bleBrakeParam.brakeRegenMin = brakeConfig->minimumRegen;
+        bleBrakeParam.brakeRegenMax = brakeConfig->maximumRegen;
+        bleBrakeParam.doUpdate = 1;
     }
     if (motorConfig) {
-        gatt.setChar(MeasureCharId[52], motorConfig->speedMax);
-        gatt.setChar(MeasureCharId[28], motorConfig->coolFan);
-        gatt.setChar(MeasureCharId[29], motorConfig->coolOn);
-        gatt.setChar(MeasureCharId[30], motorConfig->coolOff);
-        gatt.setChar(MeasureCharId[31], motorConfig->brakeLight);
-        gatt.setChar(MeasureCharId[32], motorConfig->revLight);
-        gatt.setChar(MeasureCharId[33], motorConfig->enableIn);
-        gatt.setChar(MeasureCharId[34], motorConfig->reverseIn);
-        gatt.setChar(MeasureCharId[25], motorConfig->prechargeR);
-        gatt.setChar(MeasureCharId[26], motorConfig->prechargeRelay);
-        gatt.setChar(MeasureCharId[27], motorConfig->mainContactorRelay);
-        gatt.setChar(MeasureCharId[12], (uint16_t)(motorConfig->nominalVolt));
-        gatt.setChar(MeasureCharId[53], (uint16_t)(motorConfig->torqueMax));         
+        bleDigIO.coolingRelay = motorConfig->coolFan;
+        bleDigIO.coolOnTemp = motorConfig->coolOn;
+        bleDigIO.coolOffTemp = motorConfig->coolOff;
+        bleDigIO.brakeLightOut = motorConfig->brakeLight;
+        bleDigIO.reverseLightOut = motorConfig->revLight;
+        bleDigIO.enableIn = motorConfig->enableIn;
+        bleDigIO.reverseIn = motorConfig->reverseIn;
+        bleDigIO.prechargeR = motorConfig->prechargeR;
+        bleDigIO.prechargeRelay = motorConfig->prechargeRelay;
+        bleDigIO.mainContRelay = motorConfig->mainContactorRelay;
+        bleDigIO.doUpdate = 1;
+        bleMaxParams.nomVoltage = motorConfig->nominalVolt;
+        bleMaxParams.maxTorque = motorConfig->torqueMax;
+        bleMaxParams.maxRPM = motorConfig->speedMax;
+        bleMaxParams.doUpdate = 1;
     }
-    gatt.setChar(MeasureCharId[54], (uint8_t)Logger::getLogLevel());
+    bleModes.logLevel = (uint8_t)Logger::getLogLevel();
+    bleModes.doUpdate = 1;
+    
+    transferUpdates();
 }
 
 DeviceType ADAFRUITBLE::getType() {

@@ -61,12 +61,129 @@ class BLEConfiguration : public DeviceConfiguration {
 public:
 };
 
-struct Characteristic {
+struct Characteristic 
+{
+    BLEDataType_t dataType;
     int minSize;
     int maxSize;
     uint8_t properties;
     const char *descript;
     GattPresentationFormat present;
+};
+
+struct BLETrqReqAct 
+{
+    int16_t torqueRequested;
+    int16_t torqueActual;
+    uint8_t doUpdate; //0 = no need to update this struct to the BLE module 1 = need to update onto BLE module
+};
+
+struct BLEThrBrkLevels 
+{
+    uint16_t throttleLevel;
+    uint16_t brakeLevel;
+    uint8_t doUpdate; 
+};
+
+struct BLESpeeds
+{
+    int16_t speedRequested;
+    int16_t speedActual;
+    uint8_t doUpdate; 
+};
+
+struct BLEModes
+{
+    uint8_t powerMode;
+    uint8_t gear;
+    uint8_t isRunning;
+    uint8_t isFaulted;
+    uint8_t isWarning;
+    uint8_t logLevel;
+    uint8_t doUpdate; 
+};
+    
+struct BLEPowerStatus
+{
+    uint16_t busVoltage;
+    int16_t busCurrent;
+    int16_t motorCurrent;
+    uint16_t kwHours;
+    int16_t mechPower;
+    uint8_t doUpdate; 
+};
+
+struct BLEBitfields
+{
+    uint32_t bitfield1;
+    uint32_t bitfield2;
+    uint32_t bitfield3;
+    uint32_t bitfield4;
+    uint8_t doUpdate; 
+};
+
+struct BLETemperatures
+{
+    int16_t motorTemperature;
+    int16_t inverterTemperature;
+    int16_t systemTemperature;
+    uint8_t doUpdate; 
+};
+
+
+struct BLEDigIO
+{
+    uint16_t prechargeR;
+    uint8_t prechargeRelay;
+    uint8_t mainContRelay;
+    uint8_t coolingRelay;
+    int8_t coolOnTemp;
+    int8_t coolOffTemp;
+    uint8_t brakeLightOut;
+    uint8_t reverseLightOut;
+    uint8_t enableIn;
+    uint8_t reverseIn;
+    uint8_t doUpdate; 
+};
+
+struct BLEThrottleIO
+{
+    uint8_t numThrottlePots;
+    uint8_t throttleType;
+    uint16_t throttle1Min;
+    uint16_t throttle2Min;
+    uint16_t throttle1Max;
+    uint16_t throttle2Max;   
+    uint8_t doUpdate; 
+};
+
+struct BLEThrottleMap
+{
+    uint8_t throttleRegenMax; //% of pedal where regen is at max setting
+    uint8_t throttleRegenMin; //% of pedal with lowest regen
+    uint8_t throttleFwd; //% of pedal where forward motion starts
+    uint8_t throttleMap; //% of pedal where 50% power is given
+    uint8_t throttleLowestRegen; //% of system max regen to use for lowest regen with throttle
+    uint8_t throttleHighestRegen; //% of system max regen to use for highest regen with throttle
+    uint8_t throttleCreep; //% of forward torque to output for creeping
+    uint8_t doUpdate; 
+};
+    
+struct BLEBrakeParam
+{
+    uint16_t brakeMin;
+    uint16_t brakeMax;
+    uint8_t brakeRegenMin;
+    uint8_t brakeRegenMax;
+    uint8_t doUpdate; 
+};
+
+struct BLEMaxParams
+{
+    uint16_t nomVoltage;
+    uint16_t maxRPM;
+    uint16_t maxTorque;
+    uint8_t doUpdate; 
 };
 
 class ADAFRUITBLE : public Device {
@@ -90,18 +207,30 @@ private:
     ELM327Processor *elmProc;
     int tickCounter;
     int32_t ServiceId;
-    int32_t MeasureCharId[55]; //Keep track and update this to be large enough.
+    int32_t MeasureCharId[13]; //Keep track and update this to be large enough.
     int32_t LocationCharId;
     boolean success;
     int counter;
     char buffer[30]; // a buffer for various string conversions
     ParamCache paramCache;
     boolean didParamLoad;
+    BLETrqReqAct bleTrqReqAct;
+    BLEThrBrkLevels bleThrBrkLevels;
+    BLESpeeds bleSpeeds;
+    BLEModes bleModes;
+    BLEPowerStatus blePowerStatus;
+    BLEBitfields bleBitFields;
+    BLETemperatures bleTemperatures;
+    BLEDigIO bleDigIO;
+    BLEThrottleIO bleThrottleIO;
+    BLEThrottleMap bleThrottleMap;
+    BLEBrakeParam bleBrakeParam;
+    BLEMaxParams bleMaxParams;
 
     void setupBLEservice();
+    void transferUpdates();
+    void dumpRawData(uint8_t *data, int len);
     void processParameterChange(char *response);
 };
 
 #endif
-
-
