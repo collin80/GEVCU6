@@ -1,0 +1,50 @@
+Looking at the component side of the driver board:
+
+2  4  6  8  10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40
+1  3  5  7  9  11 13 15 17 19 21 23 25 27 29 31 33 35 37 39
+
+1 Gate A Bottom VIN-
+2 Driver ground
+3 Gate A Top VIN-
+4 Driver ground
+5 Gate B Bottom VIN-
+6 Driver ground
+7 Gate B Top VIN-
+8 Driver ground
+9 Gate C Bottom VIN-
+10 Driver ground
+11 Gate C Top VIN-
+12 Driver ground
+13 very weakly floats to 1.5 to 2v but bleeds off rapidly when tested.
+14 Not sure, seems to not read any voltage ever
+15 Signal Ground
+16 Fault output (+5v when not faulted, pulled low when desat fault happens)
+17 Signal Ground
+18 Fault output (+5V when not faulted, pulled low when desat fault happens)
+19 Gate VIN+ for all drivers and gates (5V in)
+20 Some sort of AC signal that runs around 70Hz and +/- 3.3v
+21 Seems to be 5v while board is active?
+22 Seems to always be around 5.3v. Seems to be +5V source from power board.
+23 Driver reset (for all drivers and gates)
+24 Floats up to +5v but when pulled to ground it enables gate drivers
+25 Temperature 1 signal (J3)
+26 Very weakly floats to about 2v when not spinning. When spinning pegged at 2v
+27 Signal 1 from current sensor board (don't know what this is)
+28 Op amp reference for current sensors
+29 Sensor CT1-B on current board
+30 Op amp reference for current sensors
+31 Sensor CT1-A on current board
+32 Op amp reference for current sensors
+33 Pack voltage reading (1/100 scale so 400v is 4v)
+34 Signal ground (connects to current sensors and temperature sensors)
+35 Signal Ground
+36 Signal ground
+37 Temperature 2 signal (J4)
+38 Seems to run about 4 to 4.8v while board is active
+39 Not sure, seems to not read any voltage ever
+40 Signal Ground
+
+PWM pins are 10Khz and rest at high (active low)
+
+
+
