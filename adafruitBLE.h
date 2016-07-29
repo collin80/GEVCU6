@@ -71,6 +71,7 @@ struct Characteristic
     GattPresentationFormat present;
 };
 
+#pragma pack(push, 1)
 struct BLETrqReqAct 
 {
     int16_t torqueRequested;
@@ -148,12 +149,12 @@ struct BLEDigIO
 
 struct BLEThrottleIO
 {
-    uint8_t numThrottlePots;
-    uint8_t throttleType;
     uint16_t throttle1Min;
     uint16_t throttle2Min;
     uint16_t throttle1Max;
     uint16_t throttle2Max;   
+    uint8_t numThrottlePots;
+    uint8_t throttleType;
     uint8_t doUpdate; 
 };
 
@@ -185,6 +186,8 @@ struct BLEMaxParams
     uint16_t maxTorque;
     uint8_t doUpdate; 
 };
+#pragma pack(pop)
+
 
 class ADAFRUITBLE : public Device {
 public:

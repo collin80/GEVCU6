@@ -34,10 +34,20 @@ uint8_t DFU=65;
 uint8_t MODE=64;
 uint8_t BLETYPE=1;  //Type 1 is SPI type 2 is UART
 
-//formed as a standard C array right now. Sort of dangerous in that there is no good way
-//to know the length... well, you can grab the sizeof operator with division
-//but instead this array is null terminated sort of like a C string.
-//Characteristics can be up to 20 bytes so stay under that.
+/*
+ * Extra things that should be sent but perhaps aren't:
+ * current state of digital inputs and outputs
+ * Battery SOC
+ * Current throttle application (where is the pedal being depressed to? +/- 100%
+ * Enabled/Disabled device drivers
+ */
+
+/*
+ * formed as a standard C array right now. Sort of dangerous in that there is no good way
+ * to know the length... well, you can grab the sizeof operator with division
+ * but instead this array is null terminated sort of like a C string.
+ * Characteristics can be up to 20 bytes so stay under that.
+*/
 Characteristic characteristics[] = 
 {
     {BLE_DATATYPE_INTEGER, 4, 4, 0x12, "TimeRunning", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_TIME_SECOND, 1, 0}}, //MeasureCharId[0]
@@ -61,7 +71,7 @@ Characteristic characteristics[] =
     {BLE_DATATYPE_BYTEARRAY, 16, 16, 0x12,  "Bitfields", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[6]
 
     //Temperatures - Motor, Inverter, System. All 16 bit
-    {BLE_DATATYPE_BYTEARRAY, 6, 6, 0x12,  "Temperatures", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //7
+{BLE_DATATYPE_BYTEARRAY, 6, 6, 0x12,  "Temperatures", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //7
     
     //PrechargeResist(2), PrechargeRelay(1), MainContRelay(1), CoolFanRelay(1), CoolOnTemp(1), coolOffTemp(1), BrakeLightOut(1), ReverseLightOut(1), EnableIn(1), ReverseIn(1)
     {BLE_DATATYPE_BYTEARRAY, 11, 11, 0x1A,  "DigIO", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //8
@@ -230,134 +240,134 @@ void ADAFRUITBLE::transferUpdates()
     if (bleTrqReqAct.doUpdate != 0)
     {
         bleTrqReqAct.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[1], (uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 2))
+        if (!gatt.setChar(MeasureCharId[1], (uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 1))
         {
             Logger::error("Could not update bleTrqReqAct");
         }
         else Logger::debug(ADABLUE, "Updated bleTrqReqAct");
-        dumpRawData((uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 2);
+        dumpRawData((uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 1);
     }
     
     if (bleThrBrkLevels.doUpdate != 0)
     {
         bleThrBrkLevels.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[2], (uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 2))
+        if (!gatt.setChar(MeasureCharId[2], (uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 1))
         {
             Logger::error("Could not update bleThrBrkLevels");
         }
 
         else Logger::debug(ADABLUE, "Updated bleThrBrkLevels");
-        dumpRawData((uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 2);
+        dumpRawData((uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 1);
     }
     
     if (bleSpeeds.doUpdate != 0)
     {
         bleSpeeds.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[3], (uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 2))
+        if (!gatt.setChar(MeasureCharId[3], (uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 1))
         {
             Logger::error("Could not update bleSpeeds");
         }            
         else Logger::debug(ADABLUE, "Updated bleSpeeds");
-        dumpRawData((uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 2);
+        dumpRawData((uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 1);
     }
     
     if (bleModes.doUpdate != 0)
     {
         bleModes.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[4], (uint8_t *)&bleModes, sizeof(bleModes) - 2))
+        if (!gatt.setChar(MeasureCharId[4], (uint8_t *)&bleModes, sizeof(bleModes) - 1))
         {
             Logger::error("Could not update bleModes");
         }            
         else Logger::debug(ADABLUE, "Updated bleModes");
-        dumpRawData((uint8_t *)&bleModes, sizeof(bleModes) - 2);
+        dumpRawData((uint8_t *)&bleModes, sizeof(bleModes) - 1);
     }
     
     if (blePowerStatus.doUpdate != 0)
     {
         blePowerStatus.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[5], (uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 2))
+        if (!gatt.setChar(MeasureCharId[5], (uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 1))
         {
             Logger::error("Could not update blePowerStatus");
         }            
         else Logger::debug(ADABLUE, "Updated blePowerStatus");
-        dumpRawData((uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 2);
+        dumpRawData((uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 1);
     }
     
     if (bleBitFields.doUpdate != 0)
     {
         bleBitFields.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[6], (uint8_t *)&bleBitFields, sizeof(bleBitFields) - 2))
+        if (!gatt.setChar(MeasureCharId[6], (uint8_t *)&bleBitFields, sizeof(bleBitFields) - 1))
         {
             Logger::error("Could not update bleBitFields");
         }            
         else Logger::debug(ADABLUE, "Updated bleBitFields");
-        dumpRawData((uint8_t *)&bleBitFields, sizeof(bleBitFields) - 2);
+        dumpRawData((uint8_t *)&bleBitFields, sizeof(bleBitFields) - 1);
     }
     
     if (bleTemperatures.doUpdate != 0)
     {
         bleTemperatures.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[7], (uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 2))
+        if (!gatt.setChar(MeasureCharId[7], (uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 1))
         {
             Logger::error("Could not update bleTemperatures");
         }            
         else Logger::debug(ADABLUE, "Updated bleTemperatures");
-        dumpRawData((uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 2);
+        dumpRawData((uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 1);
     }
     
     if (bleDigIO.doUpdate != 0)
     {
         bleDigIO.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[8], (uint8_t *)&bleDigIO, sizeof(bleDigIO) - 2))
+        if (!gatt.setChar(MeasureCharId[8], (uint8_t *)&bleDigIO, sizeof(bleDigIO) - 1))
         {
             Logger::error("Could not update bleDigIO");
         }            
         else Logger::debug(ADABLUE, "Updated bleDigIO");
-        dumpRawData((uint8_t *)&bleDigIO, sizeof(bleDigIO) - 2);
+        dumpRawData((uint8_t *)&bleDigIO, sizeof(bleDigIO) - 1);
     }
         
     if (bleThrottleIO.doUpdate != 0)
     {
         bleThrottleIO.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[9], (uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 2))
+        if (!gatt.setChar(MeasureCharId[9], (uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 1))
         {
             Logger::error("Could not update bleThrottleIO");
         }            
         else Logger::debug(ADABLUE, "Updated bleThrottleIO");
-        dumpRawData((uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 2);
+        dumpRawData((uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 1);
     }
     
     if (bleThrottleMap.doUpdate != 0)
     {
         bleThrottleMap.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[10], (uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 2))
+        if (!gatt.setChar(MeasureCharId[10], (uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 1))
         {
             Logger::error("Could not update bleThrottleMap");
         }            
         else Logger::debug(ADABLUE, "Updated bleThrottleMap");
-        dumpRawData((uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 2);
+        dumpRawData((uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 1);
     }    
 
     if (bleBrakeParam.doUpdate != 0)
     {
         bleBrakeParam.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[11], (uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 2))
+        if (!gatt.setChar(MeasureCharId[11], (uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 1))
         {
             Logger::error("Could not update bleBrakeParam");
         }            
         else Logger::debug(ADABLUE, "Updated bleBrakeParam");
-        dumpRawData((uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 2);
+        dumpRawData((uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 1);
     }
     
     if (bleMaxParams.doUpdate != 0)
     {
         bleMaxParams.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[12], (uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 2))
+        if (!gatt.setChar(MeasureCharId[12], (uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 1))
         {
             Logger::error("Could not update bleMaxParams");
         }            
         else Logger::debug(ADABLUE, "Updated bleMaxParams");
-        dumpRawData((uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 2);
+        dumpRawData((uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 1);
     }    
 }
 
