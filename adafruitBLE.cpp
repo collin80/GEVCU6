@@ -36,9 +36,6 @@ uint8_t BLETYPE=1;  //Type 1 is SPI type 2 is UART
 
 /*
  * Extra things that should be sent but perhaps aren't:
- * current state of digital inputs and outputs
- * Battery SOC
- * Current throttle application (where is the pedal being depressed to? +/- 100%
  * Enabled/Disabled device drivers
  */
 
@@ -53,40 +50,40 @@ Characteristic characteristics[] =
     {BLE_DATATYPE_INTEGER, 4, 4, 0x12, "TimeRunning", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_TIME_SECOND, 1, 0}}, //MeasureCharId[0]
     
     //Requested torque followed by actual torque, both signed 16 bit
-    {BLE_DATATYPE_BYTEARRAY, 4, 4, 0x12,  "TrqReqAct", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //1
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLETrqReqAct) - 1, sizeof(BLETrqReqAct) - 1, 0x12,  "TrqReqAct", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //1
     
     //First the throttle level, then the brake level, both 16 bit values
-    {BLE_DATATYPE_BYTEARRAY, 4, 4, 0x12,  "ThrBrkLevels", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //2
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLEThrBrkLevels) - 1, sizeof(BLEThrBrkLevels) - 1, 0x12,  "ThrBrkLevels", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //2
     
     //First requested speed then actual speed, both 16 bit
-    {BLE_DATATYPE_BYTEARRAY, 4, 4, 0x12,  "Speed", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_ANGULAR_VELOCITY_REVOLUTION_PER_MINUTE, 1, 0}}, //3
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLESpeeds) - 1, sizeof(BLESpeeds) - 1, 0x12,  "Speed", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_ANGULAR_VELOCITY_REVOLUTION_PER_MINUTE, 1, 0}}, //3
     
     //PowerMode, then Gear, then IsRunning then isFaulted, then IsWarning, lastly LogLevel all 1 byte each
-    {BLE_DATATYPE_BYTEARRAY, 6, 6, 0x1A,  "Modes", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[4]
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLEModes) - 1, sizeof(BLEModes) - 1, 0x1A,  "Modes", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[4]
 
     //Bus Voltage then Bus Current, then motor current, then kwhours, then mechanical power all 16 bit with currents being signed.
-    {BLE_DATATYPE_BYTEARRAY, 10, 10, 0x12,  "PowerStatus", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_NONE, 1, 0}}, //5
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLEPowerStatus) - 1, sizeof(BLEPowerStatus) - 1, 0x12,  "PowerStatus", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_NONE, 1, 0}}, //5
         
     //Bitfield 1 through 4 all in the same characteristic. All 32 bit
-    {BLE_DATATYPE_BYTEARRAY, 16, 16, 0x12,  "Bitfields", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[6]
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLEBitfields) - 1, sizeof(BLEBitfields) - 1, 0x12,  "Bitfields", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //MeasureCharId[6]
 
     //Temperatures - Motor, Inverter, System. All 16 bit
-{BLE_DATATYPE_BYTEARRAY, 6, 6, 0x12,  "Temperatures", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //7
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLETemperatures) - 1, sizeof(BLETemperatures) - 1, 0x12,  "Temperatures", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_THERMODYNAMIC_TEMPERATURE_DEGREE_CELSIUS, 1, 0}}, //7
     
     //PrechargeResist(2), PrechargeRelay(1), MainContRelay(1), CoolFanRelay(1), CoolOnTemp(1), coolOffTemp(1), BrakeLightOut(1), ReverseLightOut(1), EnableIn(1), ReverseIn(1)
-    {BLE_DATATYPE_BYTEARRAY, 11, 11, 0x1A,  "DigIO", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //8
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLEDigIO) - 1, sizeof(BLEDigIO) - 1, 0x1A,  "DigIO", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //8
     
     //NumThrPots(1), ThrottleType(1), T1Min(2), T2Min(2), T1Max(2), T2Max(2)   
-    {BLE_DATATYPE_BYTEARRAY, 10, 10, 0x1A,  "ThrottleIO", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //9
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLEThrottleIO) - 1, sizeof(BLEThrottleIO) - 1, 0x1A,  "ThrottleIO", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //9
      
     //ThrottleRegenMax(2), ThrRegenMin(2), ThrottleFwd(2), ThrottleMap(2), TRegenMin(1), TRegenMax(1), TCreep(1)
-    {BLE_DATATYPE_BYTEARRAY, 11, 11, 0x1A,  "ThrottleMap", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //10
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLEThrottleMap) - 1, sizeof(BLEThrottleMap) - 1, 0x1A,  "ThrottleMap", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //10
 
     //BrakeMin(2), BrakeMax(2), BRegenMin(1), BRegenMax(1)
-    {BLE_DATATYPE_BYTEARRAY, 6, 6, 0x1A,  "BrakeParam", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //11
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLEBrakeParam) - 1, sizeof(BLEBrakeParam) - 1, 0x1A,  "BrakeParam", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //11
         
     //NominalVoltage(2), MaxRPM(2), MaxTorque(2)
-    {BLE_DATATYPE_BYTEARRAY, 6, 6, 0x1A,  "MaxParams", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //12
+    {BLE_DATATYPE_BYTEARRAY, sizeof(BLEMaxParams) - 1, sizeof(BLEMaxParams) - 1, 0x1A,  "MaxParams", {GATT_PRESENT_FORMAT_STRUCT, 0, GATT_PRESENT_UNIT_NONE, 1, 0}}, //12
          
     {BLE_DATATYPE_INTEGER, 0, 0, 0, "END", {GATT_PRESENT_FORMAT_UINT8, 0, GATT_PRESENT_UNIT_NONE, 1, 0}} //leave this at the end - null terminator
 };
@@ -380,10 +377,10 @@ void ADAFRUITBLE::handleTick() {
     MotorController* motorController = DeviceManager::getInstance()->getMotorController();
     Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
     Throttle *brake = DeviceManager::getInstance()->getBrake();
-    static int pollListening = 0;
-    static int pollSocket = 0;
+    BatteryManager *bms = reinterpret_cast<BatteryManager *>(DeviceManager::getInstance()->getDeviceByType(DEVICE_BMS));
+    
     uint32_t ms = millis();
-    char buff[6];
+    uint32_t IOTemp = 0;
     uint8_t brklt;
     tickCounter++;
 
@@ -406,7 +403,7 @@ void ADAFRUITBLE::handleTick() {
             //Logger::console("Wifi tick counter 1...");
 
             paramCache.timeRunning = ms / 1000;
-            gatt.setChar(MeasureCharId[0], getTimeRunning());
+            gatt.setChar(MeasureCharId[0], (uint8_t *)&paramCache.timeRunning, 4);
 
             if ( bleTrqReqAct.torqueRequested  != motorController->getTorqueRequested() ) {
                 bleTrqReqAct.torqueRequested = motorController->getTorqueRequested();
@@ -419,26 +416,49 @@ void ADAFRUITBLE::handleTick() {
         }
         if (accelerator) {
             RawSignalData *rawSignal = accelerator->acquireRawSignal();
-            if ( bleThrBrkLevels.throttleLevel !=  rawSignal->input1) {
-                bleThrBrkLevels.throttleLevel = rawSignal->input1;
+            if ( bleThrBrkLevels.throttleRawLevel1 !=  rawSignal->input1) 
+            {
+                bleThrBrkLevels.throttleRawLevel1 = rawSignal->input1;
+                bleThrBrkLevels.doUpdate = 1;
+            }
+            if ( bleThrBrkLevels.throttleRawLevel2 !=  rawSignal->input2) 
+            {
+                bleThrBrkLevels.throttleRawLevel2 = rawSignal->input2;
+                bleThrBrkLevels.doUpdate = 1;
+            }
+            if (bleThrBrkLevels.throttlePercentage != accelerator->getLevel())
+            {
+                bleThrBrkLevels.throttlePercentage = accelerator->getLevel();
                 bleThrBrkLevels.doUpdate = 1;
             }
         }
         if (brake) {
             RawSignalData *rawSignal = brake->acquireRawSignal();
-            if (bleThrBrkLevels.brakeLevel !=  rawSignal->input1) {
-                bleThrBrkLevels.brakeLevel = rawSignal->input1;
+            if (bleThrBrkLevels.brakeRawLevel !=  rawSignal->input1) {
+                bleThrBrkLevels.brakeRawLevel = rawSignal->input1;
                 paramCache.brakeNotAvailable = false;
                 bleThrBrkLevels.doUpdate = 1;
             }
+            if (bleThrBrkLevels.brakePercentage !=  brake->getLevel()) {
+                bleThrBrkLevels.brakePercentage = brake->getLevel();
+                bleThrBrkLevels.doUpdate = 1;
+            }            
         } else {
             if ( paramCache.brakeNotAvailable == true ) {
                 paramCache.brakeNotAvailable = false; // no need to keep sending this
-                bleThrBrkLevels.brakeLevel = 0;
+                bleThrBrkLevels.brakeRawLevel = 0;
                 bleThrBrkLevels.doUpdate = 1;
             }
         }
     } else if (tickCounter == 2) {
+        if (bms)
+        {
+            if (blePowerStatus.SOC != bms->getSOC())
+            {
+                blePowerStatus.SOC = bms->getSOC();
+                blePowerStatus.doUpdate = 1;
+            }
+        }
         if (motorController) {
             //Logger::console("Wifi tick counter 2...");
             if ( bleSpeeds.speedRequested != motorController->getSpeedRequested() ) {
@@ -453,8 +473,8 @@ void ADAFRUITBLE::handleTick() {
             
             if ( blePowerStatus.busVoltage != motorController->getDcVoltage() ) {
                 blePowerStatus.busVoltage = motorController->getDcVoltage();
-                if(blePowerStatus.busVoltage<1000) blePowerStatus.busVoltage=1000;  //Limits of the gage display
-                if(blePowerStatus.busVoltage>4500) blePowerStatus.busVoltage=4500;
+                if(blePowerStatus.busVoltage<0) blePowerStatus.busVoltage=0; 
+                //if(blePowerStatus.busVoltage>4500) blePowerStatus.busVoltage=4500;
                 blePowerStatus.doUpdate = 1;
             }
             
@@ -501,12 +521,26 @@ void ADAFRUITBLE::handleTick() {
                 bleBitFields.bitfield2 = motorController->getStatusBitfield2();
                 bleBitFields.doUpdate = 1;
             }
-            if ( bleBitFields.bitfield3 != motorController->getStatusBitfield3() ) {
-                bleBitFields.bitfield3 = motorController->getStatusBitfield3();
+            
+            IOTemp = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                if (getDigital(i)) bleBitFields.digitalInputs |= 1 << i;
+            }            
+                        
+            if ( bleBitFields.digitalInputs != IOTemp ) {
+                bleBitFields.digitalInputs = IOTemp;
                 bleBitFields.doUpdate = 1;
             }
-            if ( bleBitFields.bitfield4 != motorController->getStatusBitfield4() ) {
-                bleBitFields.bitfield4 = motorController->getStatusBitfield4();
+            
+            IOTemp = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                if (getOutput(i)) bleBitFields.digitalOutputs |= 1 << i;
+            }
+            
+            if ( bleBitFields.digitalOutputs != IOTemp ) {
+                bleBitFields.digitalOutputs = IOTemp;
                 bleBitFields.doUpdate = 1;
             }
             
@@ -537,8 +571,8 @@ void ADAFRUITBLE::handleTick() {
         if (motorController) {
             //Logger::console("Wifi tick counter 4...");
             
-            if ( bleDigIO.prechargeR != motorController->getprechargeR() ) {
-                bleDigIO.prechargeR = motorController->getprechargeR();
+            if ( bleDigIO.prechargeDuration != motorController->getprechargeR() ) {
+                bleDigIO.prechargeDuration = motorController->getprechargeR();
                 bleDigIO.doUpdate = 1;
             }
 
@@ -1007,7 +1041,7 @@ void ADAFRUITBLE::loadParameters() {
         bleDigIO.reverseLightOut = motorConfig->revLight;
         bleDigIO.enableIn = motorConfig->enableIn;
         bleDigIO.reverseIn = motorConfig->reverseIn;
-        bleDigIO.prechargeR = motorConfig->prechargeR;
+        bleDigIO.prechargeDuration = motorConfig->prechargeR;
         bleDigIO.prechargeRelay = motorConfig->prechargeRelay;
         bleDigIO.mainContRelay = motorConfig->mainContactorRelay;
         bleDigIO.doUpdate = 1;

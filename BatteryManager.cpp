@@ -32,6 +32,7 @@ BatteryManager::BatteryManager() : Device()
 {
     packVoltage = 0;
     packCurrent = 0;
+    SOC = 0;
 }
 
 BatteryManager::~BatteryManager()
@@ -70,5 +71,9 @@ signed int BatteryManager::getPackCurrent()
     return packCurrent;
 }
 
+int BatteryManager::getSOC()
+{
+    return SOC;
+}
 
 

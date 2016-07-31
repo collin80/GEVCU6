@@ -39,7 +39,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config.h"
 #include "constants.h"
 #include "DeviceManager.h"
+#include "sys_io.h"
 #include "PotThrottle.h"
+#include "BatteryManager.h"
 #include "Sys_Messages.h"
 #include "Logger.h"
 #include "DeviceTypes.h"
@@ -81,8 +83,11 @@ struct BLETrqReqAct
 
 struct BLEThrBrkLevels 
 {
-    uint16_t throttleLevel;
-    uint16_t brakeLevel;
+    uint16_t throttleRawLevel1;
+    uint16_t throttleRawLevel2;
+    uint16_t brakeRawLevel;
+    int8_t throttlePercentage; // -100 to 100 with regen being negative
+    int8_t brakePercentage; //always regen
     uint8_t doUpdate; 
 };
 
@@ -111,6 +116,7 @@ struct BLEPowerStatus
     int16_t motorCurrent;
     uint16_t kwHours;
     int16_t mechPower;
+    uint8_t SOC;
     uint8_t doUpdate; 
 };
 
@@ -118,8 +124,8 @@ struct BLEBitfields
 {
     uint32_t bitfield1;
     uint32_t bitfield2;
-    uint32_t bitfield3;
-    uint32_t bitfield4;
+    uint32_t digitalInputs;
+    uint32_t digitalOutputs;
     uint8_t doUpdate; 
 };
 
@@ -134,7 +140,7 @@ struct BLETemperatures
 
 struct BLEDigIO
 {
-    uint16_t prechargeR;
+    uint16_t prechargeDuration;
     uint8_t prechargeRelay;
     uint8_t mainContRelay;
     uint8_t coolingRelay;

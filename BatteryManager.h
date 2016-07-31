@@ -39,6 +39,7 @@ public:
     ~BatteryManager();
     int getPackVoltage(); //in tenths of a volt
     signed int getPackCurrent(); //in tenths of an amp
+    int getSOC();
     //bool allowCharging();
     //bool allowDischarging();
     DeviceType getType();
