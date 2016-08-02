@@ -215,10 +215,12 @@ void createObjects() {
 	PotThrottle *paccelerator = new PotThrottle();
 	CanThrottle *caccelerator = new CanThrottle();
 	PotBrake *pbrake = new PotBrake();
+    TestThrottle *testAccel = new TestThrottle();
 	CanBrake *cbrake = new CanBrake();
 	DmocMotorController *dmotorController = new DmocMotorController();
     CodaMotorController *cmotorController = new CodaMotorController();
 	CKMotorController *ckMotorController = new CKMotorController();
+    TestMotorController *testMotorController = new TestMotorController();
     DCDCController *dcdcController = new DCDCController();
 	BrusaMotorController *bmotorController = new BrusaMotorController();
 	ThinkBatteryManager *BMS = new ThinkBatteryManager();
@@ -227,7 +229,8 @@ void createObjects() {
     ADAFRUITBLE *ble = new ADAFRUITBLE();
     EVIC *eVIC = new EVIC();
 }
-     void initializeDevices() {
+
+void initializeDevices() {
 	DeviceManager *deviceManager = DeviceManager::getInstance();
 
 	//heartbeat is always enabled now
@@ -259,12 +262,12 @@ void createObjects() {
 void setup() {
 	sys_boot_setup(); //sets digital outputs to "off" right as soon as the sketch gets control.
 	
-        //delay(5000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
+    //delay(5000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
        
-        //initWiReach();
+    //initWiReach();
 	pinMode(BLINK_LED, OUTPUT);
 	digitalWrite(BLINK_LED, LOW);
-        SerialUSB.begin(CFG_SERIAL_SPEED);
+    SerialUSB.begin(CFG_SERIAL_SPEED);
 	SerialUSB.println(CFG_VERSION);
 	SerialUSB.print("Build number: ");
 	SerialUSB.println(CFG_BUILD_NUM);
@@ -285,7 +288,7 @@ void setup() {
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
 	//Logger::setLoglevel((Logger::LogLevel)loglevel);
-	Logger::setLoglevel((Logger::LogLevel)1);
+	Logger::setLoglevel((Logger::LogLevel)0);
 	sys_early_setup();     
 	tickHandler = TickHandler::getInstance();
 	canHandlerEV = CanHandler::getInstanceEV();

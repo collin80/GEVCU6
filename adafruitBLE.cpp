@@ -98,6 +98,7 @@ ADAFRUITBLE::ADAFRUITBLE() {
     sysPrefs->read(EESYS_SYSTEM_TYPE, &sys_type);
 
     commonName = "Adafruit BLE";
+    didParamLoad = false;
 }
 
 /*
@@ -389,7 +390,7 @@ void ADAFRUITBLE::handleTick() {
     // Do a delayed parameter load once about a second after startup
     if (!didParamLoad && ms > 5000) {
         loadParameters();
-        Logger::console("Wifi Parameters loaded...");
+        Logger::console("BLE characteristics loaded...");
         bleBitFields.bitfield1 = motorController->getStatusBitfield1();
         bleBitFields.bitfield2 = motorController->getStatusBitfield2();
         bleBitFields.doUpdate = 1;        
@@ -426,9 +427,9 @@ void ADAFRUITBLE::handleTick() {
                 bleThrBrkLevels.throttleRawLevel2 = rawSignal->input2;
                 bleThrBrkLevels.doUpdate = 1;
             }
-            if (bleThrBrkLevels.throttlePercentage != accelerator->getLevel())
+            if (bleThrBrkLevels.throttlePercentage != accelerator->getLevel() / 10)
             {
-                bleThrBrkLevels.throttlePercentage = accelerator->getLevel();
+                bleThrBrkLevels.throttlePercentage = accelerator->getLevel() / 10;
                 bleThrBrkLevels.doUpdate = 1;
             }
         }
@@ -439,8 +440,8 @@ void ADAFRUITBLE::handleTick() {
                 paramCache.brakeNotAvailable = false;
                 bleThrBrkLevels.doUpdate = 1;
             }
-            if (bleThrBrkLevels.brakePercentage !=  brake->getLevel()) {
-                bleThrBrkLevels.brakePercentage = brake->getLevel();
+            if (bleThrBrkLevels.brakePercentage !=  brake->getLevel() / 10) {
+                bleThrBrkLevels.brakePercentage = brake->getLevel() / 10;
                 bleThrBrkLevels.doUpdate = 1;
             }            
         } else {
