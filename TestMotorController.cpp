@@ -110,8 +110,8 @@ void TestMotorController::handleTick() {
     //Assume ambient temperature is 18C
     //These numbers are horrifically off from realistic physics at this point
     //but we're trying to aid debugging, not making a perfect physics model.
-    temperatureMotor = 180 + abs(mechanicalPower);
-    temperatureInverter = 190 + abs(mechanicalPower);
+    temperatureMotor = 180 + abs(mechanicalPower * 2);
+    temperatureInverter = 190 + abs(mechanicalPower * 3) / 2;
     temperatureSystem = (temperatureInverter + temperatureMotor) / 2;
     
     Logger::debug(TESTINVERTER, "PowerMode: %i, Gear: %i", powerMode, selectedGear);

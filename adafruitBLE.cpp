@@ -47,7 +47,7 @@ uint8_t BLETYPE=1;  //Type 1 is SPI type 2 is UART
 */
 Characteristic characteristics[] = 
 {
-    {BLE_DATATYPE_INTEGER, 4, 4, 0x12, "TimeRunning", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_TIME_SECOND, 1, 0}}, //MeasureCharId[0]
+    {BLE_DATATYPE_BYTEARRAY, 4, 4, 0x12, "TimeRunning", {GATT_PRESENT_FORMAT_UINT32, 0, GATT_PRESENT_UNIT_TIME_SECOND, 1, 0}}, //MeasureCharId[0]
     
     //Requested torque followed by actual torque, both signed 16 bit
     {BLE_DATATYPE_BYTEARRAY, sizeof(BLETrqReqAct) - 1, sizeof(BLETrqReqAct) - 1, 0x12,  "TrqReqAct", {GATT_PRESENT_FORMAT_STRUCT, -1, GATT_PRESENT_UNIT_MOMENT_OF_FORCE_NEWTON_METRE, 1, 0}}, //1
@@ -135,7 +135,7 @@ void ADAFRUITBLE::setup() {
     setupBLEservice();
     Logger::debug(ADABLUE, "BluefruitLE Initialization Complete....");
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_WIFI);
+    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_BLE);
 }
 
 void ADAFRUITBLE::setupBLEservice()
@@ -397,15 +397,22 @@ void ADAFRUITBLE::handleTick() {
         // DeviceManager::getInstance()->updateWifiByID(BRUSA_DMC5);
         didParamLoad = true;
     }
-
-    // make small slices so the main loop is not blocked for too long
-    if (tickCounter == 1) {
+    
+    if (paramCache.timeRunning != (ms / 1000))
+    {
+        paramCache.timeRunning = ms / 1000;
+        if (!gatt.setChar(MeasureCharId[0], (uint8_t*)&paramCache.timeRunning, 4))
+        {
+            Logger::error("Could not update timeRunning");
+        }
+        else Logger::debug(ADABLUE, "Updated timeRunning");
+        dumpRawData((uint8_t *)&paramCache.timeRunning, 4);
+    }
+    
+    //every other time - 80ms by default
+    if (tickCounter & 1)
+    {
         if (motorController) {
-            //Logger::console("Wifi tick counter 1...");
-
-            paramCache.timeRunning = ms / 1000;
-            gatt.setChar(MeasureCharId[0], (uint8_t *)&paramCache.timeRunning, 4);
-
             if ( bleTrqReqAct.torqueRequested  != motorController->getTorqueRequested() ) {
                 bleTrqReqAct.torqueRequested = motorController->getTorqueRequested();
                 bleTrqReqAct.doUpdate = 1;
@@ -414,7 +421,17 @@ void ADAFRUITBLE::handleTick() {
                 bleTrqReqAct.torqueActual = motorController->getTorqueActual();
                 bleTrqReqAct.doUpdate = 1;
             }
+            if ( bleSpeeds.speedRequested != motorController->getSpeedRequested() ) {
+                bleSpeeds.speedRequested = motorController->getSpeedRequested();
+                bleSpeeds.doUpdate = 1;
+            }
+            
+            if ( bleSpeeds.speedActual != motorController->getSpeedActual() ) {
+                bleSpeeds.speedActual = motorController->getSpeedActual();
+                bleSpeeds.doUpdate = 1;
+            }
         }
+    
         if (accelerator) {
             RawSignalData *rawSignal = accelerator->acquireRawSignal();
             if ( bleThrBrkLevels.throttleRawLevel1 !=  rawSignal->input1) 
@@ -451,7 +468,9 @@ void ADAFRUITBLE::handleTick() {
                 bleThrBrkLevels.doUpdate = 1;
             }
         }
-    } else if (tickCounter == 2) {
+    }
+    
+    if (tickCounter == 2) {
         if (bms)
         {
             if (blePowerStatus.SOC != bms->getSOC())
@@ -461,17 +480,7 @@ void ADAFRUITBLE::handleTick() {
             }
         }
         if (motorController) {
-            //Logger::console("Wifi tick counter 2...");
-            if ( bleSpeeds.speedRequested != motorController->getSpeedRequested() ) {
-                bleSpeeds.speedRequested = motorController->getSpeedRequested();
-                bleSpeeds.doUpdate = 1;
-            }
-            
-            if ( bleSpeeds.speedActual != motorController->getSpeedActual() ) {
-                bleSpeeds.speedActual = motorController->getSpeedActual();
-                bleSpeeds.doUpdate = 1;
-            }
-            
+            //Logger::console("Wifi tick counter 2...");            
             if ( blePowerStatus.busVoltage != motorController->getDcVoltage() ) {
                 blePowerStatus.busVoltage = motorController->getDcVoltage();
                 if(blePowerStatus.busVoltage<0) blePowerStatus.busVoltage=0; 
