@@ -39,12 +39,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config.h"
 #include "constants.h"
 #include "DeviceManager.h"
-#include "sys_io.h"
+#include "SystemIO.h"
 #include "PotThrottle.h"
 #include "BatteryManager.h"
 #include "Sys_Messages.h"
 #include "Logger.h"
 #include "DeviceTypes.h"
+#include "PrefHandler.h"
 #include "ELM327Processor.h"
 #include "Adafruit_BLE.h"
 #include "Adafruit_BluefruitLE_UART.h"
@@ -166,10 +167,10 @@ struct BLEThrottleIO
 
 struct BLEThrottleMap
 {
-    uint8_t throttleRegenMax; //% of pedal where regen is at max setting
-    uint8_t throttleRegenMin; //% of pedal with lowest regen
-    uint8_t throttleFwd; //% of pedal where forward motion starts
-    uint8_t throttleMap; //% of pedal where 50% power is given
+    uint16_t throttleRegenMax; //% of pedal where regen is at max setting
+    uint16_t throttleRegenMin; //% of pedal with lowest regen
+    uint16_t throttleFwd; //% of pedal where forward motion starts
+    uint16_t throttleMap; //% of pedal where 50% power is given
     uint8_t throttleLowestRegen; //% of system max regen to use for lowest regen with throttle
     uint8_t throttleHighestRegen; //% of system max regen to use for highest regen with throttle
     uint8_t throttleCreep; //% of forward torque to output for creeping
@@ -192,6 +193,14 @@ struct BLEMaxParams
     uint16_t maxTorque;
     uint8_t doUpdate; 
 };
+
+//two 32 bit bitfields so that a total of 64 devices can be enabled or disabled from the app
+struct BLEDeviceEnable
+{
+    uint32_t deviceEnable1;
+    uint32_t deviceEnable2;
+    uint8_t doUpdate; 
+};
 #pragma pack(pop)
 
 
@@ -206,6 +215,7 @@ public:
     DeviceId getId();
     void loop();
     char *getTimeRunning();
+    void gattRX(int32_t chars_id, uint8_t *data, uint16_t len);
 
     void loadConfiguration();
     void saveConfiguration();
@@ -216,7 +226,7 @@ private:
     ELM327Processor *elmProc;
     int tickCounter;
     int32_t ServiceId;
-    int32_t MeasureCharId[13]; //Keep track and update this to be large enough.
+    int32_t MeasureCharId[29]; //Keep track and update this to be large enough.
     int32_t LocationCharId;
     boolean success;
     int counter;
@@ -235,11 +245,13 @@ private:
     BLEThrottleMap bleThrottleMap;
     BLEBrakeParam bleBrakeParam;
     BLEMaxParams bleMaxParams;
+    BLEDeviceEnable bleDeviceEnable;
 
     void setupBLEservice();
     void transferUpdates();
-    void dumpRawData(uint8_t *data, int len);
-    void processParameterChange(char *response);
+    void dumpRawData(uint8_t *data, int len);    
+    void buildEnabledDevices();    
+    void checkGattChar(uint8_t charact);
 };
 
 #endif
