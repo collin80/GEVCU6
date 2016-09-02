@@ -482,98 +482,98 @@ void SerialConsole::handleConfigCmd() {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC0_OFFSET, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid offset. Enter value from 0 to 65535");
     } else if (cmdString == String("ADC0GAIN")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC0_GAIN, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid gain. Enter value from 0 to 65535");
     } else if (cmdString == String("ADC1OFF")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC1_OFFSET, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid offset. Enter value from 0 to 65535");
     } else if (cmdString == String("ADC1GAIN")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC1_GAIN, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid gain. Enter value from 0 to 65535");
     } else if (cmdString == String("ADC2OFF")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC2_OFFSET, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid offset. Enter value from 0 to 65535");
     } else if (cmdString == String("ADC2GAIN")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC2_GAIN, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid gain. Enter value from 0 to 65535");
     } else if (cmdString == String("ADC3OFF")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC3_OFFSET, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid offset. Enter value from 0 to 65535");
     } else if (cmdString == String("ADC3GAIN")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC3_GAIN, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid gain. Enter value from 0 to 65535");
     } else if (cmdString == String("ADCPACKHOFF")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC_PACKH_OFFSET, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid offset. Enter value from 0 to 65535");
     } else if (cmdString == String("ADCPACKHGAIN")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC_PACKH_GAIN, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid gain. Enter value from 0 to 65535");
     } else if (cmdString == String("ADCPACKLOFF")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC_PACKL_OFFSET, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid offset. Enter value from 0 to 65535");
     } else if (cmdString == String("ADCPACKLGAIN")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC_PACKL_GAIN, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid gain. Enter value from 0 to 65535");
     } else if (cmdString == String("ADCPACKCOFF")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC_PACKC_OFFSET, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid offset. Enter value from 0 to 65535");
     } else if (cmdString == String("ADCPACKCGAIN")) {
         if (newValue >= 0 && newValue <= 65535) {
             sysPrefs->write(EESYS_ADC_PACKC_GAIN, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            setup_ADC_params(); //change takes immediate effect
+            systemIO.setup_ADC_params(); //change takes immediate effect
         }
         else Logger::console("Invalid gain. Enter value from 0 to 65535");
     } else if (cmdString == String("LOGLEVEL")) {
@@ -673,21 +673,23 @@ void SerialConsole::handleConfigCmd() {
         }
         else Logger::console("Invalid cooling OFF temperature. Please enter a value 0 - 200F");
     } else if (cmdString == String("OUTPUT") && newValue<8) {
-        int outie = getOutput(newValue);
+        int outie = systemIO.getDigitalOutput(newValue);
         Logger::console("DOUT%d,  STATE: %d",newValue, outie);
         if(outie)
         {
-            setOutput(newValue,0);
+            systemIO.setDigitalOutput(newValue,0);
             motorController->statusBitfield1 &= ~(1 << newValue);//Clear
         }
         else
         {
-            setOutput(newValue,1);
+            systemIO.setDigitalOutput(newValue,1);
             motorController->statusBitfield1 |=1 << newValue;//setbit to Turn on annunciator
         }
 
 
-        Logger::console("DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d, DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", getOutput(0), getOutput(1), getOutput(2), getOutput(3), getOutput(4), getOutput(5), getOutput(6), getOutput(7));
+        Logger::console("DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d, DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
+                        systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3), 
+                        systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
 
     } else if (cmdString == String("CAPACITY") ) {
         motorConfig->capacity = newValue;
@@ -754,11 +756,11 @@ void SerialConsole::handleShortCmd() {
         }
         break;
     case 'K': //set all outputs high
-        for (int tout = 0; tout < NUM_OUTPUT; tout++) setOutput(tout, true);
+        for (int tout = 0; tout < NUM_OUTPUT; tout++) systemIO.setDigitalOutput(tout, true);
         Logger::console("all outputs: ON");
         break;
     case 'J': //set the four outputs low
-        for (int tout = 0; tout < NUM_OUTPUT; tout++) setOutput(tout, false);
+        for (int tout = 0; tout < NUM_OUTPUT; tout++) systemIO.setDigitalOutput(tout, false);
         Logger::console("all outputs: OFF");
         break;
     case 'z': // detect throttle min/max & other details
@@ -802,21 +804,10 @@ void SerialConsole::handleShortCmd() {
         uint32_t accum;
         for (int i = 0; i < 7; i++)
         {
-            accum = 0;
-            for (int j = 0; j < 400; j++)
-            {
-                accum += getRawADC(i);
-                //normally one shouldn't call watchdog reset in multiple
-                //places but this is a special case.
-                watchdogReset();
-                delay(7);
-            }
-            accum /= 400;
-            sysPrefs->write(EESYS_ADC0_OFFSET + (4*i), (uint16_t)(accum));
-            Logger::console("ADC %i offset is now %i", i, accum);
+            systemIO.calibrateADCOffset(i, true);
         }
         sysPrefs->saveChecksum();
-        setup_ADC_params(); //change takes immediate effect
+        systemIO.setup_ADC_params(); //change takes immediate effect
         break;
     case 'S':
         //there is not really any good way (currently) to auto generate this list

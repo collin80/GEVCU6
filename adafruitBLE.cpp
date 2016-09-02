@@ -645,7 +645,7 @@ void ADAFRUITBLE::handleTick() {
             IOTemp = 0;
             for (int i = 0; i < 4; i++)
             {
-                if (getDigital(i)) bleBitFields.digitalInputs |= 1 << i;
+                if (systemIO.getDigitalIn(i)) bleBitFields.digitalInputs |= 1 << i;
             }            
                         
             if ( bleBitFields.digitalInputs != IOTemp ) {
@@ -656,7 +656,7 @@ void ADAFRUITBLE::handleTick() {
             IOTemp = 0;
             for (int i = 0; i < 8; i++)
             {
-                if (getOutput(i)) bleBitFields.digitalOutputs |= 1 << i;
+                if (systemIO.getDigitalOutput(i)) bleBitFields.digitalOutputs |= 1 << i;
             }
             
             if ( bleBitFields.digitalOutputs != IOTemp ) {

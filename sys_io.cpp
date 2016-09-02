@@ -31,53 +31,66 @@ by stimmer
 */
 
 #include "sys_io.h"
+#include "CANIODevice.h"
 
 #undef HID_ENABLED
 
-uint8_t dig[NUM_DIGITAL];
-uint8_t adc[NUM_ANALOG][2];
-uint8_t out[NUM_OUTPUT];
+SPISettings spi_settings(1000000, MSBFIRST, SPI_MODE3);    
 
-volatile int bufn,obufn;
-volatile uint16_t adc_buf[NUM_ANALOG][256];   // 4 buffers of 256 readings
-uint16_t adc_values[NUM_ANALOG * 2];
-uint16_t adc_out_vals[NUM_ANALOG];
-
-uint8_t sys_type;
-
-int NumADCSamples;
-
-//the ADC values fluctuate a lot so smoothing is required.
-uint16_t adc_buffer[NUM_ANALOG][64];
-uint8_t adc_pointer[NUM_ANALOG]; //pointer to next position to use
-
-extern PrefHandler *sysPrefs;
-
-ADC_COMP adc_comp[7]; //GEVCU 6.2 has 7 adc inputs but three are special
-
-bool useRawADC = false;
-bool useSPIADC = false;
-
-SPISettings spi_settings(1000000, MSBFIRST, SPI_MODE3);
-
-/*
-There have been problems where the digital outputs of GEVCU aren't set to digital outputs with low state early enough and for some
-people this triggers their connected relays. This code doesn't need EEPROM and so can execute very early in initialization. It assumes
-that one has at least a GEVCU3 board which basically 99.9% of people do. Only the early developers would have anything earlier.
-With this assumption in place it is possible to initialize all possible digital outputs right when the board starts up.
-*/
-void sys_boot_setup()
+SystemIO::SystemIO()
 {
-    for (int i = 2; i < 10; i++) { //possible digital outs are 2 - 9
-        pinMode(out[i], OUTPUT);
-        digitalWrite(out[i], LOW);
+    useRawADC = false;
+    useSPIADC = false;
+    
+    for (int i = 0; i < NUM_EXT_IO; i++)
+    {
+        extendedDigitalOut[i].device = NULL;
+        extendedDigitalIn[i].device = NULL;
+        extendedAnalogOut[i].device = NULL;
+        extendedAnalogIn[i].device = NULL;
+    }
+    
+    numDigIn = NUM_DIGITAL;
+    numDigOut = NUM_OUTPUT;
+    numAnaIn = NUM_ANALOG;
+    numAnaOut = 0;
+}
+
+void SystemIO::setup_ADC_params()
+{
+    int i;
+    //requires the value to be contiguous in memory
+    for (i = 0; i < 7; i++) {
+        sysPrefs->read(EESYS_ADC0_GAIN + 4*i, &adc_comp[i].gain);
+        sysPrefs->read(EESYS_ADC0_OFFSET + 4*i, &adc_comp[i].offset);
+        Logger::debug("ADC:%d GAIN: %d Offset: %d", i, adc_comp[i].gain, adc_comp[i].offset);
+        if (i < NUM_ANALOG) {
+            for (int j = 0; j < NumADCSamples; j++) adc_buffer[i][j] = 0;
+            adc_pointer[i] = 0;
+            adc_values[i] = 0;
+            adc_out_vals[i] = 0;
+        }
     }
 }
 
-//forces the digital I/O ports to a safe state. This is called very early in initialization.
-void sys_early_setup() {
-    int i;
+void SystemIO::setSystemType(SystemType systemType) {
+    if (systemType >= GEVCU1 && systemType <= GEVCU6)
+    {
+        sysType = systemType;
+        sysPrefs->write(EESYS_SYSTEM_TYPE, (uint8_t)sysType);
+    }
+}
 
+SystemType SystemIO::getSystemType() {
+    return sysType;
+}
+
+/*
+Initialize DMA driven ADC and read in gain/offset for each channel
+*/
+void SystemIO::setup() {
+    int i;
+    
     //the first order of business is to figure out what hardware we are running on and fill in
     //the pin tables.
 
@@ -91,8 +104,8 @@ void sys_early_setup() {
 
     NumADCSamples = 64;
 
-    sysPrefs->read(EESYS_SYSTEM_TYPE, &sys_type);
-    if (sys_type == 2) {
+    sysPrefs->read(EESYS_SYSTEM_TYPE, (uint8_t *) &sysType);
+    if (sysType == GEVCU2) {
         Logger::info("Running on GEVCU2/DUED hardware.");
         dig[0]=9;
         dig[1]=11;
@@ -115,7 +128,7 @@ void sys_early_setup() {
         out[6] = 255;
         out[7] = 255;
         NumADCSamples = 32;
-    } else if (sys_type == 3) {
+    } else if (sysType == GEVCU3) {
         Logger::info("Running on GEVCU3 hardware");
         dig[0]=48;
         dig[1]=49;
@@ -138,8 +151,8 @@ void sys_early_setup() {
         out[6] = 255;
         out[7] = 255;
         useRawADC = true; //this board does require raw adc so force it.
-    } else if (sys_type == 4) {
-        Logger::info("Running on GEVCU 4.x hardware");
+    } else if (sysType == GEVCU4 || sysType == GEVCU5) {
+        Logger::info("Running on GEVCU 4.x/5.x hardware");
         dig[0]=48;
         dig[1]=49;
         dig[2]=50;
@@ -161,7 +174,7 @@ void sys_early_setup() {
         out[6] = 8;
         out[7] = 9;
         useRawADC = true; //this board does require raw adc so force it.
-    } else if (sys_type == 6) {
+    } else if (sysType == GEVCU6) {
         Logger::info("Running on GEVCU 6.2 hardware");
         dig[0]=48;
         dig[1]=49;
@@ -226,32 +239,7 @@ void sys_early_setup() {
             pinMode(out[i], OUTPUT);
             digitalWrite(out[i], LOW);
         }
-    }
-
-}
-
-void setup_ADC_params()
-{
-    int i;
-    //requires the value to be contiguous in memory
-    for (i = 0; i < 7; i++) {
-        sysPrefs->read(EESYS_ADC0_GAIN + 4*i, &adc_comp[i].gain);
-        sysPrefs->read(EESYS_ADC0_OFFSET + 4*i, &adc_comp[i].offset);
-        Logger::debug("ADC:%d GAIN: %d Offset: %d", i, adc_comp[i].gain, adc_comp[i].offset);
-        if (i < NUM_ANALOG) {
-            for (int j = 0; j < NumADCSamples; j++) adc_buffer[i][j] = 0;
-            adc_pointer[i] = 0;
-            adc_values[i] = 0;
-            adc_out_vals[i] = 0;
-        }
-    }
-}
-
-/*
-Initialize DMA driven ADC and read in gain/offset for each channel
-*/
-void setup_sys_io() {
-    int i;
+    }    
 
     setup_ADC_params();
 
@@ -259,11 +247,134 @@ void setup_sys_io() {
     else setupFastADC();
 }
 
+void SystemIO::installExtendedIO(CANIODevice *device)
+{
+    bool found = false;
+    int counter;
+   
+    if (device->getAnalogInputCount() > 0)
+    {
+        for (counter = 0; counter < NUM_EXT_IO; counter++)
+        {
+            if (extendedAnalogIn[counter].device == NULL)
+            {
+                for (int i = 0; i < device->getAnalogInputCount(); i++)
+                {
+                    if ((counter + i) == NUM_EXT_IO) break;
+                    extendedAnalogIn[counter + i].device = device;
+                    extendedAnalogIn[counter + i].localOffset = i;
+                }
+            }
+        }
+    }
+    
+    if (device->getAnalogOutputCount() > 0)
+    {
+        for (counter = 0; counter < NUM_EXT_IO; counter++)
+        {
+            if (extendedAnalogOut[counter].device == NULL)
+            {
+                for (int i = 0; i < device->getAnalogOutputCount(); i++)
+                {
+                    if ((counter + i) == NUM_EXT_IO) break;
+                    extendedAnalogOut[counter + i].device = device;
+                    extendedAnalogOut[counter + i].localOffset = i;
+                }
+            }
+        }
+    }
+
+    if (device->getDigitalOutputCount() > 0)
+    {
+        for (counter = 0; counter < NUM_EXT_IO; counter++)
+        {
+            if (extendedDigitalOut[counter].device == NULL)
+            {
+                for (int i = 0; i < device->getDigitalOutputCount(); i++)
+                {
+                    if ((counter + i) == NUM_EXT_IO) break;
+                    extendedDigitalOut[counter + i].device = device;
+                    extendedDigitalOut[counter + i].localOffset = i;
+                }
+            }
+        }
+    }
+
+    if (device->getDigitalInputCount() > 0)
+    {
+        for (counter = 0; counter < NUM_EXT_IO; counter++)
+        {
+            if (extendedDigitalIn[counter].device == NULL)
+            {
+                for (int i = 0; i < device->getDigitalInputCount(); i++)
+                {
+                    if ((counter + i) == NUM_EXT_IO) break;
+                    extendedDigitalIn[counter + i].device = device;
+                    extendedDigitalIn[counter + i].localOffset = i;
+                }
+            }
+        }
+    }
+    
+    int numDI = NUM_DIGITAL; 
+    for (int i = 0; i < NUM_EXT_IO; i++)
+    {
+        if (extendedDigitalIn[i].device != NULL) numDI++;
+        else break;
+    }
+    numDigIn = numDI;
+    
+    int numDO = NUM_DIGITAL;
+    for (int i = 0; i < NUM_EXT_IO; i++)
+    {
+        if (extendedDigitalOut[i].device != NULL) numDO++;
+        else break;
+    }
+    numDigOut = numDO;
+
+    int numAI = NUM_ANALOG; 
+    for (int i = 0; i < NUM_EXT_IO; i++)
+    {
+        if (extendedAnalogIn[i].device != NULL) numAI++;
+        else break;
+    }
+    numAnaIn = numAI;
+
+    int numAO = 0; //GEVCU has no real analog outputs - there are PWM but they're on the digital outputs
+    for (int i = 0; i < NUM_EXT_IO; i++)
+    {
+        if (extendedDigitalIn[i].device != NULL) numAO++;
+        else break;
+    }
+    numAnaOut = numAO;
+}
+
+int SystemIO::numDigitalInputs()
+{
+    return numDigIn;
+}
+
+int SystemIO::numDigitalOutputs()
+{
+    return numDigOut;
+}
+
+int SystemIO::numAnalogInputs()
+{
+    return numAnaIn;
+}
+
+int SystemIO::numAnalogOutputs()
+{
+    return numAnaOut;
+}
+
+
 /*
 Some of the boards are differential and thus require subtracting one ADC from another to obtain the true value. This function
 handles that case. It also applies gain and offset
 */
-uint16_t getDiffADC(uint8_t which) {
+uint16_t SystemIO::getDiffADC(uint8_t which) {
     uint32_t low, high;
 
     low = adc_values[adc[which][0]];
@@ -298,10 +409,10 @@ uint16_t getDiffADC(uint8_t which) {
 /*
 Exactly like the previous function but for non-differential boards (all the non-prototype boards are non-differential)
 */
-uint16_t getRawADC(uint8_t which) {
+uint16_t SystemIO::getRawADC(uint8_t which) {
     uint32_t val;
 
-    if (sys_type < 6)
+    if (getSystemType() < GEVCU6)
     {
         val = adc_values[adc[which][0]];
 
@@ -335,25 +446,6 @@ uint16_t getRawADC(uint8_t which) {
 }
 
 /*
-Adds a new ADC reading to the buffer for a channel. The buffer is NumADCSamples large (either 32 or 64) and rolling
-*/
-void addNewADCVal(uint8_t which, uint16_t val) {
-    adc_buffer[which][adc_pointer[which]] = val;
-    adc_pointer[which] = (adc_pointer[which] + 1) % NumADCSamples;
-}
-
-/*
-Take the arithmetic average of the readings in the buffer for each channel. This smooths out the ADC readings
-*/
-uint16_t getADCAvg(uint8_t which) {
-    uint32_t sum;
-    sum = 0;
-    for (int j = 0; j < NumADCSamples; j++) sum += adc_buffer[which][j];
-    sum = sum / NumADCSamples;
-    return ((uint16_t)sum);
-}
-
-/*
 get value of one of the 4 analog inputs
 On GEVCU5 or less
 Uses a special buffer which has smoothed and corrected ADC values. This call is very fast
@@ -363,33 +455,47 @@ Gets reading over SPI which is still pretty fast. The SPI connected chip is 24 b
 but too much of the code for GEVCU uses 16 bit integers for storage so the 24 bit values returned
 are knocked down to 16 bit values before being passed along.
 */
-uint16_t getAnalog(uint8_t which) {
-    if (which >= NUM_ANALOG && sys_type < 6) which = 0;
-    if (which >= 7 && sys_type == 6) which = 0;
-    if (!useSPIADC) return adc_out_vals[which];
-    else
-    {
-        int32_t valu;
-        //first 4 analog readings must match old methods
-        if (which < 2)
-        {
-            valu = getSPIADCReading(CS1, (which & 1) + 1);
-        }
-        else if (which < 4) valu = getSPIADCReading(CS2, (which & 1) + 1);
-        //the next three are new though. 4 = current sensor, 5 = pack high (ref to mid), 6 = pack low (ref to mid)
-        else if (which == 4) valu = getSPIADCReading(CS1, 0);
-        else if (which == 5) valu = getSPIADCReading(CS3, 1);
-        else if (which == 6) valu = getSPIADCReading(CS3, 2);
-        valu >>= 8;
-        valu -= adc_comp[which].offset;
-        valu = (valu * adc_comp[which].gain) / 1024;
-        return valu;
+uint16_t SystemIO::getAnalogIn(uint8_t which) {
+    int base;
+    if (which > numAnaIn) {
+        return 0;
     }
+    
+    if (which < NUM_ANALOG) {
+        if (getSystemType() == GEVCU6)
+        {
+            int32_t valu;
+            //first 4 analog readings must match old methods
+
+            if (which < 2)
+            {
+                valu = getSPIADCReading(CS1, (which & 1) + 1);
+            }
+            else if (which < 4) valu = getSPIADCReading(CS2, (which & 1) + 1);
+            //the next three are new though. 4 = current sensor, 5 = pack high (ref to mid), 6 = pack low (ref to mid)
+            else if (which == 4) valu = getSPIADCReading(CS1, 0);
+            else if (which == 5) valu = getSPIADCReading(CS3, 1);
+            else if (which == 6) valu = getSPIADCReading(CS3, 2);
+            valu >>= 8;
+            valu -= adc_comp[which].offset;
+            valu = (valu * adc_comp[which].gain) / 1024;
+            return valu;
+        }
+        else return adc_out_vals[which];
+    }
+    else //the return makes this superfluous...
+    {        
+        //handle an extended I/O call
+        CANIODevice *dev = extendedAnalogIn[which - NUM_ANALOG].device;
+        if (dev) return dev->getAnalogInput(extendedAnalogIn[which - NUM_ANALOG].localOffset);
+        return 0;
+    }
+    return 0; //if it falls through and nothing could provide the answer then return 0
 }
 
 
 //the new pack voltage and current functions however, being new, don't have legacy problems so they're 24 bit ADC.
-int32_t getCurrentReading()
+int32_t SystemIO::getCurrentReading()
 {
     int32_t valu;
     valu = getSPIADCReading(CS1, 0);
@@ -399,7 +505,7 @@ int32_t getCurrentReading()
     return valu;
 }
 
-int32_t getPackHighReading()
+int32_t SystemIO::getPackHighReading()
 {
     int32_t valu;
     valu = getSPIADCReading(CS3, 1);
@@ -409,7 +515,7 @@ int32_t getPackHighReading()
     return valu;
 }
 
-int32_t getPackLowReading()
+int32_t SystemIO::getPackLowReading()
 {
     int32_t valu;
     valu = getSPIADCReading(CS3, 2);
@@ -420,25 +526,60 @@ int32_t getPackLowReading()
 }
 
 //get value of one of the 4 digital inputs
-boolean getDigital(uint8_t which) {
-    if (which >= NUM_DIGITAL) which = 0;
-    return !(digitalRead(dig[which]));
+boolean SystemIO::getDigitalIn(uint8_t which) {
+    if (which >= numDigIn) return false;
+    
+    if (which < NUM_DIGITAL) return !(digitalRead(dig[which]));
+    else
+    {
+        CANIODevice *dev;
+        dev = extendedDigitalIn[which - NUM_DIGITAL].device;
+        if (dev) return dev->getDigitalInput(extendedDigitalIn[which - NUM_DIGITAL].localOffset);
+    }
 }
 
 //set output high or not
-void setOutput(uint8_t which, boolean active) {
-    if (which >= NUM_OUTPUT) return;
-    if (out[which] == 255) return;
-    if (active)
-        digitalWrite(out[which], HIGH);
-    else digitalWrite(out[which], LOW);
+void SystemIO::setDigitalOutput(uint8_t which, boolean active) {
+    if (which >= numDigOut) return;
+    
+    if (which < NUM_OUTPUT)
+    {
+        if (out[which] == 255) return;
+        if (active)
+            digitalWrite(out[which], HIGH);
+        else digitalWrite(out[which], LOW);
+    }
+    else
+    {
+        CANIODevice *dev;
+        dev = extendedDigitalOut[which - NUM_OUTPUT].device;
+        if (dev) return dev->setDigitalOutput(extendedDigitalOut[which - NUM_OUTPUT].localOffset, active);
+    }
 }
 
 //get current value of output state (high?)
-boolean getOutput(uint8_t which) {
-    if (which >= NUM_OUTPUT) return false;
-    if (out[which] == 255) return false;
-    return digitalRead(out[which]);
+boolean SystemIO::getDigitalOutput(uint8_t which) {
+    if (which >= numDigOut) return false;
+    
+    if (which < NUM_OUTPUT)
+    {
+        if (out[which] == 255) return false;
+        return digitalRead(out[which]);
+    }
+    else
+    {
+        CANIODevice *dev;
+        dev = extendedDigitalOut[which - NUM_OUTPUT].device;
+        if (dev) return dev->getDigitalOutput(extendedDigitalOut[which - NUM_OUTPUT].localOffset);
+    }
+}
+
+/*
+ * Move DMA pointers to next buffer.
+ */
+uint32_t SystemIO::getNextADCBuffer() {
+    bufn = (bufn + 1) & 3;
+    return (uint32_t) adc_buffer[bufn];
 }
 
 /*
@@ -451,15 +592,15 @@ and this happens virtually for free. It all happens in the background with
 minimal CPU overhead.
 */
 void ADC_Handler() {    // move DMA pointers to next buffer
-    int f=ADC->ADC_ISR;
-    if (f & (1<<27)) { //receive counter end of buffer
-        bufn=(bufn+1)&3;
-        ADC->ADC_RNPR=(uint32_t)adc_buf[bufn];
-        ADC->ADC_RNCR=256;
-    }
+    int f = ADC->ADC_ISR;
+
+    if (f & (1 << 27)) { //receive counter end of buffer
+        ADC->ADC_RNPR = systemIO.getNextADCBuffer();
+        ADC->ADC_RNCR = 256;
+    }        
 }
 
-bool setupSPIADC()
+bool SystemIO::setupSPIADC()
 {
     bool chip1OK = false, chip2OK = false, chip3OK = false;
     byte result;
@@ -561,7 +702,7 @@ bool setupSPIADC()
     return true;
 }
 
-int32_t getSPIADCReading(int CS, int sensor)
+int32_t SystemIO::getSPIADCReading(int CS, int sensor)
 {
     int32_t result;
     int32_t byt;
@@ -585,12 +726,40 @@ int32_t getSPIADCReading(int CS, int sensor)
 }
 
 /*
+ * adc is the adc port to calibrate, update if true will write the new value to EEPROM automatically
+ */
+bool SystemIO::calibrateADCOffset(int adc, bool update)
+{
+    int32_t accum = 0;
+    for (int j = 0; j < 400; j++)
+    {
+        if (adc < 2)
+        {
+            accum += getSPIADCReading(CS1, (adc & 1) + 1);
+        }
+        else if (adc < 4) accum += getSPIADCReading(CS2, (adc & 1) + 1);
+        //the next three are new though. 4 = current sensor, 5 = pack high (ref to mid), 6 = pack low (ref to mid)
+        else if (adc == 4) accum += getSPIADCReading(CS1, 0);
+        else if (adc == 5) accum += getSPIADCReading(CS3, 1);
+        else if (adc == 6) accum += getSPIADCReading(CS3, 2);
+
+        //normally one shouldn't call watchdog reset in multiple
+        //places but this is a special case.
+        watchdogReset();
+        delay(7);
+    }
+    accum /= 400;
+    if (update) sysPrefs->write(EESYS_ADC0_OFFSET + (4*adc), (uint16_t)(accum));    
+    Logger::console("ADC %i offset is now %i", adc, accum);
+}
+
+/*
 Setup the system to continuously read the proper ADC channels and use DMA to place the results into RAM
 Testing to find a good batch of settings for how fast to do ADC readings. The relevant areas:
 1. In the adc_init call it is possible to use something other than ADC_FREQ_MAX to slow down the ADC clock
 2. ADC_MR has a clock divisor, start up time, settling time, tracking time, and transfer time. These can be adjusted
 */
-void setupFastADC() {
+void SystemIO::setupFastADC() {
     pmc_enable_periph_clk(ID_ADC);
     adc_init(ADC, SystemCoreClock, ADC_FREQ_MAX, ADC_STARTUP_FAST); //just about to change a bunch of these parameters with the next command
 
@@ -634,8 +803,8 @@ void setupFastADC() {
 //value. It takes this value and averages it with the existing value in an 8 position buffer
 //which serves as a super fast place for other code to retrieve ADC values
 // This is only used when RAWADC is not defined
-void sys_io_adc_poll() {
-    if (sys_type > 4) return;
+void SystemIO::adcPoll() {
+    if (getSystemType() > GEVCU5) return;
     if (obufn != bufn) {
         uint32_t tempbuff[8] = {0,0,0,0,0,0,0,0}; //make sure its zero'd
 
@@ -693,6 +862,6 @@ void sys_io_adc_poll() {
     }
 }
 
-
+SystemIO systemIO;
 
 

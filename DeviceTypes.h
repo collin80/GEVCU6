@@ -37,6 +37,7 @@ enum DeviceType {
     DEVICE_BRAKE,
     DEVICE_MISC,
     DEVICE_WIFI,
+    DEVICE_IO,
     DEVICE_NONE
 };
 
@@ -68,6 +69,17 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     ELM327EMU = 0x650,
     INVALID = 0xFFFF
 };
+
+namespace LatchModes
+{
+    enum LATCHMODE
+    {
+        NO_LATCHING, //always reads the actual current input state
+        LATCHING, //input state sticks "ON" until it is actually read then is automatically cleared
+        TOGGLING, //Pushing a button toggles it on/off
+        LOCKING //input locks as ON until it is explicitly set off by request
+    };
+}
 
 #endif /* DEVICE_TYPES_H_ */
 

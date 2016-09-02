@@ -260,7 +260,12 @@ void initializeDevices() {
 }
 
 void setup() {
-	sys_boot_setup(); //sets digital outputs to "off" right as soon as the sketch gets control.
+    //Most boards pre 6.2 have outputs on 2-9 and a problem where their outputs can trigger on for just a quick moment
+    //upon start up. So, try to pull the outputs low as soon as we can just to be sure.
+    for (int i = 2; i < 10; i++) {
+        pinMode(i, OUTPUT);
+        digitalWrite(i, LOW);
+    }
 	
     //delay(5000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
        
@@ -289,13 +294,12 @@ void setup() {
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
 	//Logger::setLoglevel((Logger::LogLevel)loglevel);
 	Logger::setLoglevel((Logger::LogLevel)0);
-	sys_early_setup();     
+	systemIO.setup();  
 	tickHandler = TickHandler::getInstance();
 	canHandlerEV = CanHandler::getInstanceEV();
 	canHandlerCar = CanHandler::getInstanceCar();
 	canHandlerEV->initialize();
 	canHandlerCar->initialize();
-	setup_sys_io(); //get calibration data for system IO
 	Logger::info("SYSIO init ok");	
 
 	initializeDevices();
@@ -328,7 +332,7 @@ void loop() {
 	//}
 
 	//this should still be here. It checks for a flag set during an interrupt
-	sys_io_adc_poll();
+	systemIO.adcPoll();
 }
 
 

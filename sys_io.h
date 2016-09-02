@@ -37,6 +37,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "PrefHandler.h"
 #include "Logger.h"
 
+class CANIODevice;
+
 #define CS1	26
 #define CS2	28
 #define CS3	30
@@ -65,22 +67,99 @@ typedef struct {
     uint16_t gain;
 } ADC_COMP;
 
-void setup_sys_io();
-void setup_ADC_params();
-uint16_t getAnalog(uint8_t which); //get value of one of the 4 analog inputs
-int32_t getCurrentReading();
-int32_t getPackHighReading();
-int32_t getPackLowReading();
-uint16_t getDiffADC(uint8_t which);
-uint16_t getRawADC(uint8_t which);
-boolean getDigital(uint8_t which); //get value of one of the 4 digital inputs
-void setOutput(uint8_t which, boolean active); //set output high or not
-boolean getOutput(uint8_t which); //get current value of output state (high?)
-void setupFastADC();
-bool setupSPIADC();
-int32_t getSPIADCReading(int CS, int sensor);
-void sys_io_adc_poll();
-void sys_early_setup();
-void sys_boot_setup();
+enum SystemType {
+    GEVCU1 = 1,
+    GEVCU2 = 2,
+    GEVCU3 = 3,
+    GEVCU4 = 4,
+    GEVCU5 = 5,
+    GEVCU6 = 6
+};
+
+class ExtendedIODev
+{
+public:
+    CANIODevice *device;
+    uint8_t localOffset;
+};
+
+class SystemIO
+{
+public:
+    SystemIO();
+    
+    void setup();
+    void setup_ADC_params();
+    uint32_t getNextADCBuffer();
+
+    uint16_t getAnalogIn(uint8_t which); //get value of one of the 4 analog inputs
+    boolean setAnalogOut(uint8_t which, int32_t level);
+    int32_t getAnalogOut(uint8_t which);
+    boolean getDigitalIn(uint8_t which); //get value of one of the 4 digital inputs
+    void setDigitalOutput(uint8_t which, boolean active); //set output high or not
+    boolean getDigitalOutput(uint8_t which); //get current value of output state (high?)    
+    
+    void setDigitalInLatchMode(int which, LatchModes::LATCHMODE mode);
+    void unlockDigitalInLatch(int which);
+
+    int32_t getCurrentReading();
+    int32_t getPackHighReading();
+    int32_t getPackLowReading();
+    
+    void installExtendedIO(CANIODevice *device);
+    
+    int numDigitalInputs();
+    int numDigitalOutputs();
+    int numAnalogInputs();
+    int numAnalogOutputs();
+    
+    void setSystemType(SystemType);
+    SystemType getSystemType();
+    bool calibrateADCOffset(int, bool);
+
+    void adcPoll();
+
+private:
+    int32_t getSPIADCReading(int CS, int sensor);    
+    uint16_t getDiffADC(uint8_t which);
+    uint16_t getRawADC(uint8_t which);
+    void setupFastADC();
+    bool setupSPIADC();
+
+    uint8_t dig[NUM_DIGITAL];
+    uint8_t adc[NUM_ANALOG][2];
+    uint8_t out[NUM_OUTPUT];
+
+    volatile int bufn,obufn;
+    volatile uint16_t adc_buf[NUM_ANALOG][256];   // 4 buffers of 256 readings
+    uint16_t adc_values[NUM_ANALOG * 2];
+    uint16_t adc_out_vals[NUM_ANALOG];
+
+    SystemType sysType;
+
+    int NumADCSamples;
+
+    //the ADC values fluctuate a lot so smoothing is required.
+    uint16_t adc_buffer[NUM_ANALOG][64];
+    uint8_t adc_pointer[NUM_ANALOG]; //pointer to next position to use
+
+    ADC_COMP adc_comp[NUM_ANALOG]; //GEVCU 6.2 has 7 adc inputs but three are special
+
+    bool useRawADC;
+    bool useSPIADC;
+    
+    int numDigIn;
+    int numDigOut;
+    int numAnaIn;
+    int numAnaOut;
+    
+    ExtendedIODev extendedDigitalOut[NUM_EXT_IO];
+    ExtendedIODev extendedDigitalIn[NUM_EXT_IO];
+    ExtendedIODev extendedAnalogOut[NUM_EXT_IO];
+    ExtendedIODev extendedAnalogIn[NUM_EXT_IO];    
+};
+
+extern PrefHandler *sysPrefs;
+extern SystemIO systemIO;
 
 #endif

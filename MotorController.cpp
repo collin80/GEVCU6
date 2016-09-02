@@ -98,7 +98,9 @@ void MotorController::setup() {
     Logger::console("PREDELAY=%i - Precharge delay time", config->prechargeR);
 
     //show our work
-    Logger::console("PRECHARGING...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", getOutput(0), getOutput(1), getOutput(2), getOutput(3),getOutput(4), getOutput(5), getOutput(6), getOutput(7));
+    Logger::console("PRECHARGING...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
+                    systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
+                    systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
     coolflag=false;
 
     Device::setup();
@@ -236,10 +238,10 @@ void MotorController::checkPrecharge()
     {
         if(!prelay)
         {
-            setOutput(contactor, 0); //Make sure main contactor off
+            systemIO.setDigitalOutput(contactor, 0); //Make sure main contactor off
             statusBitfield2 &= ~(1 << 17); //clear bitTurn off MAIN CONTACTOR annunciator
             statusBitfield1 &= ~(1 << contactor);//clear bitTurn off main contactor output annunciator
-            setOutput(relay, 1); //ok.  Turn on precharge relay
+            systemIO.setDigitalOutput(relay, 1); //ok.  Turn on precharge relay
             statusBitfield2 |=1 << 19; //set bit to turn on  PRECHARGE RELAY annunciator
             statusBitfield1 |=1 << relay; //set bit to turn ON precharge OUTPUT annunciator
             throttleRequested = 0; //Keep throttle at zero during precharge
@@ -250,11 +252,13 @@ void MotorController::checkPrecharge()
     }
     else
     {
-        setOutput(contactor, 1); //Main contactor on
+        systemIO.setDigitalOutput(contactor, 1); //Main contactor on
         statusBitfield2 |=1 << 17; //set bit to turn on MAIN CONTACTOR annunciator
         statusBitfield1 |=1 << contactor;//setbit to Turn on main contactor output annunciator
         Logger::info("Precharge sequence complete after %i milliseconds", prechargetime);
-        Logger::info("MAIN CONTACTOR ENABLED...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", getOutput(0), getOutput(1), getOutput(2), getOutput(3),getOutput(4), getOutput(5), getOutput(6), getOutput(7));
+        Logger::info("MAIN CONTACTOR ENABLED...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
+                    systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
+                    systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
         donePrecharge=true; //Time's up.  Let's don't do ANY of this on future ticks.
         //Generally, we leave the precharge relay on.  This doesn't hurt much in any configuration.  But when using two contactors
         //one positive with a precharge resistor and one on the negative leg to act as precharge, we need to leave precharge on.
@@ -275,7 +279,7 @@ void MotorController::coolingcheck()
             if(!coolflag)
             {
                 coolflag=1;
-                setOutput(coolfan, 1); //Turn on cooling fan output
+                systemIO.setDigitalOutput(coolfan, 1); //Turn on cooling fan output
                 statusBitfield1 |=1 << coolfan; //set bit to turn on cooling fan output annunciator
                 statusBitfield3 |=1 << 9; //Set bit to turn on OVERTEMP annunciator
             }
@@ -286,7 +290,7 @@ void MotorController::coolingcheck()
             if(coolflag)
             {
                 coolflag=0;
-                setOutput(coolfan, 0); //Set cooling fan output off
+                systemIO.setDigitalOutput(coolfan, 0); //Set cooling fan output off
                 statusBitfield1 &= ~(1 << coolfan); //clear bit to turn off cooling fan output annunciator
                 statusBitfield3 &= ~(1 << 9); //clear bit to turn off OVERTEMP annunciator
             }
@@ -304,12 +308,12 @@ void MotorController::checkBrakeLight()
 
         if(getTorqueActual() < -100)  //We only want to turn on brake light if we are have regen of more than 10 newton meters
         {
-            setOutput(brakelight, 1); //Turn on brake light output
+            systemIO.setDigitalOutput(brakelight, 1); //Turn on brake light output
             statusBitfield1 |=1 << brakelight; //set bit to turn on brake light output annunciator
         }
         else
         {
-            setOutput(brakelight, 0); //Turn off brake light output
+            systemIO.setDigitalOutput(brakelight, 0); //Turn off brake light output
             statusBitfield1 &= ~(1 << brakelight);//clear bit to turn off brake light output annunciator
         }
     }
@@ -324,12 +328,12 @@ void MotorController::checkReverseLight()
     {
         if(selectedGear==REVERSE)  //If the selected gear IS reverse
         {
-            setOutput(reverseLight, true); //Turn on reverse light output
+            systemIO.setDigitalOutput(reverseLight, true); //Turn on reverse light output
             statusBitfield1 |=1 << reverseLight; //set bit to turn on reverse light output annunciator
         }
         else
         {
-            setOutput(reverseLight, false); //Turn off reverse light output
+            systemIO.setDigitalOutput(reverseLight, false); //Turn off reverse light output
             statusBitfield1 &= ~(1 << reverseLight);//clear bit to turn off reverselight OUTPUT annunciator
         }
     }
@@ -341,7 +345,7 @@ void MotorController:: checkEnableInput()
     uint16_t enableinput=getEnableIn();
     if(enableinput >= 0 && enableinput<4) //Do we even have an enable input configured ie NOT 255.
     {
-        if((getDigital(enableinput))||testenableinput) //If it's ON let's set our opstate to ENABLE
+        if((systemIO.getDigitalIn(enableinput))||testenableinput) //If it's ON let's set our opstate to ENABLE
         {
             setOpState(ENABLE);
             statusBitfield2 |=1 << enableinput; //set bit to turn on ENABLE annunciator
@@ -362,7 +366,7 @@ void MotorController:: checkReverseInput()
     uint16_t reverseinput=getReverseIn();
     if(reverseinput >= 0 && reverseinput<4)  //If we don't have a Reverse Input, do nothing
     {
-        if((getDigital(reverseinput))||testreverseinput)
+        if((systemIO.getDigitalIn(reverseinput))||testreverseinput)
         {
             setSelectedGear(REVERSE);
             statusBitfield2 |=1 << 16; //set bit to turn on REVERSE annunciator

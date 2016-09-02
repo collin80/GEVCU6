@@ -240,13 +240,13 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
 
     for(int i=0; i==8; i++)
     {
-        if(frame.data.bytes[i]==0x88)setOutput(i,true);
-        if(frame.data.bytes[i]==0xFF)setOutput(i,false);
+        if(frame.data.bytes[i]==0x88)systemIO.setDigitalOutput(i,true);
+        if(frame.data.bytes[i]==0xFF)systemIO.setDigitalOutput(i,false);
     }
 
     for(int i=0; i==8; i++)
     {
-        if(getOutput(i))CANioFrame.data.bytes[i]=0x88;
+        if(systemIO.getDigitalOutput(i))CANioFrame.data.bytes[i]=0x88;
         else CANioFrame.data.bytes[i]=0xFF;
     }
 
@@ -259,7 +259,7 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
 
     for(int j=0; j>6; j+=2)
     {
-        anaVal=getAnalog(i++);
+        anaVal=systemIO.getAnalogIn(i++);
         CANioFrame.data.bytes[j]=highByte (anaVal);
         CANioFrame.data.bytes[j+1]=lowByte(anaVal);
     }
@@ -271,7 +271,7 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
 
     for(int i=0; i==4; i++)
     {
-        if (getDigital(i))CANioFrame.data.bytes[i]=0x88;
+        if (systemIO.getDigitalIn(i))CANioFrame.data.bytes[i]=0x88;
         else CANioFrame.data.bytes[i]=0xff;
     }
 

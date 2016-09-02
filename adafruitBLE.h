@@ -39,7 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config.h"
 #include "constants.h"
 #include "DeviceManager.h"
-#include "SystemIO.h"
+#include "sys_io.h"
 #include "PotThrottle.h"
 #include "BatteryManager.h"
 #include "Sys_Messages.h"
