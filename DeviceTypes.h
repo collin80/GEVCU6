@@ -67,6 +67,7 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     MEMCACHE = 0x5002,
     PIDLISTENER = 0x6000,
     ELM327EMU = 0x650,
+    POWERKEYPRO = 0x700,
     INVALID = 0xFFFF
 };
 

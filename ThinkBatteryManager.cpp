@@ -43,7 +43,7 @@ void ThinkBatteryManager::setup() {
     BatteryManager::setup(); // run the parent class version of this function
 
     //Relevant BMS messages are 0x300 - 0x30F
-    CanHandler::getInstanceEV()->attach(this, 0x300, 0x7f0, false);
+    canHandlerEv.attach(this, 0x300, 0x7f0, false);
 
     TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_BMS_THINK);
 }
@@ -154,11 +154,11 @@ void ThinkBatteryManager::sendKeepAlive()
     output.extended = 0; //standard frame
     output.rtr = 0;
     for (int i = 0; i < 8; i++) output.data.bytes[i] = 0;
-    CanHandler::getInstanceEV()->sendFrame(output);
+    canHandlerEv.sendFrame(output);
 
     output.id = 0x311;
     output.length = 2;
-    CanHandler::getInstanceEV()->sendFrame(output);
+    canHandlerEv.sendFrame(output);
 }
 
 DeviceId ThinkBatteryManager::getId()

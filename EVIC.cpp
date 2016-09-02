@@ -64,8 +64,8 @@ void EVIC::setup() {
     Device::setup(); // run the parent class version of this function
 
     // register ourselves as observer of all 0x404 and 0x505 can frames from JLD505
-    CanHandler::getInstanceCar()->attach(this, 0x404, 0x7ff, false);
-    CanHandler::getInstanceCar()->attach(this, 0x505, 0x7ff, false);
+    canHandlerCar.attach(this, 0x404, 0x7ff, false);
+    canHandlerCar.attach(this, 0x505, 0x7ff, false);
 
     MotorController* motorController = DeviceManager::getInstance()->getMotorController();
     nominalVolt=(motorController->nominalVolts); //Get default nominal volts and capacity from motorcontroller
@@ -209,7 +209,7 @@ void EVIC::sendTestCmdCurtis()
     output.data.bytes[6] = highByte(DCV);
     output.data.bytes[7] = lowByte(DCV);
 
-    CanHandler::getInstanceCar()->sendFrame(output);  //Mail it.
+    canHandlerCar.sendFrame(output);  //Mail it.
 
     timestamp();
 
@@ -236,7 +236,7 @@ void EVIC::sendTestCmdOrion()
     output.data.bytes[6] = 0;  //Cell temp
     output.data.bytes[7] = 0; //Cell temp
 
-    CanHandler::getInstanceCar()->sendFrame(output);  //Mail it.
+    canHandlerCar.sendFrame(output);  //Mail it.
     timestamp();
 
     Logger::debug("Orion Message1: %X  %X %X %X %X %X %X %X %X  %d:%d:%d.%d",output.id, output.data.bytes[0],
@@ -257,7 +257,7 @@ void EVIC::sendTestCmdOrion()
     output.data.bytes[6] = 0;  //pack cycles MSB
     output.data.bytes[7] = 0; //pack cycles LSB
 
-    CanHandler::getInstanceCar()->sendFrame(output);  //Mail it.
+    canHandlerCar.sendFrame(output);  //Mail it.
     timestamp();
 
     Logger::debug("Orion Message2: %X  %X %X %X %X %X %X %X %X  %d:%d:%d.%d",output.id, output.data.bytes[0],
@@ -291,7 +291,7 @@ void EVIC::sendCmdCurtis()
     output.data.bytes[6] = highByte(dcVoltage);
     output.data.bytes[7] = lowByte(dcVoltage);
 
-    CanHandler::getInstanceCar()->sendFrame(output);  //Mail it.
+    canHandlerCar.sendFrame(output);  //Mail it.
     timestamp();
     Logger::debug("EVIC Message: %X  %X %X %X %X %X %X %X %X  %d:%d:%d.%d",output.id, output.data.bytes[0],
                   output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],output.data.bytes[5],output.data.bytes[6],output.data.bytes[7], hours, minutes, seconds, milliseconds);
@@ -349,7 +349,7 @@ void EVIC::sendCmdOrion()
     output.data.bytes[6] = CellHi;  //Cell temp
     output.data.bytes[7] = Cello; //Cell temp
 
-    CanHandler::getInstanceCar()->sendFrame(output);  //Mail it.
+    canHandlerCar.sendFrame(output);  //Mail it.
     timestamp();
     Logger::debug("Orion Message1: %X  %X %X %X %X %X %X %X %X  %d:%d:%d.%d",output.id, output.data.bytes[0],
                   output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],output.data.bytes[5],output.data.bytes[6],output.data.bytes[7], hours, minutes, seconds, milliseconds);
@@ -374,7 +374,7 @@ void EVIC::sendCmdOrion()
     output.data.bytes[6] = 0;  //pack cycles MSB
     output.data.bytes[7] = 0; //pack cycles LSB
 
-    CanHandler::getInstanceCar()->sendFrame(output);  //Mail it.
+    canHandlerCar.sendFrame(output);  //Mail it.
     timestamp();
     Logger::debug("Orion Message2: %X  %X %X %X %X %X %X %X %X  %d:%d:%d.%d",output.id, output.data.bytes[0],
                   output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],output.data.bytes[5],output.data.bytes[6],output.data.bytes[7], hours, minutes, seconds, milliseconds);

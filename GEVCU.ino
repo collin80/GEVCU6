@@ -63,8 +63,6 @@ Random comments on things that should be coded up soon:
 //RTC_clock rtc_clock(XTAL); //init RTC with the external 32k crystal as a reference
 
 //Evil, global variables
-CanHandler *canHandlerEV;
-CanHandler *canHandlerCar;
 TickHandler *tickHandler;
 PrefHandler *sysPrefs;
 MemCache *memCache;
@@ -228,6 +226,7 @@ void createObjects() {
 	ICHIPWIFI *iChip = new ICHIPWIFI();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
     EVIC *eVIC = new EVIC();
+    PowerkeyPad *powerKey = new PowerkeyPad();
 }
 
 void initializeDevices() {
@@ -296,10 +295,8 @@ void setup() {
 	Logger::setLoglevel((Logger::LogLevel)0);
 	systemIO.setup();  
 	tickHandler = TickHandler::getInstance();
-	canHandlerEV = CanHandler::getInstanceEV();
-	canHandlerCar = CanHandler::getInstanceCar();
-	canHandlerEV->initialize();
-	canHandlerCar->initialize();
+	canHandlerEv.setup();
+	canHandlerCar.setup();
 	Logger::info("SYSIO init ok");	
 
 	initializeDevices();
@@ -318,8 +315,8 @@ void loop() {
 #endif
 
 	// check if incoming frames are available in the can buffer and process them
-	canHandlerEV->process();
-	canHandlerCar->process();
+	canHandlerEv.process();
+	canHandlerCar.process();
 
 	serialConsole->loop();
 	//TODO: this is dumb... shouldn't have to manually do this. Devices should be able to register loop functions

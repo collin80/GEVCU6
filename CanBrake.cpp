@@ -76,7 +76,7 @@ void CanBrake::setup() {
         Logger::error(CANBRAKEPEDAL, "no valid car type defined.");
     }
 
-    CanHandler::getInstanceCar()->attach(this, responseId, responseMask, responseExtended);
+    canHandlerCar.attach(this, responseId, responseMask, responseExtended);
     TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_CAN_THROTTLE);
 }
 
@@ -87,7 +87,7 @@ void CanBrake::setup() {
 void CanBrake::handleTick() {
     Throttle::handleTick(); // Call parent handleTick
 
-    CanHandler::getInstanceCar()->sendFrame(requestFrame);
+    canHandlerCar.sendFrame(requestFrame);
 
     if (ticksNoResponse < 255) // make sure it doesn't overflow
         ticksNoResponse++;

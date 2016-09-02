@@ -73,7 +73,7 @@ void CodaMotorController::setup()
     MotorController::setup(); // run the parent class version of this function
 
     // register ourselves as observer of all 0x20x can frames for UQM
-    CanHandler::getInstanceEV()->attach(this, 0x200, 0x7f0, false);
+    canHandlerEv.attach(this, 0x200, 0x7f0, false);
 
     operationState=ENABLE;
     selectedGear=DRIVE;
@@ -249,7 +249,7 @@ void CodaMotorController::sendCmd1()
     output.data.bytes[2] = (torqueCommand & 0x00FF);
     output.data.bytes[4] = genCodaCRC(output.data.bytes[1], output.data.bytes[2], output.data.bytes[3]); //Calculate security byte
 
-    CanHandler::getInstanceEV()->sendFrame(output);  //Mail it.
+    canHandlerEv.sendFrame(output);  //Mail it.
     timestamp();
 
     Logger::debug("Torque command: %X   %X  ControlByte: %X  LSB %X  MSB: %X  CRC: %X  %d:%d:%d.%d",output.id, output.data.bytes[0],
@@ -281,7 +281,7 @@ void CodaMotorController::sendCmd2() {
     output.data.bytes[6] = 0x00;
     output.data.bytes[7] = 0x00;
 
-    CanHandler::getInstanceEV()->sendFrame(output);
+    canHandlerEv.sendFrame(output);
     timestamp();
     Logger::debug("Watchdog reset: %X  %X  %X  %d:%d:%d.%d",output.data.bytes[0], output.data.bytes[1],
                   output.data.bytes[2], hours, minutes, seconds, milliseconds);

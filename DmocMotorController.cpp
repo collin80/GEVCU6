@@ -68,8 +68,8 @@ void DmocMotorController::setup() {
     MotorController::setup(); // run the parent class version of this function
 
     // register ourselves as observer of 0x23x and 0x65x can frames
-    CanHandler::getInstanceEV()->attach(this, 0x230, 0x7f0, false);
-    CanHandler::getInstanceEV()->attach(this, 0x650, 0x7f0, false);
+    canHandlerEv.attach(this, 0x230, 0x7f0, false);
+    canHandlerEv.attach(this, 0x650, 0x7f0, false);
 
     running = false;
     setPowerMode(modeTorque);
@@ -265,7 +265,7 @@ void DmocMotorController::sendCmd1() {
 
     output.data.bytes[7] = calcChecksum(output);
 
-    CanHandler::getInstanceEV()->sendFrame(output);
+    canHandlerEv.sendFrame(output);
 }
 
 //Torque limits
@@ -313,7 +313,7 @@ void DmocMotorController::sendCmd2() {
 
     //Logger::debug("requested torque: %i",(((long) throttleRequested * (long) maxTorque) / 1000L));
 
-    CanHandler::getInstanceEV()->sendFrame(output);
+    canHandlerEv.sendFrame(output);
     timestamp();
     Logger::debug("Torque command: MSB: %X  LSB: %X  %X  %X  %X  %X  %X  CRC: %X  %d:%d:%d.%d",output.data.bytes[0],
                   output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],output.data.bytes[5],output.data.bytes[6],output.data.bytes[7], hours, minutes, seconds, milliseconds);
@@ -339,7 +339,7 @@ void DmocMotorController::sendCmd3() {
     output.data.bytes[6] = alive;
     output.data.bytes[7] = calcChecksum(output);
 
-    CanHandler::getInstanceEV()->sendFrame(output);
+    canHandlerEv.sendFrame(output);
 }
 
 //challenge/response frame 1 - Really doesn't contain anything we need I dont think
@@ -358,7 +358,7 @@ void DmocMotorController::sendCmd4() {
     output.data.bytes[6] = alive;
     output.data.bytes[7] = calcChecksum(output);
 
-    CanHandler::getInstanceEV()->sendFrame(output);
+    canHandlerEv.sendFrame(output);
 }
 
 //Another C/R frame but this one also specifies which shifter position we're in
@@ -385,7 +385,7 @@ void DmocMotorController::sendCmd5() {
     output.data.bytes[6] = alive;
     output.data.bytes[7] = calcChecksum(output);
 
-    CanHandler::getInstanceEV()->sendFrame(output);
+    canHandlerEv.sendFrame(output);
 }
 
 
