@@ -40,7 +40,7 @@ TestThrottle::TestThrottle() : Throttle() {
  * Setup the device.
  */
 void TestThrottle::setup() {
-    TickHandler::getInstance()->detach(this); // unregister from TickHandler first
+    tickHandler.detach(this); // unregister from TickHandler first
 
     Logger::info("add device: TestThrottle (id: %X, %X)", TESTACCEL, this);
 
@@ -49,7 +49,7 @@ void TestThrottle::setup() {
     Throttle::setup(); //call base class
 
     //Use same tick interval as a pot based pedal would have used.
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_POT_THROTTLE);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_POT_THROTTLE);
 }
 
 /*

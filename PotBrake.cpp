@@ -39,7 +39,7 @@ PotBrake::PotBrake() : Throttle() {
  * Setup the device.
  */
 void PotBrake::setup() {
-    TickHandler::getInstance()->detach(this); // unregister from TickHandler first
+    tickHandler.detach(this); // unregister from TickHandler first
 
     Logger::info("add device: PotBrake (id: %X, %X)", POTBRAKEPEDAL, this);
 
@@ -49,7 +49,7 @@ void PotBrake::setup() {
     //pinMode(THROTTLE_INPUT_BRAKELIGHT, INPUT_PULLUP); //Brake light switch
 
     loadConfiguration();
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_POT_THROTTLE);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_POT_THROTTLE);
 }
 
 /*

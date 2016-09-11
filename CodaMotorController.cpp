@@ -64,7 +64,7 @@ CodaMotorController::CodaMotorController() : MotorController()
 
 void CodaMotorController::setup()
 {
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     Logger::info("add device: CODA UQM (id:%X, %X)", CODAUQM, this);
 
@@ -77,8 +77,7 @@ void CodaMotorController::setup()
 
     operationState=ENABLE;
     selectedGear=DRIVE;
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_CODAUQM);
-
+    tickHandler.attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_CODAUQM);
 }
 
 

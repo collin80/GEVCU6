@@ -63,7 +63,6 @@ Random comments on things that should be coded up soon:
 //RTC_clock rtc_clock(XTAL); //init RTC with the external 32k crystal as a reference
 
 //Evil, global variables
-TickHandler *tickHandler;
 PrefHandler *sysPrefs;
 MemCache *memCache;
 Heartbeat *heartbeat;
@@ -71,9 +70,7 @@ SerialConsole *serialConsole;
 Device *wifiDevice;
 Device *btDevice;
 
-
 byte i = 0;
-
 
 void sendWiReach(char* message)
 {
@@ -230,8 +227,6 @@ void createObjects() {
 }
 
 void initializeDevices() {
-	DeviceManager *deviceManager = DeviceManager::getInstance();
-
 	//heartbeat is always enabled now
 	heartbeat = new Heartbeat();
 	Logger::info("add: Heartbeat (id: %X, %X)", HEARTBEAT, heartbeat);
@@ -254,7 +249,7 @@ void initializeDevices() {
 	 *	out there as they initialize. For instance, a motor controller could see if a BMS
 	 *	exists and supports a function that the motor controller wants to access.
 	 */
-	deviceManager->sendMessage(DEVICE_ANY, INVALID, MSG_STARTUP, NULL);
+	deviceManager.sendMessage(DEVICE_ANY, INVALID, MSG_STARTUP, NULL);
 
 }
 
@@ -294,7 +289,6 @@ void setup() {
 	//Logger::setLoglevel((Logger::LogLevel)loglevel);
 	Logger::setLoglevel((Logger::LogLevel)0);
 	systemIO.setup();  
-	tickHandler = TickHandler::getInstance();
 	canHandlerEv.setup();
 	canHandlerCar.setup();
 	Logger::info("SYSIO init ok");	
@@ -302,16 +296,17 @@ void setup() {
 	initializeDevices();
     serialConsole = new SerialConsole(memCache, heartbeat);
 	serialConsole->printMenu();
-	wifiDevice = DeviceManager::getInstance()->getDeviceByID(ICHIP2128);
-	btDevice = DeviceManager::getInstance()->getDeviceByID(ELM327EMU);
-    DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); //Load configuration variables into WiFi Web Configuration screen
+	wifiDevice = deviceManager.getDeviceByID(ICHIP2128);
+	btDevice = deviceManager.getDeviceByID(ELM327EMU);
+    deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); //Load configuration variables into WiFi Web Configuration screen
+    deviceManager.sendMessage(DEVICE_WIFI, ADABLUE, MSG_CONFIG_CHANGE, NULL); //Load config into BLE interface
 	Logger::info("System Ready");	
 }
 
 void loop() {
 
 #ifdef CFG_TIMER_USE_QUEUING
-	tickHandler->process();
+	tickHandler.process();
 #endif
 
 	// check if incoming frames are available in the can buffer and process them

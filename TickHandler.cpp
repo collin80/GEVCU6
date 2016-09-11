@@ -33,8 +33,6 @@
 
 #include "TickHandler.h"
 
-TickHandler *TickHandler::tickHandler = NULL;
-
 TickHandler::TickHandler() {
     for (int i = 0; i < NUM_TIMERS; i++) {
         timerEntry[i].interval = 0;
@@ -45,16 +43,6 @@ TickHandler::TickHandler() {
 #ifdef CFG_TIMER_USE_QUEUING
     bufferHead = bufferTail = 0;
 #endif
-}
-
-/*
- * Get a singleton instance of the TickHandler
- */
-TickHandler *TickHandler::getInstance() {
-    if (tickHandler == NULL) {
-        tickHandler = new TickHandler();
-    }
-    return tickHandler;
 }
 
 /**
@@ -192,55 +180,55 @@ void TickHandler::handleInterrupt(int timerNumber) {
  * Interrupt function for Timer0
  */
 void timer0Interrupt() {
-    TickHandler::getInstance()->handleInterrupt(0);
+    tickHandler.handleInterrupt(0);
 }
 /*
  * Interrupt function for Timer1
  */
 void timer1Interrupt() {
-    TickHandler::getInstance()->handleInterrupt(1);
+    tickHandler.handleInterrupt(1);
 }
 /*
  * Interrupt function for Timer2
  */
 void timer2Interrupt() {
-    TickHandler::getInstance()->handleInterrupt(2);
+    tickHandler.handleInterrupt(2);
 }
 /*
  * Interrupt function for Timer3
  */
 void timer3Interrupt() {
-    TickHandler::getInstance()->handleInterrupt(3);
+    tickHandler.handleInterrupt(3);
 }
 /*
  * Interrupt function for Timer4
  */
 void timer4Interrupt() {
-    TickHandler::getInstance()->handleInterrupt(4);
+    tickHandler.handleInterrupt(4);
 }
 /*
  * Interrupt function for Timer5
  */
 void timer5Interrupt() {
-    TickHandler::getInstance()->handleInterrupt(5);
+    tickHandler.handleInterrupt(5);
 }
 /*
  * Interrupt function for Timer6
  */
 void timer6Interrupt() {
-    TickHandler::getInstance()->handleInterrupt(6);
+    tickHandler.handleInterrupt(6);
 }
 /*
  * Interrupt function for Timer7
  */
 void timer7Interrupt() {
-    TickHandler::getInstance()->handleInterrupt(7);
+    tickHandler.handleInterrupt(7);
 }
 /*
  * Interrupt function for Timer8
  */
 void timer8Interrupt() {
-    TickHandler::getInstance()->handleInterrupt(8);
+    tickHandler.handleInterrupt(8);
 }
 
 /*
@@ -251,4 +239,4 @@ void TickObserver::handleTick() {
     Logger::error("TickObserver does not implement handleTick()");
 }
 
-
+TickHandler tickHandler;

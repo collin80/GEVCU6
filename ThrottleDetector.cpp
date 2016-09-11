@@ -77,7 +77,7 @@ void ThrottleDetector::handleTick() {
  * Step 1. Kick it off
  */
 void ThrottleDetector::detect() {
-    Logger::console("Throttle detection starting. Do NOT press the pedal until instructed.");
+    Logger::console("Range detection starting. Do NOT press the pedal until instructed.");
 
     resetValues();
 
@@ -94,7 +94,7 @@ void ThrottleDetector::detect() {
     startTime = millis();
     state = DetectMinWait;
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_POT_THROTTLE);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_POT_THROTTLE);
 }
 
 /*
@@ -124,7 +124,7 @@ void ThrottleDetector::detectMinCalibrate() {
         throttle2MinRest = throttle2Min;
         throttle2MaxRest = throttle2Max;
 
-        Logger::console("\nSmoothly depress the pedal to full acceleration");
+        Logger::console("\nSmoothly depress the pedal until fully depressed");
         Logger::console("and hold the pedal until complete");
 
         // wait for 5 seconds so they can react and then still get some readings
@@ -280,7 +280,7 @@ void ThrottleDetector::detectMaxCalibrate() {
             Logger::console("Num inverse throttle matches: %d", inverseCount);
         }
 
-        Logger::console("Throttle type: %s", type);
+        Logger::console("Throttle/Brake type: %s", type);
         Logger::console("========================================");
 
         // update the throttle's configuration (without storing it yet)
@@ -298,10 +298,10 @@ void ThrottleDetector::detectMaxCalibrate() {
 
         // Done!
         state = DoNothing;
-        TickHandler::getInstance()->detach(this);
+        tickHandler.detach(this);
 
         // send updates to ichip wifi
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
     }
 }
 

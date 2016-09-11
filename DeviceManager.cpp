@@ -37,27 +37,12 @@
 
 #include "DeviceManager.h"
 
-DeviceManager *DeviceManager::deviceManager = NULL;
-
 DeviceManager::DeviceManager() {
     throttle = NULL;
     brake = NULL;
     motorController = NULL;
     for (int i = 0; i < CFG_DEV_MGR_MAX_DEVICES; i++)
         devices[i] = NULL;
-}
-
-/*
- * Get the instance of the DeviceManager (singleton pattern)
- *
- * Note: It's a simple singleton implementation - no worries about
- * thread-safety and memory-leaks, this object lives as long as the
- * Arduino has power.
- */
-DeviceManager *DeviceManager::getInstance() {
-    if (deviceManager == NULL)
-        deviceManager = new DeviceManager();
-    return deviceManager;
 }
 
 /*
@@ -328,6 +313,6 @@ void DeviceManager::updateWifi() {
 
 }
 
-
-
+//Create a permanent instance of the device manager useable from anywhere.
+DeviceManager deviceManager;
 

@@ -60,7 +60,7 @@ DmocMotorController::DmocMotorController() : MotorController() {
 }
 
 void DmocMotorController::setup() {
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     Logger::info("add device: DMOC645 (id:%X, %X)", DMOC645, this);
 
@@ -77,7 +77,7 @@ void DmocMotorController::setup() {
     setOpState(DISABLED );
     ms=millis();
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC);
 }
 
 /*

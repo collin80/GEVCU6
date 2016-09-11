@@ -57,7 +57,7 @@ void EVIC::setup() {
 
     Logger::info("add device: EVIC (id: %X, %X)", EVICTUS, this);
 
-    TickHandler::getInstance()->detach(this);//Turn off tickhandler
+    tickHandler.detach(this);//Turn off tickhandler
 
     loadConfiguration(); //Retrieve any persistant variables
 
@@ -67,7 +67,7 @@ void EVIC::setup() {
     canHandlerCar.attach(this, 0x404, 0x7ff, false);
     canHandlerCar.attach(this, 0x505, 0x7ff, false);
 
-    MotorController* motorController = DeviceManager::getInstance()->getMotorController();
+    MotorController* motorController = deviceManager.getMotorController();
     nominalVolt=(motorController->nominalVolts); //Get default nominal volts and capacity from motorcontroller
     capacity=(motorController->capacity);//If we do NOT have a JLD505, we will use these.
 
@@ -87,7 +87,7 @@ void EVIC::setup() {
     elapsedtime=timemark = timemark2=millis();
     rpm=0;  //Increment all our test variables each time
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_EVIC);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_EVIC);
 
 }
 
@@ -268,7 +268,7 @@ void EVIC::sendTestCmdOrion()
 void EVIC::sendCmdCurtis()
 {
 
-    MotorController* motorController = DeviceManager::getInstance()->getMotorController();
+    MotorController* motorController = deviceManager.getMotorController();
 
     if(millis()-timemark>2000)
     {
@@ -306,7 +306,7 @@ void EVIC::sendCmdOrion()
     if(millis()-timemark>2000) // Checks to see how long its been since JLD505 message was received.
         //If more than 2 seconds, we'll use MotorController values and calculate what we need.
     {
-        MotorController* motorController = DeviceManager::getInstance()->getMotorController();
+        MotorController* motorController = deviceManager.getMotorController();
         dcCurrent=(motorController->getDcCurrent());
         dcVoltage=(motorController->getDcVoltage());
 

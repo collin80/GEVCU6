@@ -41,7 +41,7 @@ CanBrake::CanBrake() : Throttle() {
 }
 
 void CanBrake::setup() {
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     Logger::info("add device: CanBrake (id: %X, %X)", CANBRAKEPEDAL, this);
 
@@ -77,7 +77,7 @@ void CanBrake::setup() {
     }
 
     canHandlerCar.attach(this, responseId, responseMask, responseExtended);
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_CAN_THROTTLE);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_CAN_THROTTLE);
 }
 
 /*

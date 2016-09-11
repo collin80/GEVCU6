@@ -53,7 +53,7 @@ BrusaMotorController::BrusaMotorController() : MotorController() {
  * Setup the device if it is enabled in configuration.
  */
 void BrusaMotorController::setup() {
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     Logger::info("add device: Brusa DMC5 (id: %X, %X)", BRUSA_DMC5, this);
 
@@ -64,7 +64,7 @@ void BrusaMotorController::setup() {
     canHandlerEv.attach(this, CAN_MASKED_ID_1, CAN_MASK_1, false);
     canHandlerEv.attach(this, CAN_MASKED_ID_2, CAN_MASK_2, false);
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_BRUSA);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_BRUSA);
 }
 
 /*

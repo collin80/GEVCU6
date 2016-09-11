@@ -44,7 +44,7 @@ CKMotorController::CKMotorController() : MotorController() {
 }
 
 void CKMotorController::setup() {
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     Logger::info("add device: CKINVCTRL (id:%X, %X)", CKINVERTER, this);
 
@@ -59,7 +59,7 @@ void CKMotorController::setup() {
     setOpState(DISABLED);
     CK_milli = millis();
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC);
 }
 
 /*

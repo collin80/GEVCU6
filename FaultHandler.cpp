@@ -33,7 +33,7 @@ FaultHandler::FaultHandler()
 
 void FaultHandler::setup()
 {
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     Logger::info("Initializing Fault Handler", FAULTSYS, this);
 
@@ -41,7 +41,7 @@ void FaultHandler::setup()
 
     //Use the heartbeat interval because it's slow and already exists so we can piggyback on the interrupt
     //so as to not create more timers than necessary.
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_HEARTBEAT);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_HEARTBEAT);
 }
 
 

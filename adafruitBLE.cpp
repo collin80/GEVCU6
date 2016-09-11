@@ -153,7 +153,7 @@ void ADAFRUITBLE::setup() {
 
     Logger::info(ADABLUE, "add device: AdaFruit BLE (id: %X, %X)", ADABLUE, this);
 
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     tickCounter = 0;
 
@@ -180,7 +180,7 @@ void ADAFRUITBLE::setup() {
     setupBLEservice();
     Logger::debug(ADABLUE, "BluefruitLE Initialization Complete....");
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_BLE);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_BLE);
 }
 
 void ADAFRUITBLE::setupBLEservice()
@@ -478,10 +478,10 @@ void ADAFRUITBLE::transferUpdates()
  */
 //TODO: See the processing function below for a more detailed explanation - can't send so many setParam commands in a row
 void ADAFRUITBLE::handleTick() {
-    MotorController* motorController = DeviceManager::getInstance()->getMotorController();
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
-    BatteryManager *bms = reinterpret_cast<BatteryManager *>(DeviceManager::getInstance()->getDeviceByType(DEVICE_BMS));
+    MotorController* motorController = deviceManager.getMotorController();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
+    BatteryManager *bms = reinterpret_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
     
     uint32_t ms = millis();
     uint32_t IOTemp = 0;
@@ -847,9 +847,9 @@ void ADAFRUITBLE::loop() {
  * This is required to initially set-up the ichip
  */
 void ADAFRUITBLE::loadParameters() {
-    MotorController *motorController = DeviceManager::getInstance()->getMotorController();
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
+    MotorController *motorController = deviceManager.getMotorController();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
     PotThrottleConfiguration *acceleratorConfig = NULL;
     PotThrottleConfiguration *brakeConfig = NULL;
     MotorControllerConfiguration *motorConfig = NULL;
@@ -921,7 +921,7 @@ void ADAFRUITBLE::buildEnabledDevices()
     Device *dev;
     while (deviceTable[idx] != 0)
     {
-        dev = DeviceManager::getInstance()->getDeviceByID((DeviceId)deviceTable[idx]);
+        dev = deviceManager.getDeviceByID((DeviceId)deviceTable[idx]);
         if (dev != 0 && dev->isEnabled())
         {
             bitfield |= 1 << idx;
@@ -942,9 +942,9 @@ void ADAFRUITBLE::buildEnabledDevices()
 void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
 {
     Logger::info("Entered gattRX with charid: %i, datalen = %i", chars_id, len);
-    MotorController *motorController = DeviceManager::getInstance()->getMotorController();
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
+    MotorController *motorController = deviceManager.getMotorController();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
     PotThrottleConfiguration *acceleratorConfig = NULL;
     PotThrottleConfiguration *brakeConfig = NULL;
     MotorControllerConfiguration *motorConfig = NULL;

@@ -57,14 +57,14 @@ void DCDCController::handleCanFrame(CAN_FRAME *frame)
 
 void DCDCController::setup()
 {
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     loadConfiguration();
     Device::setup(); // run the parent class version of this function
 
     canHandlerCar.attach(this, 0x1D5, 0x7ff, false);
     //Watch for 0x1D5 messages from Delphi converter
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_DCDC);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_DCDC);
 }
 
 

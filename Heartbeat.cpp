@@ -32,9 +32,9 @@ Heartbeat::Heartbeat() {
 }
 
 void Heartbeat::setup() {
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_HEARTBEAT);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_HEARTBEAT);
 }
 
 void Heartbeat::setThrottleDebug(bool debug) {
@@ -63,9 +63,9 @@ void Heartbeat::handleTick() {
     led = !led;
 
     if (throttleDebug) {
-        MotorController *motorController = DeviceManager::getInstance()->getMotorController();
-        Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-        Throttle *brake = DeviceManager::getInstance()->getBrake();
+        MotorController *motorController = deviceManager.getMotorController();
+        Throttle *accelerator = deviceManager.getAccelerator();
+        Throttle *brake = deviceManager.getBrake();
 
         Logger::console("");
         if (motorController) {

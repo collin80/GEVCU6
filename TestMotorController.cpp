@@ -37,7 +37,7 @@ TestMotorController::TestMotorController() : MotorController() {
 }
 
 void TestMotorController::setup() {
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     Logger::info("add device: Test Inverter (id:%X, %X)", TESTINVERTER, this);
 
@@ -49,7 +49,7 @@ void TestMotorController::setup() {
     setSelectedGear(DRIVE);
     setOpState(ENABLE);
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC);
 }
 
 void TestMotorController::handleTick() {

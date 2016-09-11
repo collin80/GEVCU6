@@ -135,8 +135,8 @@ void MotorController::handleTick() {
 
 
     //Throttle check
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
     if (accelerator)
         throttleRequested = accelerator->getLevel();
     if (brake && brake->getLevel() < -10 && brake->getLevel() < accelerator->getLevel()) //if the brake has been pressed it overrides the accelerator.

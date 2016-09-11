@@ -58,7 +58,7 @@ void SerialConsole::loop() {
     {
         if(loopcount++==350000) {
             //DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
-            DeviceManager::getInstance()->updateWifi();
+            deviceManager.updateWifi();
             cancel=true;
         }
     }
@@ -70,10 +70,10 @@ void SerialConsole::loop() {
 }
 
 void SerialConsole::printMenu() {
-    MotorController* motorController = (MotorController*) DeviceManager::getInstance()->getMotorController();
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
-    ICHIPWIFI *wifi = (ICHIPWIFI*) DeviceManager::getInstance()->getDeviceByType(DEVICE_WIFI);
+    MotorController* motorController = (MotorController*) deviceManager.getMotorController();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
+    ICHIPWIFI *wifi = (ICHIPWIFI*) deviceManager.getDeviceByType(DEVICE_WIFI);
 
     //Show build # here as well in case people are using the native port and don't get to see the start up messages
     SerialUSB.print("Build number: ");
@@ -150,7 +150,7 @@ void SerialConsole::printMenu() {
 
     }
 
-    DeviceManager::getInstance()->printDeviceList();
+    deviceManager.printDeviceList();
 
     if (motorController && motorController->getConfiguration()) {
         MotorControllerConfiguration *config = (MotorControllerConfiguration *) motorController->getConfiguration();
@@ -287,9 +287,9 @@ void SerialConsole::handleConfigCmd() {
     PotThrottleConfiguration *brakeConfig = NULL;
     MotorControllerConfiguration *motorConfig = NULL;
 
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
-    MotorController *motorController = DeviceManager::getInstance()->getMotorController();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
+    MotorController *motorController = deviceManager.getMotorController();
     int i;
     int newValue;
     bool updateWifi = true;
@@ -603,9 +603,9 @@ void SerialConsole::handleConfigCmd() {
         sysPrefs->saveChecksum();
 
     } else if (cmdString == String("WIREACH")) {
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)(cmdBuffer + i));
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)(cmdBuffer + i));
         Logger::info("sent \"AT+i%s\" to WiReach wireless LAN device", (cmdBuffer + i));
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
         updateWifi = false;
     } else if (cmdString == String("SSID")) {
         String cmdString = String();
@@ -613,8 +613,8 @@ void SerialConsole::handleConfigCmd() {
         cmdString.concat('=');
         cmdString.concat((char *)(cmdBuffer + i));
         Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
         updateWifi = false;
     } else if (cmdString == String("IP")) {
         String cmdString = String();
@@ -622,8 +622,8 @@ void SerialConsole::handleConfigCmd() {
         cmdString.concat('=');
         cmdString.concat((char *)(cmdBuffer + i));
         Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
         updateWifi = false;
     } else if (cmdString == String("CHANNEL")) {
         String cmdString = String();
@@ -631,8 +631,8 @@ void SerialConsole::handleConfigCmd() {
         cmdString.concat('=');
         cmdString.concat((char *)(cmdBuffer + i));
         Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
         updateWifi = false;
     } else if (cmdString == String("SECURITY")) {
         String cmdString = String();
@@ -640,8 +640,8 @@ void SerialConsole::handleConfigCmd() {
         cmdString.concat('=');
         cmdString.concat((char *)(cmdBuffer + i));
         Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
         updateWifi = false;
 
     } else if (cmdString == String("PWD")) {
@@ -650,8 +650,8 @@ void SerialConsole::handleConfigCmd() {
         cmdString.concat('=');
         cmdString.concat((char *)(cmdBuffer + i));
         Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
         updateWifi = false;
 
     } else if (cmdString == String("COOLFAN") && motorConfig) {
@@ -721,16 +721,17 @@ void SerialConsole::handleConfigCmd() {
         updateWifi = false;
     }
     // send updates to ichip wifi
-    if (updateWifi)
-        DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
+    if (updateWifi) {        
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
+        deviceManager.sendMessage(DEVICE_WIFI, ADABLUE, MSG_CONFIG_CHANGE, NULL);
+    }
 }
 
 void SerialConsole::handleShortCmd() {
     uint8_t val;
-    MotorController* motorController = (MotorController*) DeviceManager::getInstance()->getMotorController();
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
-    DeviceManager *deviceManager = DeviceManager::getInstance();
+    MotorController* motorController = (MotorController*) deviceManager.getMotorController();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
 
     switch (cmdBuffer[0]) {
     case 'h':
@@ -828,44 +829,43 @@ void SerialConsole::handleShortCmd() {
         break;
     case 's':
         Logger::console("Finding and listing all nearby WiFi access points");
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"RP20");
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"RP20");
         break;
     case 'W':
         Logger::console("Resetting wifi to factory defaults and setting up GEVCU5.2 Access Point");
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"FD");//Reset
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"FD");//Reset
         delay(2000);
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"HIF=1");  //Set for RS-232 serial.
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"HIF=1");  //Set for RS-232 serial.
         delay(1000);
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"BDRA");//Auto baud rate selection
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"BDRA");//Auto baud rate selection
         delay(1000);
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"WLCH=9"); //use whichever channel an AP wants to use
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"WLCH=9"); //use whichever channel an AP wants to use
         delay(1000);
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"WLSI=GEVCU"); //set for GEVCU aS AP.
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"WLSI=GEVCU"); //set for GEVCU aS AP.
+        delay(1000);
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"STAP=1"); //enable IP
         delay(1000);
 
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"STAP=1"); //enable IP
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DIP=192.168.3.10"); //enable IP
         delay(1000);
-
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DIP=192.168.3.10"); //enable IP
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DPSZ=8"); //set DHCP server for 8
         delay(1000);
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DPSZ=8"); //set DHCP server for 8
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"RPG=secret"); // set the configuration password for /ichip
         delay(1000);
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"RPG=secret"); // set the configuration password for /ichip
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"WPWD=secret"); // set the password to update config params
         delay(1000);
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"WPWD=secret"); // set the password to update config params
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"AWS=1"); //turn on web server
         delay(1000);
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"AWS=1"); //turn on web server
-        delay(1000);
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN"); //cause a reset to allow it to come up with the settings
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN"); //cause a reset to allow it to come up with the settings
         delay(5000); // a 5 second delay is required for the chip to come back up ! Otherwise commands will be lost
 
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); // reload configuration params as they were lost
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); // reload configuration params as they were lost
         Logger::console("Wifi 5.2 initialized");
         break;
     case 'w':
         Logger::console("Resetting wifi to factory defaults and setting up GEVCU4.2 Ad Hoc network");
         resetWiReachMini();
-        deviceManager->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); // reload configuration params as they were lost
+        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); // reload configuration params as they were lost
         break;
 
     case 'X':

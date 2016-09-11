@@ -59,7 +59,7 @@ void ICHIPWIFI::setup() {
 
     Logger::info("add device: iChip 2128 WiFi (id: %X, %X)", ICHIP2128, this);
 
-    TickHandler::getInstance()->detach(this);
+    tickHandler.detach(this);
 
     //MSEL pin
     pinMode(18, OUTPUT);
@@ -95,7 +95,7 @@ void ICHIPWIFI::setup() {
 
     elmProc = new ELM327Processor();
 
-    TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_WIFI);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_WIFI);
 
 }
 
@@ -149,9 +149,9 @@ void ICHIPWIFI::sendToSocket(int socket, String data) {
  */
 //TODO: See the processing function below for a more detailed explanation - can't send so many setParam commands in a row
 void ICHIPWIFI::handleTick() {
-    MotorController* motorController = DeviceManager::getInstance()->getMotorController();
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
+    MotorController* motorController = deviceManager.getMotorController();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
     static int pollListening = 0;
     static int pollSocket = 0;
     uint32_t ms = millis();
@@ -669,9 +669,9 @@ void ICHIPWIFI::processParameterChange(char *key) {
     if (!value)
         return;
 
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
-    MotorController *motorController = DeviceManager::getInstance()->getMotorController();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
+    MotorController *motorController = deviceManager.getMotorController();
 
     if (accelerator)
         acceleratorConfig = (PotThrottleConfiguration *)accelerator->getConfiguration();
@@ -936,7 +936,7 @@ void ICHIPWIFI::processParameterChange(char *key) {
     }
     else {
         sysPrefs->forceCacheWrite();
-        DeviceManager::getInstance()->updateWifi();
+        deviceManager.updateWifi();
     }
 }
 
@@ -945,9 +945,9 @@ void ICHIPWIFI::processParameterChange(char *key) {
  * This is required to initially set-up the ichip
  */
 void ICHIPWIFI::loadParameters() {
-    MotorController *motorController = DeviceManager::getInstance()->getMotorController();
-    Throttle *accelerator = DeviceManager::getInstance()->getAccelerator();
-    Throttle *brake = DeviceManager::getInstance()->getBrake();
+    MotorController *motorController = deviceManager.getMotorController();
+    Throttle *accelerator = deviceManager.getAccelerator();
+    Throttle *brake = deviceManager.getBrake();
     PotThrottleConfiguration *acceleratorConfig = NULL;
     PotThrottleConfiguration *brakeConfig = NULL;
     MotorControllerConfiguration *motorConfig = NULL;
