@@ -174,7 +174,7 @@ Throttle *DeviceManager::getAccelerator() {
     //so down range code doesn't puke
     if (!throttle)
     {
-        Logger::debug("getAccelerator() called but there is no registered accelerator!");
+        //Logger::debug("getAccelerator() called but there is no registered accelerator!");
         return 0; //NULL!
     }
     return throttle;
@@ -197,7 +197,7 @@ MotorController *DeviceManager::getMotorController() {
 
     if (!motorController)
     {
-        Logger::debug("getMotorController() called but there is no registered motor controller!");
+        //Logger::debug("getMotorController() called but there is no registered motor controller!");
         return 0; //NULL!
     }
     return motorController;
@@ -217,7 +217,7 @@ Device *DeviceManager::getDeviceByID(DeviceId id)
             if (devices[i]->getId() == id) return devices[i];
         }
     }
-    Logger::debug("getDeviceByID - No device with ID: %X", (int)id);
+    //Logger::debug("getDeviceByID - No device with ID: %X", (int)id);
     return 0; //NULL!
 }
 
@@ -234,7 +234,7 @@ Device *DeviceManager::getDeviceByType(DeviceType type)
             if (devices[i]->getType() == type) return devices[i];
         }
     }
-    Logger::debug("getDeviceByType - No devices of type: %X", (int)type);
+    //Logger::debug("getDeviceByType - No devices of type: %X", (int)type);
     return 0; //NULL!
 }
 

@@ -59,6 +59,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "DCDCController.h"
 #include "EVIC.h"
 #include "Powerkeypad.h"
+#include "VehicleSpecific.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,10 +70,6 @@ void setup();
 #ifdef __cplusplus
 } // extern "C"
 #endif
-
-#define SYSTEM_PROTO	1
-#define SYSTEM_DUED		2
-#define SYSTEM_GEVCU3	3
 
 #endif /* GEVCU_H_ */
 

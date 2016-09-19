@@ -105,11 +105,10 @@ void SerialConsole::printMenu() {
     SerialUSB.println("W = GEVCU 5.2 reset wifi to factory defaults, setup GEVCU as Access Point");
     SerialUSB.println("s = Scan WiFi for nearby access points");
     SerialUSB.println("A = Autocompensate ADC inputs");
+    SerialUSB.println("a = Re-setup Adafruit BLE");
     SerialUSB.println();
     SerialUSB.println("Config Commands (enter command=newvalue). Current values shown in parenthesis:");
     SerialUSB.println();
-    Logger::console("LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", Logger::getLogLevel());
-
     Logger::console("LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", Logger::getLogLevel());
 
     sysPrefs->read(EESYS_SYSTEM_TYPE, &systype);
@@ -599,7 +598,8 @@ void SerialConsole::handleConfigCmd() {
             Logger::setLoglevel(Logger::Off);
             break;
         }
-        sysPrefs->write(EESYS_LOG_LEVEL, (uint8_t)newValue);
+        if (!sysPrefs->write(EESYS_LOG_LEVEL, (uint8_t)newValue))
+            Logger::error("Couldn't write log level!");
         sysPrefs->saveChecksum();
 
     } else if (cmdString == String("WIREACH")) {
@@ -809,6 +809,9 @@ void SerialConsole::handleShortCmd() {
         }
         sysPrefs->saveChecksum();
         systemIO.setup_ADC_params(); //change takes immediate effect
+        break;
+    case 'a':
+        deviceManager.sendMessage(DEVICE_ANY, ADABLUE, 0xDEADBEEF, nullptr);
         break;
     case 'S':
         //there is not really any good way (currently) to auto generate this list

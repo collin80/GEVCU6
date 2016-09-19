@@ -251,6 +251,12 @@ void SystemIO::installExtendedIO(CANIODevice *device)
 {
     bool found = false;
     int counter;
+    
+    //Logger::debug("Before adding extended IO counts are DI:%i DO:%i AI:%i AO:%i", numDigIn, numDigOut, numAnaIn, numAnaOut);
+    //Logger::debug("Num Analog Inputs: %i", device->getAnalogInputCount());
+    //Logger::debug("Num Analog Outputs: %i", device->getAnalogOutputCount());
+    //Logger::debug("Num Digital Inputs: %i", device->getDigitalInputCount());
+    //Logger::debug("Num Digital Outputs: %i", device->getDigitalOutputCount());
    
     if (device->getAnalogInputCount() > 0)
     {
@@ -264,6 +270,7 @@ void SystemIO::installExtendedIO(CANIODevice *device)
                     extendedAnalogIn[counter + i].device = device;
                     extendedAnalogIn[counter + i].localOffset = i;
                 }
+                break;
             }
         }
     }
@@ -280,6 +287,7 @@ void SystemIO::installExtendedIO(CANIODevice *device)
                     extendedAnalogOut[counter + i].device = device;
                     extendedAnalogOut[counter + i].localOffset = i;
                 }
+                break;
             }
         }
     }
@@ -296,6 +304,7 @@ void SystemIO::installExtendedIO(CANIODevice *device)
                     extendedDigitalOut[counter + i].device = device;
                     extendedDigitalOut[counter + i].localOffset = i;
                 }
+                break;
             }
         }
     }
@@ -312,6 +321,7 @@ void SystemIO::installExtendedIO(CANIODevice *device)
                     extendedDigitalIn[counter + i].device = device;
                     extendedDigitalIn[counter + i].localOffset = i;
                 }
+                break;
             }
         }
     }
@@ -324,7 +334,7 @@ void SystemIO::installExtendedIO(CANIODevice *device)
     }
     numDigIn = numDI;
     
-    int numDO = NUM_DIGITAL;
+    int numDO = NUM_OUTPUT;
     for (int i = 0; i < NUM_EXT_IO; i++)
     {
         if (extendedDigitalOut[i].device != NULL) numDO++;
@@ -347,6 +357,7 @@ void SystemIO::installExtendedIO(CANIODevice *device)
         else break;
     }
     numAnaOut = numAO;
+    Logger::debug("After added extended IO the counts are DI:%i DO:%i AI:%i AO:%i", numDigIn, numDigOut, numAnaIn, numAnaOut);
 }
 
 int SystemIO::numDigitalInputs()
@@ -491,6 +502,22 @@ uint16_t SystemIO::getAnalogIn(uint8_t which) {
         return 0;
     }
     return 0; //if it falls through and nothing could provide the answer then return 0
+}
+
+boolean SystemIO::setAnalogOut(uint8_t which, int32_t level)
+{
+    if (which >= numAnaOut) return false;
+    CANIODevice *dev;
+    dev = extendedAnalogOut[which].device;
+    if (dev) dev->setAnalogOutput(extendedAnalogOut[which].localOffset, level);    
+}
+
+int32_t SystemIO::getAnalogOut(uint8_t which)
+{
+    if (which >= numAnaOut) return 0;
+    CANIODevice *dev;
+    dev = extendedAnalogOut[which].device;
+    if (dev) return dev->getAnalogOutput(extendedAnalogOut[which].localOffset);    
 }
 
 
@@ -706,7 +733,7 @@ int32_t SystemIO::getSPIADCReading(int CS, int sensor)
 {
     int32_t result;
     int32_t byt;
-    Logger::debug("SPI Read CS: %i Sensor: %i", CS, sensor);
+    //Logger::debug("SPI Read CS: %i Sensor: %i", CS, sensor);
     SPI.beginTransaction(spi_settings);
     digitalWrite(CS, LOW);
     if (sensor == 0) SPI.transfer(ADE7913_READ | ADE7913_AMP_READING);

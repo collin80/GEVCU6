@@ -196,6 +196,7 @@ uint8_t PrefHandler::calcChecksum() {
 void PrefHandler::saveChecksum() {
     uint8_t csum;
     csum = calcChecksum();
+    Logger::debug("New checksum: %x", csum);
     memCache->Write(EE_CHECKSUM + base_address + lkg_address, csum);
 }
 

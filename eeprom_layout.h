@@ -110,6 +110,7 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EETH_ADC_2		54 //1 byte - which ADC port to use for second throttle input
 
 //System Data
+#define EESYS_LOG_LEVEL          5   //1 byte - the log level
 #define EESYS_SYSTEM_TYPE        10  //1 byte - 1 = Old school protoboards 2 = GEVCU2/DUED 3 = GEVCU3, 4 = GEVCU4 or 5, 6 = GEVCU6 - Defaults to 2 if invalid or not set up
 #define EESYS_RAWADC			 20  //1 byte - if not zero then use raw ADC mode (no preconditioning or buffering or differential).
 //Newer GEVCU boards use a 24 bit ADC so the resolution is far higher. But, offset and gain are still using the 16 bit values so offset is limited.
@@ -125,84 +126,18 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EESYS_ADC2_OFFSET        40  //2 bytes - ADC offset from zero - ADC reads 12 bit so the offset will be [0,4095] - Offset is subtracted from read ADC value
 #define EESYS_ADC3_GAIN          42  //2 bytes - ADC gain centered at 1024 being 1 to 1 gain, thus 512 is 0.5 gain, 2048 is double, etc
 #define EESYS_ADC3_OFFSET        44  //2 bytes - ADC offset from zero - ADC reads 12 bit so the offset will be [0,4095] - Offset is subtracted from read ADC value
-#define EESYS_ADC_PACKH_GAIN	   46  //2 bytes - GAIN for Pack High to Mid voltage reading
+#define EESYS_ADC_PACKH_GAIN	 46  //2 bytes - GAIN for Pack High to Mid voltage reading
 #define EESYS_ADC_PACKH_OFFSET	 48  //2 bytes - Offset for Pack high to mid voltage reading
-#define EESYS_ADC_PACKL_GAIN	   50  //2 bytes - GAIN for Pack Mid to Low voltage reading
+#define EESYS_ADC_PACKL_GAIN	 50  //2 bytes - GAIN for Pack Mid to Low voltage reading
 #define EESYS_ADC_PACKL_OFFSET	 52  //2 bytes - Offset for Pack Mid to Low voltage reading
-#define EESYS_ADC_PACKC_GAIN	   54  //2 bytes - GAIN for Pack current reading
+#define EESYS_ADC_PACKC_GAIN	 54  //2 bytes - GAIN for Pack current reading
 #define EESYS_ADC_PACKC_OFFSET	 56  //2 bytes - Offset for Pack current reading
+#define EESYS_CAN0_BAUD          80 //2 bytes - Baud rate of CAN0 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN0
+#define EESYS_CAN1_BAUD          82 //2 bytes - Baud rate of CAN1 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN1
+#define EESYS_CAPACITY           100 // 1 byte - battery pack capacity in AH
+#define EESYS_AH                 101 // 2 bytes - current cumulative ampere hours 
 
-#define EESYS_CAN0_BAUD          100 //2 bytes - Baud rate of CAN0 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN0
-#define EESYS_CAN1_BAUD          102 //2 bytes - Baud rate of CAN1 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN1
-#define EESYS_SERUSB_BAUD        104 //2 bytes - Baud rate of serial debugging port. Multiplied by 10 to get baud. So 115200 baud will be set as 11520
-#define EESYS_TWI_BAUD           106 //2 bytes - Baud for TWI in 1000's just like CAN bauds. So 100k baud is set as 100
-#define EESYS_TICK_RATE          108 //2 bytes - # of system ticks per second. Can range the full 16 bit value [1, 65536] which yields ms rate of [15us, 1000ms]
 
-//We store the current system time from the RTC in EEPROM every so often.
-//RTC is not battery backed up on the Due so a power failure will reset it.
-//These storage spaces let the firmware reload the last knowm time to bootstrap itself
-//as much as possible. The hope is that we'll be able to get access to internet eventually
-//and use NTP to get the real time.
-#define EESYS_RTC_TIME           150 //4 bytes - BCD packed version of the current time in the same format as it is stored in RTC chip
-#define EESYS_RTC_DATE           154 //4 bytes - BCD version of date in format of RTC chip
-
-//Technically there are two different canbus systems in use. The MCP2515 has 2 masks and 5 filters. The Arduino DUE
-//Has 8 masks and 8 filters potentially (not really, you do need transmit boxes too). So, the most masks and filters
-//we could ever set is 7 (using one mb as transmit) so support accordingly.
-
-#define EESYS_CAN_RX_COUNT       199 //1 byte - how many mailboxes to use for RX on the Due. On the Macchina it is always 5.
-#define EESYS_CAN_MASK0          200 //4 bytes - first canbus mask - bit 31 sets whether it is extended or not (set = extended)
-#define EESYS_CAN_FILTER0        204 //4 bytes - first canbus filter - uses mask 0 on Due and Macchina
-#define EESYS_CAN_MASK1          208 //4 bytes - second canbus mask - bit 31 sets whether it is extended or not (set = extended)
-#define EESYS_CAN_FILTER1        212 //4 bytes - second canbus filter - uses mask 0 on Macchina, Mask 1 on Due
-#define EESYS_CAN_MASK2          216 //4 bytes - third canbus mask - bit 31 sets whether it is extended or not (set = extended)
-#define EESYS_CAN_FILTER2        220 //4 bytes - third canbus filter - uses mask 1 on Macchina, Mask 2 on Due
-#define EESYS_CAN_MASK3          224 //4 bytes - fourth canbus mask - bit 31 sets whether it is extended or not (set = extended)
-#define EESYS_CAN_FILTER3        228 //4 bytes - fourth canbus filter - uses mask 1 on Macchina, Mask 3 on Due
-#define EESYS_CAN_MASK4          232 //4 bytes - fifth canbus mask - bit 31 sets whether it is extended or not (set = extended)
-#define EESYS_CAN_FILTER4        236 //4 bytes - fifth canbus filter - uses mask 1 on Macchina, Mask 4 on Due
-#define EESYS_CAN_MASK5          240 //4 bytes - sixth canbus mask - bit 31 sets whether it is extended or not (set = extended)
-#define EESYS_CAN_FILTER5        244 //4 bytes - sixth canbus filter - not valid on Macchina, Mask 5 on Due
-#define EESYS_CAN_MASK6          248 //4 bytes - seventh canbus mask - bit 31 sets whether it is extended or not (set = extended)
-#define EESYS_CAN_FILTER6        252 //4 bytes - seventh canbus filter - not valid on Macchina, Mask 6 on Due
-#define EESYS_CAPACITY           256 // 1 byte - battery pack capacity in AH
-#define EESYS_AH                257 // 2 bytes - current cumulative ampere hours 
-
-//Allow for a few defined WIFI SSIDs that the GEVCU will try to automatically connect to.
-#define EESYS_WIFI0_SSID	 300 //32 bytes - the SSID to create or use (prefixed with ! if create ad-hoc)
-#define EESYS_WIFI0_CHAN         332 //1 byte - the wifi channel (1 - 11) to use
-#define EESYS_WIFI0_DHCP         333 //1 byte - DHCP mode, 0 = off, 1 = server, 2 = client
-#define EESYS_WIFI0_MODE         334 //1 byte - 0 = B, 1 = G
-#define EESYS_WIFI0_IPADDR       335 //4 bytes - IP address to use if DHCP is off
-#define EESYS_WIFI0_KEY          339 //40 bytes - the security key (13 bytes for WEP, 8 - 83 for WPA but only up to 40 here
-
-#define EESYS_WIFI1_SSID	 400 //32 bytes - the SSID to create or use (prefixed with ! if create ad-hoc)
-#define EESYS_WIFI1_CHAN         432 //1 byte - the wifi channel (1 - 11) to use
-#define EESYS_WIFI1_DHCP	 433 //1 byte - DHCP mode, 0 = off, 1 = server, 2 = client
-#define EESYS_WIFI1_MODE         434 //1 byte - 0 = B, 1 = G
-#define EESYS_WIFI1_IPADDR       435 //4 bytes - IP address to use if DHCP is off
-#define EESYS_WIFI1_KEY          439 //40 bytes - the security key (13 bytes for WEP, 8 - 83 for WPA but only up to 40 here
-
-#define EESYS_WIFI2_SSID	500 //32 bytes - the SSID to create or use (prefixed with ! if create ad-hoc)
-#define EESYS_WIFI2_CHAN	532 //1 byte - the wifi channel (1 - 11) to use
-#define EESYS_WIFI2_DHCP	533 //1 byte - DHCP mode, 0 = off, 1 = server, 2 = client
-#define EESYS_WIFI2_MODE	534 //1 byte - 0 = B, 1 = G
-#define EESYS_WIFI2_IPADDR	535 //4 bytes - IP address to use if DHCP is off
-#define EESYS_WIFI2_KEY		539 //40 bytes - the security key (13 bytes for WEP, 8 - 83 for WPA but only up to 40 here
-
-//If the above networks can't be joined then try to form our own adhoc network
-//with the below parameters.
-#define EESYS_WIFIX_SSID	579 //32 bytes - the SSID to create or use (prefixed with ! if create ad-hoc)
-#define EESYS_WIFIX_CHAN	611 //1 byte - the wifi channel (1 - 11) to use
-#define EESYS_WIFIX_DHCP	612 //1 byte - DHCP mode, 0 = off, 1 = server, 2 = client
-#define EESYS_WIFIX_MODE        613 //1 byte - 0 = B, 1 = G
-#define EESYS_WIFIX_IPADDR      614 //4 bytes - IP address to use if DHCP is off
-#define EESYS_WIFIX_KEY         618 //40 bytes - the security key (13 bytes for WEP, 8 - 83 for WPA but only up to 40 here
-
-#define EESYS_LOG_LEVEL         658 //1 byte - the log level
-#define EESYS_AMPHOURS		659 //1 byte - ???
-#define EESYS_BRAKELIGHT	660 //1 byte - 
-#define EESYS_xxxx		661 //1 byte -
 
 #define EEFAULT_VALID		0 //1 byte - Set to value of 0xB2 if fault data has been initialized
 #define EEFAULT_READPTR		1 //2 bytes - index where reading should start (first unacknowledged fault)

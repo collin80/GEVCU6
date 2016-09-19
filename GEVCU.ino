@@ -134,73 +134,7 @@ void initSysEEPROM() {
 	sysPrefs->write(EESYS_CAN0_BAUD, sixteen);
 	sysPrefs->write(EESYS_CAN1_BAUD, sixteen);
 
-	sixteen = 11520; //multiplied by 10
-	sysPrefs->write(EESYS_SERUSB_BAUD, sixteen);
-
-	sixteen = 100; //multiplied by 1000
-	sysPrefs->write(EESYS_TWI_BAUD, sixteen);
-
-	sixteen = 100; //number of ticks per second
-	sysPrefs->write(EESYS_TICK_RATE, sixteen);
-
-	thirtytwo = 0;
-	sysPrefs->write(EESYS_RTC_TIME, thirtytwo);
-	sysPrefs->write(EESYS_RTC_DATE, thirtytwo);
-
-	eight = 5; //how many RX mailboxes
-	sysPrefs->write(EESYS_CAN_RX_COUNT, eight);
-
-	thirtytwo = 0x7f0; //standard frame, ignore bottom 4 bits
-	sysPrefs->write(EESYS_CAN_MASK0, thirtytwo);
-	sysPrefs->write(EESYS_CAN_MASK1, thirtytwo);
-	sysPrefs->write(EESYS_CAN_MASK2, thirtytwo);
-	sysPrefs->write(EESYS_CAN_MASK3, thirtytwo);
-	sysPrefs->write(EESYS_CAN_MASK4, thirtytwo);
-
-	thirtytwo = 0x230;
-	sysPrefs->write(EESYS_CAN_FILTER0, thirtytwo);
-	sysPrefs->write(EESYS_CAN_FILTER1, thirtytwo);
-	sysPrefs->write(EESYS_CAN_FILTER2, thirtytwo);
-
-	thirtytwo = 0x650;
-	sysPrefs->write(EESYS_CAN_FILTER3, thirtytwo);
-	sysPrefs->write(EESYS_CAN_FILTER4, thirtytwo);
-
-	thirtytwo = 0; //ok, not technically 32 bytes but the four zeros still shows it is unused.
-	sysPrefs->write(EESYS_WIFI0_SSID, thirtytwo);
-	sysPrefs->write(EESYS_WIFI1_SSID, thirtytwo);
-	sysPrefs->write(EESYS_WIFI2_SSID, thirtytwo);
-	sysPrefs->write(EESYS_WIFIX_SSID, thirtytwo);
-
-	eight = 0; //no channel, DHCP off, B mode
-	sysPrefs->write(EESYS_WIFI0_CHAN, eight);
-	sysPrefs->write(EESYS_WIFI0_DHCP, eight);
-	sysPrefs->write(EESYS_WIFI0_MODE, eight);
-
-	sysPrefs->write(EESYS_WIFI1_CHAN, eight);
-	sysPrefs->write(EESYS_WIFI1_DHCP, eight);
-	sysPrefs->write(EESYS_WIFI1_MODE, eight);
-
-	sysPrefs->write(EESYS_WIFI2_CHAN, eight);
-	sysPrefs->write(EESYS_WIFI2_DHCP, eight);
-	sysPrefs->write(EESYS_WIFI2_MODE, eight);
-
-	sysPrefs->write(EESYS_WIFIX_CHAN, eight);
-	sysPrefs->write(EESYS_WIFIX_DHCP, eight);
-	sysPrefs->write(EESYS_WIFIX_MODE, eight);
-
-	thirtytwo = 0;
-	sysPrefs->write(EESYS_WIFI0_IPADDR, thirtytwo);
-	sysPrefs->write(EESYS_WIFI1_IPADDR, thirtytwo);
-	sysPrefs->write(EESYS_WIFI2_IPADDR, thirtytwo);
-	sysPrefs->write(EESYS_WIFIX_IPADDR, thirtytwo);
-
-	sysPrefs->write(EESYS_WIFI0_KEY, thirtytwo);
-	sysPrefs->write(EESYS_WIFI1_KEY, thirtytwo);
-	sysPrefs->write(EESYS_WIFI2_KEY, thirtytwo);
-	sysPrefs->write(EESYS_WIFIX_KEY, thirtytwo);
-
-	eight = 0;  //0=debug, 1=info,2=warn,3=error,4=off
+	eight = 2;  //0=debug, 1=info,2=warn,3=error,4=off
 	sysPrefs->write(EESYS_LOG_LEVEL, eight);
 
 	sysPrefs->saveChecksum();
@@ -224,6 +158,7 @@ void createObjects() {
     ADAFRUITBLE *ble = new ADAFRUITBLE();
     EVIC *eVIC = new EVIC();
     PowerkeyPad *powerKey = new PowerkeyPad();
+    VehicleSpecific *vehicleSpecific = new VehicleSpecific();
 }
 
 void initializeDevices() {
@@ -260,6 +195,10 @@ void setup() {
         pinMode(i, OUTPUT);
         digitalWrite(i, LOW);
     }
+    pinMode(64, OUTPUT); //DFU for BLE Module
+    digitalWrite(64, HIGH);
+    pinMode(65, OUTPUT); //reset for BLE module
+    digitalWrite(65, HIGH);
 	
     //delay(5000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
        
@@ -286,8 +225,8 @@ void setup() {
 
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
-	//Logger::setLoglevel((Logger::LogLevel)loglevel);
-	Logger::setLoglevel((Logger::LogLevel)0);
+    Logger::console("LogLevel: %i", loglevel);
+	Logger::setLoglevel((Logger::LogLevel)loglevel);
 	systemIO.setup();  
 	canHandlerEv.setup();
 	canHandlerCar.setup();

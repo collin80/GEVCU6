@@ -37,10 +37,10 @@ void PowerkeyPad::setup()
 	setNodeID(deviceID);
 	setCANOpenMode(true);
 
-	delay(125);
-	canHandlerCar.sendNodeStart(deviceID); //tell the keypad to enable itself
-	delay(100);
-	sendAutoStart();
+	//delay(125);
+	//canHandlerCar.sendNodeStart(deviceID); //tell the keypad to enable itself
+	//delay(100);
+	//sendAutoStart();
 	
 	systemIO.installExtendedIO(this);
 }
@@ -58,7 +58,7 @@ void PowerkeyPad::handlePDOFrame(CAN_FRAME *frame)
 		{
 			if (frame->data.byte[bit / 8] & (1 << (bit % 8)))
 			{
-				//if (buttonState[bit] == false) Logger::debug(POWERKEYPRO, "Key %i was pressed");
+				if (buttonState[bit] == false) Logger::debug(POWERKEYPRO, "Key %i was pressed");
 				actualState[bit] = true;
 
 				if (latchState[bit] != LatchModes::TOGGLING) {					
@@ -73,7 +73,7 @@ void PowerkeyPad::handlePDOFrame(CAN_FRAME *frame)
 			else
 			{
 				actualState[bit] = false;
-				//if (buttonState[bit] == true) Logger::debug(POWERKEYPRO, "Key %i was released");
+				if (buttonState[bit] == true) Logger::debug(POWERKEYPRO, "Key %i was released");
 				if (latchState[bit] == LatchModes::NO_LATCHING) buttonState[bit] = false;				
 				toggleState[bit] = false;
 			}
@@ -145,6 +145,7 @@ from the other powerkeypro library:
 */
 void PowerkeyPad::setAnalogOutput(int which, int value)
 {
+    Logger::debug("AnalogOut %i with value %i", which, value);
 	if (which == 0 && value == 1000)
 	{
 		sendLEDBatch();
@@ -153,12 +154,13 @@ void PowerkeyPad::setAnalogOutput(int which, int value)
 }
 
 bool PowerkeyPad::getDigitalInput(int which)
-{
-	//Logger::debug(getId(), "PKP getting state of button %i", which);
+{	
 	if (which < 0) return false;
 	if (which >= numDigitalInputs) return false;
 	bool outputVal = buttonState[which];
 	if (latchState[which] == LatchModes::LATCHING) buttonState[which] = actualState[which];
+    
+    //Logger::debug(getId(), "PKP state of button %i is %i", which, outputVal);
 	return outputVal;
 }
 
@@ -228,6 +230,7 @@ void PowerkeyPad::sendLEDBatch()
 			else data[2] |= 1 << (i - 4);
 		}
 	}
+	Logger::debug("LED Batch: %x %x %x", data[0], data[1], data[2]);
 	canHandlerCar.sendPDOMessage(0x200 + deviceID, 8, data);
 }
 

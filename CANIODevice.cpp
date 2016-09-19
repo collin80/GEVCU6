@@ -66,7 +66,7 @@ bool CANIODevice::getDigitalOutput(int which)
 	return false;
 }
 
-void CANIODevice::setAnalogOutput(int which, int16_t value)
+void CANIODevice::setAnalogOutput(int which, int value)
 {
 }
 

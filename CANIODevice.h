@@ -47,7 +47,7 @@ public:
 	//derived classes override any of these they need to
 	virtual void setDigitalOutput(int which, bool hi);
 	virtual bool getDigitalOutput(int which);
-	virtual void setAnalogOutput(int which, int16_t value);
+	virtual void setAnalogOutput(int which, int value);
 	virtual int16_t getAnalogOutput(int which);
 	virtual bool getDigitalInput(int which);
 	virtual int16_t getAnalogInput(int which);
