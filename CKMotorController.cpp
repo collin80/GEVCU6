@@ -56,7 +56,7 @@ void CKMotorController::setup() {
 
     running = false;
     setSelectedGear(NEUTRAL);
-    setOpState(DISABLED);
+    setOpState(ENABLE);
     CK_milli = millis();
 
     tickHandler.attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC);
@@ -102,8 +102,8 @@ void CKMotorController::handleTick() {
             // it to 60 so if we lose communications, within 20 ticks we will decrement below this value.
         {
             //Logger::debug("EnableIn=%i and ReverseIn = %i" ,getEnableIn(),getReverseIn());
-            /*if(getEnableIn()<0)*/setOpState(ENABLE); //If we HAVE an enableinput 0-3, we'll let that handle opstate. Otherwise set it to ENABLE
-            /*if(getReverseIn()<0)*/setSelectedGear(DRIVE); //If we HAVE a reverse input, we'll let that determine forward/reverse.  Otherwise set it to DRIVE
+            //if(getEnableIn()<0) setOpState(ENABLE); //If we HAVE an enableinput 0-3, we'll let that handle opstate. Otherwise set it to ENABLE
+            //if(getReverseIn()<0) setSelectedGear(DRIVE); //If we HAVE a reverse input, we'll let that determine forward/reverse.  Otherwise set it to DRIVE
         }
     }
     else {
@@ -138,8 +138,8 @@ void CKMotorController::sendPowerCmd() {
 	aliveCounter++;
 	
 	//obviously just for debugging during development. Do not leave these next lines here for long!
-	operationState = MotorController::ENABLE;
-	selectedGear = MotorController::DRIVE;
+	//operationState = MotorController::ENABLE;
+	//selectedGear = MotorController::DRIVE;
 	powerMode = MotorController::modeSpeed;
 	actualState = MotorController::ENABLE;
 
