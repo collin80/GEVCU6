@@ -46,7 +46,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Logger.h"
 #include "DeviceTypes.h"
 #include "PrefHandler.h"
-#include "ELM327Processor.h"
 #include "Adafruit_BLE.h"
 #include "Adafruit_BluefruitLE_UART.h"
 #include "Adafruit_BluefruitLE_SPI.h"
@@ -58,7 +57,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 extern PrefHandler *sysPrefs;
 /*
- * The extended configuration class with additional parameters for ichip WLAN
+ * The extended configuration class with additional parameters for Adafruit BLE
  */
 class BLEConfiguration : public DeviceConfiguration {
 public:
@@ -219,11 +218,9 @@ public:
 
     void loadConfiguration();
     void saveConfiguration();
-    void loadParameters();
-
+    void loadParameters();    
 
 private:
-    ELM327Processor *elmProc;
     int tickCounter;
     int32_t ServiceId;
     int32_t MeasureCharId[29]; //Keep track and update this to be large enough.
@@ -246,12 +243,12 @@ private:
     BLEBrakeParam bleBrakeParam;
     BLEMaxParams bleMaxParams;
     BLEDeviceEnable bleDeviceEnable;
-
-    void setupBLEservice();
+    
     void transferUpdates();
     void dumpRawData(uint8_t *data, int len);    
     void buildEnabledDevices();    
     void checkGattChar(uint8_t charact);
+    void setupBLEservice();
 };
 
 #endif

@@ -125,7 +125,7 @@ uint16_t deviceTable[] =
 void BleGattRX(int32_t chars_id, uint8_t data[], uint16_t len)
 {
     adaRef->gattRX(chars_id, data, len);
-    Logger::info(ADABLUE, "Got GATT update for char: %i", chars_id);
+    Logger::debug(ADABLUE, "Got GATT update for char: %i", chars_id);
 }
    
 /*
@@ -158,8 +158,6 @@ void ADAFRUITBLE::setup() {
     tickCounter = 0;
 
     paramCache.brakeNotAvailable = true;
-
-    elmProc = new ELM327Processor();
         
     //These apply to UART only
     if(BLETYPE==2)
@@ -173,12 +171,7 @@ void ADAFRUITBLE::setup() {
     //These apply to both UART and SPI versions
     Logger::debug(ADABLUE, "Initializing ADAFruit BLE bluetooth device...");    
     ble.begin(false);  //True = verbose mode for debuggin.   
-    ble.factoryReset();        
-    Logger::debug(ADABLUE, "Retrieving Bluetooth module information...");
-    //ble.info();     
     ble.echo(false);
-    setupBLEservice();
-    Logger::debug(ADABLUE, "BluefruitLE Initialization Complete....");
 
     tickHandler.attach(this, CFG_TICK_INTERVAL_BLE);
 }
@@ -329,7 +322,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleTrqReqAct.doUpdate != 0 || transCounter == 10)
     {
         bleTrqReqAct.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[1], (uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 1))
+        if (!gatt.setChar(2, (uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 1))
         {
             Logger::error("Could not update bleTrqReqAct 1");
         }
@@ -340,7 +333,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleThrBrkLevels.doUpdate != 0 || transCounter == 20)
     {
         bleThrBrkLevels.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[2], (uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 1))
+        if (!gatt.setChar(3, (uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 1))
         {
             Logger::error("Could not update bleThrBrkLevels 2");
         }
@@ -352,7 +345,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleSpeeds.doUpdate != 0 || transCounter == 30)
     {
         bleSpeeds.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[3], (uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 1))
+        if (!gatt.setChar(4, (uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 1))
         {
             Logger::error("Could not update bleSpeeds 3");
         }            
@@ -363,7 +356,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleModes.doUpdate != 0  || transCounter == 40)
     {
         bleModes.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[4], (uint8_t *)&bleModes, sizeof(bleModes) - 1))
+        if (!gatt.setChar(5, (uint8_t *)&bleModes, sizeof(bleModes) - 1))
         {
             Logger::error("Could not update bleModes 4");
         }            
@@ -374,7 +367,7 @@ void ADAFRUITBLE::transferUpdates()
     if (blePowerStatus.doUpdate != 0  || transCounter == 50)
     {
         blePowerStatus.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[5], (uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 1))
+        if (!gatt.setChar(6, (uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 1))
         {
             Logger::error("Could not update blePowerStatus 5");
         }            
@@ -385,7 +378,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleBitFields.doUpdate != 0  || transCounter == 60)
     {
         bleBitFields.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[6], (uint8_t *)&bleBitFields, sizeof(bleBitFields) - 1))
+        if (!gatt.setChar(7, (uint8_t *)&bleBitFields, sizeof(bleBitFields) - 1))
         {
             Logger::error("Could not update bleBitFields 6");
         }            
@@ -396,7 +389,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleTemperatures.doUpdate != 0  || transCounter == 70)
     {
         bleTemperatures.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[7], (uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 1))
+        if (!gatt.setChar(8, (uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 1))
         {
             Logger::error("Could not update bleTemperatures 7");
         }            
@@ -407,7 +400,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleDigIO.doUpdate != 0  || transCounter == 80)
     {
         bleDigIO.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[8], (uint8_t *)&bleDigIO, sizeof(bleDigIO) - 1))
+        if (!gatt.setChar(9, (uint8_t *)&bleDigIO, sizeof(bleDigIO) - 1))
         {
             Logger::error("Could not update bleDigIO 8");
         }            
@@ -418,7 +411,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleThrottleIO.doUpdate != 0  || transCounter == 90)
     {
         bleThrottleIO.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[9], (uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 1))
+        if (!gatt.setChar(10, (uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 1))
         {
             Logger::error("Could not update bleThrottleIO 9");
         }            
@@ -429,7 +422,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleThrottleMap.doUpdate != 0  || transCounter == 100)
     {
         bleThrottleMap.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[10], (uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 1))
+        if (!gatt.setChar(11, (uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 1))
         {
             Logger::error("Could not update bleThrottleMap 10");
         }            
@@ -440,7 +433,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleBrakeParam.doUpdate != 0  || transCounter == 110)
     {
         bleBrakeParam.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[11], (uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 1))
+        if (!gatt.setChar(12, (uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 1))
         {
             Logger::error("Could not update bleBrakeParam 11");
         }            
@@ -451,7 +444,7 @@ void ADAFRUITBLE::transferUpdates()
     if (bleMaxParams.doUpdate != 0  || transCounter == 120)
     {
         bleMaxParams.doUpdate = 0;
-        if (!gatt.setChar(MeasureCharId[12], (uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 1))
+        if (!gatt.setChar(13, (uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 1))
         {
             Logger::error("Could not update bleMaxParams 12");
         }            
@@ -463,7 +456,7 @@ void ADAFRUITBLE::transferUpdates()
     {
         bleDeviceEnable.doUpdate = 0;
         transCounter = 0; //have to reset it at the last characteristic which is currently this one.
-        if (!gatt.setChar(MeasureCharId[13], (uint8_t *)&bleDeviceEnable, sizeof(bleDeviceEnable) - 1))
+        if (!gatt.setChar(14, (uint8_t *)&bleDeviceEnable, sizeof(bleDeviceEnable) - 1))
         {
             Logger::error("Could not update bleDeviceEnable 13");
         }            
@@ -506,7 +499,7 @@ void ADAFRUITBLE::handleTick() {
     if (paramCache.timeRunning != (ms / 1000))
     {
         paramCache.timeRunning = ms / 1000;
-        if (!gatt.setChar(MeasureCharId[0], (uint8_t*)&paramCache.timeRunning, 4))
+        if (!gatt.setChar(1, (uint8_t*)&paramCache.timeRunning, 4))
         {
             Logger::error("Could not update timeRunning");
         }
@@ -777,13 +770,16 @@ void ADAFRUITBLE::checkGattChar(uint8_t charact)
     uint16_t len;
     uint8_t buff[30];
     
-    Logger::info("Checking %i", charact);
+    /*
+    
+    Logger::debug("Checking %i", charact);
     
     ble.print("AT+GATTCHARRAW="); // use RAW command version
     ble.println(charact);
     len = ble.readraw(); // readraw swallow OK/ERROR already
     memcpy(buff, ble.buffer, len);
     gattRX(charact, buff, len);
+    */
 }
 
 /*
@@ -828,8 +824,10 @@ void ADAFRUITBLE::handleMessage(uint32_t messageType, void* message) {
     case MSG_COMMAND:  //Sends a message to the BLE module in the form of AT command
         //sendCmd((char *)message);
         break;
+    case 0xDEADBEEF:
+        setupBLEservice();
+        break;        
     }
-
 }
 
 /*
@@ -941,7 +939,7 @@ void ADAFRUITBLE::buildEnabledDevices()
 //Handle it when the connected device updates a GATT characteristic.
 void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
 {
-    Logger::info("Entered gattRX with charid: %i, datalen = %i", chars_id, len);
+    Logger::debug("Entered gattRX with charid: %i, datalen = %i", chars_id, len);
     MotorController *motorController = deviceManager.getMotorController();
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
@@ -960,7 +958,7 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
     if (motorController)
         motorConfig = (MotorControllerConfiguration *)motorController->getConfiguration(); 
     
-    if (chars_id == MeasureCharId[4]) //0x3105
+    if (chars_id == 5) //0x3105
     {
         if (bleModes.powerMode != data[0])
         {
@@ -975,7 +973,7 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
             Logger::setLoglevel((Logger::LogLevel)bleModes.logLevel);
         }
     } 
-    else if (chars_id == MeasureCharId[8]) //0x3109
+    else if (chars_id == 9) //0x3109
     {        
         uint16 = data[0] + data[1] * 256ul;
         if (bleDigIO.prechargeDuration != uint16)
@@ -1054,7 +1052,7 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
             needUpdate = false;
         }
     }    
-    else if (chars_id == MeasureCharId[9]) //0x310A
+    else if (chars_id == 10) //0x310A
     {
         uint16 = data[0] + data[1] * 256ul;
         if (bleThrottleIO.throttle1Min != uint16)
@@ -1109,7 +1107,7 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
             needUpdate = false;
         }
     }
-    else if (chars_id == MeasureCharId[10]) //0x310B
+    else if (chars_id == 11) //0x310B
     {
         uint16 = data[0] + data[1] * 256ul;
         if (bleThrottleMap.throttleRegenMax = uint16)
@@ -1170,7 +1168,7 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
             needUpdate = false;
         }
     }    
-    else if (chars_id == MeasureCharId[11]) //0x310C
+    else if (chars_id == 12) //0x310C
     {/*
         uint16 = data[0] + data[1] * 256ul;
         if (bleBrakeParam.brakeMin != uint16)
@@ -1208,7 +1206,7 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
             needUpdate = false;
         } */
     }    
-    else if (chars_id == MeasureCharId[12]) //0x310D
+    else if (chars_id == 13) //0x310D
     {
         uint16 = data[0] + data[1] * 256ul;
         if (bleMaxParams.nomVoltage != uint16)
@@ -1240,7 +1238,7 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
             needUpdate = false;
         }
     }    
-    else if (chars_id == MeasureCharId[13]) //0x310E
+    else if (chars_id == 14) //0x310E
     {
         bleDeviceEnable.deviceEnable1 = data[0] + data[1] * 256ul + data[2] * 65536ul + data[3] * 16777216ul;
         int idx;
@@ -1273,6 +1271,15 @@ void ADAFRUITBLE::loadConfiguration() {
     if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
         Logger::debug(ADABLUE, "Valid checksum so using stored BLE config values");
 //		prefsHandler->read(EESYS_WIFI0_SSID, &config->ssid);
+    }
+    else
+    {
+        ble.factoryReset();        
+        Logger::debug(ADABLUE, "Retrieving Bluetooth module information...");
+        //ble.info();         
+        setupBLEservice();
+        Logger::debug(ADABLUE, "BluefruitLE Initialization Complete....");
+        prefsHandler->saveChecksum();
     }
 }
 
