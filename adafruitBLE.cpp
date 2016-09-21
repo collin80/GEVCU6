@@ -762,6 +762,7 @@ void ADAFRUITBLE::handleTick() {
 
 void ADAFRUITBLE::checkGattChar(uint8_t charact)
 {
+    /*
     uint16_t len;
     uint8_t buff[40];
     
@@ -772,7 +773,7 @@ void ADAFRUITBLE::checkGattChar(uint8_t charact)
     len = ble.readraw(); // readraw swallow OK/ERROR already
     memcpy(buff, ble.buffer, len);
     gattRX(charact, buff, len);
-    
+    */
 }
 
 /*
