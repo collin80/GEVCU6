@@ -776,6 +776,8 @@ bool SystemIO::calibrateADCOffset(int adc, bool update)
         delay(7);
     }
     accum /= 400;
+    accum >>= 8;
+    if (accum > 6) accum -= 6;
     if (update) sysPrefs->write(EESYS_ADC0_OFFSET + (4*adc), (uint16_t)(accum));    
     Logger::console("ADC %i offset is now %i", adc, accum);
 }
