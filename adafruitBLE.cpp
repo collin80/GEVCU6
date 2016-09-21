@@ -188,12 +188,8 @@ void ADAFRUITBLE::setupBLEservice()
         //ble.setInterCharWriteDelay(5);        
     }
     
-    if (! gatt.clear() ) 
-    {
-        Logger::error(ADABLUE, "Could not clear device..");
-        return;
-    }
-  
+    Logger::debug("Factory Resetting BLE");
+    ble.factoryReset();
   
     //Set peripheral transmit power level -40 minimum -20 -16 -12 -8 -4 0 4 maximum
     if (! ble.sendCommandCheckOK(F("AT+BLEPOWERLEVEL=4")) ) 
@@ -201,7 +197,6 @@ void ADAFRUITBLE::setupBLEservice()
         Logger::error(ADABLUE, "Could not set device power level...");
         return;
     }
- 
 
     //Set peripheral name
     if (! ble.sendCommandCheckOK(F("AT+GAPDEVNAME=GEVCU 6.2 ECU")) ) 
@@ -210,7 +205,6 @@ void ADAFRUITBLE::setupBLEservice()
         return;
     }
   
-
     //Set service ID
     ServiceId = gatt.addService(0x3100);
     if (ServiceId == 0) 
@@ -245,13 +239,14 @@ void ADAFRUITBLE::setupBLEservice()
             Logger::error(ADABLUE, "Could not add characteristic %x", 0x3101 + charCounter);
             //return;            
         }
-        Logger::debug(ADABLUE, "Added characteristic %x id %x", 0x3101 + charCounter, MeasureCharId[charCounter]);
+        else Logger::debug(ADABLUE, "Added characteristic %x id %x", 0x3101 + charCounter, MeasureCharId[charCounter]);
         charact = characteristics[++charCounter];
     }           
     
     /* Add the  Service to the advertising data (needed for Nordic apps to detect the service) */
     ble.sendCommandCheckOK( F("AT+GAPSETADVDATA=02-01-06-05-02-00-31-10-31") );
 
+    Logger::debug("Resetting BLE to enable new settings.");
     /* Reset the device for the new service setting changes to take effect */
     ble.reset();
         /*
@@ -504,7 +499,7 @@ void ADAFRUITBLE::handleTick() {
             Logger::error("Could not update timeRunning");
         }
         else Logger::debug(ADABLUE, "Updated timeRunning");
-        dumpRawData((uint8_t *)&paramCache.timeRunning, 4);
+        //dumpRawData((uint8_t *)&paramCache.timeRunning, 4);
     }
     
     //every other time - 80ms by default
@@ -768,9 +763,7 @@ void ADAFRUITBLE::handleTick() {
 void ADAFRUITBLE::checkGattChar(uint8_t charact)
 {
     uint16_t len;
-    uint8_t buff[30];
-    
-    /*
+    uint8_t buff[40];
     
     Logger::debug("Checking %i", charact);
     
@@ -779,7 +772,7 @@ void ADAFRUITBLE::checkGattChar(uint8_t charact)
     len = ble.readraw(); // readraw swallow OK/ERROR already
     memcpy(buff, ble.buffer, len);
     gattRX(charact, buff, len);
-    */
+    
 }
 
 /*
@@ -962,15 +955,22 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
     {
         if (bleModes.powerMode != data[0])
         {
+            Logger::info("Updating power mode to %i from %i", data[0], bleModes.powerMode);
             bleModes.powerMode = data[0];
-            motorController->setPowerMode((MotorController::PowerMode)bleModes.powerMode);    
-            motorController->saveConfiguration();
+            if (motorController)
+            {
+                motorController->setPowerMode((MotorController::PowerMode)bleModes.powerMode);    
+                motorController->saveConfiguration();
+            }
         }
         
         if (bleModes.logLevel != data[5])
         {
+            Logger::info("Updating log level to %i from %i", data[5], bleModes.logLevel);
             bleModes.logLevel = data[5];
             Logger::setLoglevel((Logger::LogLevel)bleModes.logLevel);
+            sysPrefs->write(EESYS_LOG_LEVEL, bleModes.logLevel);
+            sysPrefs->calcChecksum();
         }
     } 
     else if (chars_id == 9) //0x3109
@@ -978,72 +978,112 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
         uint16 = data[0] + data[1] * 256ul;
         if (bleDigIO.prechargeDuration != uint16)
         {
+            Logger::info("Updating precharge duration to %i from %i", uint16, bleDigIO.prechargeDuration);
             bleDigIO.prechargeDuration = uint16;
-            motorConfig->prechargeR = bleDigIO.prechargeDuration;
-            needUpdate = true;
+            if (motorConfig)
+            {
+                motorConfig->prechargeR = bleDigIO.prechargeDuration;
+                needUpdate = true;
+            }
         }
         
         if (bleDigIO.prechargeRelay != data[2])
         {
+            Logger::info("Updating precharge output to %i from %i", data[2], bleDigIO.prechargeRelay);
             bleDigIO.prechargeRelay = data[2];
-            motorConfig->prechargeRelay = bleDigIO.prechargeRelay;
-            needUpdate = true;
+            if (motorConfig)
+            {            
+                motorConfig->prechargeRelay = bleDigIO.prechargeRelay;
+                needUpdate = true;
+            }
         }
         
         if (bleDigIO.mainContRelay != data[3])
-        {        
+        {    
+            Logger::info("Updating main contactor output to %i from %i", data[3], bleDigIO.mainContRelay);
             bleDigIO.mainContRelay = data[3];
-            motorConfig->mainContactorRelay = bleDigIO.mainContRelay;
-            needUpdate = true;
+            if (motorConfig)
+            {
+                motorConfig->mainContactorRelay = bleDigIO.mainContRelay;
+                needUpdate = true;
+            }
         }
         
         if (bleDigIO.coolingRelay != data[4])
         {
+            Logger::info("Updating cooling output to %i from %i", data[4], bleDigIO.coolingRelay);
             bleDigIO.coolingRelay = data[4];
-            motorConfig->coolFan = bleDigIO.coolingRelay;
-            needUpdate = true;
+            if (motorConfig)
+            {
+                motorConfig->coolFan = bleDigIO.coolingRelay;
+                needUpdate = true;
+            }
         }
         
         if (bleDigIO.coolOnTemp != (int8_t)data[5])
         {
+            Logger::info("Updating cooling on temperature to %i from %i", data[5], bleDigIO.coolOnTemp);
             bleDigIO.coolOnTemp = (int8_t)data[5];
-            motorConfig->coolOn = bleDigIO.coolOnTemp;
-            needUpdate = true;
+            if (motorConfig)
+            {            
+                motorConfig->coolOn = bleDigIO.coolOnTemp;
+                needUpdate = true;
+            }
         }
         
         if (bleDigIO.coolOffTemp != (int8_t)data[6])
         {
+            Logger::info("Updating cooling off temperature to %i from %i", data[6], bleDigIO.coolOffTemp);
             bleDigIO.coolOffTemp = (int8_t)data[6];
-            motorConfig->coolOff = bleDigIO.coolOffTemp;
-            needUpdate = true;
+            if (motorConfig)
+            {            
+                motorConfig->coolOff = bleDigIO.coolOffTemp;
+                needUpdate = true;
+            }
         }
         
         if (bleDigIO.brakeLightOut != data[7])
         {
+            Logger::info("Updating brake light output to %i from %i", data[7], bleDigIO.brakeLightOut);
             bleDigIO.brakeLightOut = data[7];
-            motorConfig->brakeLight = bleDigIO.brakeLightOut;
-            needUpdate = true;
+            if (motorConfig)
+            {            
+                motorConfig->brakeLight = bleDigIO.brakeLightOut;
+                needUpdate = true;
+            }
         }
         
         if (bleDigIO.reverseLightOut != data[8])
         {
+            Logger::info("Updating reverse light output to %i from %i", data[8], bleDigIO.reverseLightOut);
             bleDigIO.reverseLightOut = data[8];
-            motorConfig->revLight = bleDigIO.reverseLightOut;
-            needUpdate = true;
+            if (motorConfig)
+            {            
+                motorConfig->revLight = bleDigIO.reverseLightOut;
+                needUpdate = true;
+            }
         }
         
         if (bleDigIO.enableIn != data[9])
         {
+            Logger::info("Updating enable input to %i from %i", data[9], bleDigIO.enableIn);
             bleDigIO.enableIn = data[9];
-            motorConfig->enableIn = bleDigIO.enableIn;
-            needUpdate = true;
+            if (motorConfig)
+            {            
+                motorConfig->enableIn = bleDigIO.enableIn;
+                needUpdate = true;
+            }
         }
         
         if (bleDigIO.reverseIn != data[10])
         {        
+            Logger::info("Updating reverse input to %i from %i", data[10], bleDigIO.reverseIn);
             bleDigIO.reverseIn = data[10];                                
-            motorConfig->reverseIn = bleDigIO.reverseIn;
-            needUpdate = true;
+            if (motorConfig)
+            {            
+                motorConfig->reverseIn = bleDigIO.reverseIn;
+                needUpdate = true;
+            }
         }
         
         if (needUpdate)
@@ -1057,48 +1097,72 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
         uint16 = data[0] + data[1] * 256ul;
         if (bleThrottleIO.throttle1Min != uint16)
         {
+            Logger::info("Throttle1Min updated to %i from %i", uint16, bleThrottleIO.throttle1Min);
             bleThrottleIO.throttle1Min = uint16;
-            acceleratorConfig->minimumLevel1 = bleThrottleIO.throttle1Min;            
-            needUpdate = true;
+            if (acceleratorConfig)
+            {            
+                acceleratorConfig->minimumLevel1 = bleThrottleIO.throttle1Min;            
+                needUpdate = true;
+            }
         }
         
         uint16 = data[2] + data[3] * 256ul;
-        if (bleThrottleIO.throttle2Min)
+        if (bleThrottleIO.throttle2Min != uint16)
         {
+            Logger::info("Throttle2Min updated to %i from %i", uint16, bleThrottleIO.throttle2Min);
             bleThrottleIO.throttle2Min = uint16;
-            acceleratorConfig->minimumLevel2 = bleThrottleIO.throttle2Min;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->minimumLevel2 = bleThrottleIO.throttle2Min;
+                needUpdate = true;
+            }
         }
         
         
         uint16 = data[4] + data[5] * 256ul;
         if (bleThrottleIO.throttle1Max != uint16)
         {
+            Logger::info("Throttle1Max updated to %i from %i", uint16, bleThrottleIO.throttle1Max);
             bleThrottleIO.throttle1Max = uint16;
-            acceleratorConfig->maximumLevel1 = bleThrottleIO.throttle1Max;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->maximumLevel1 = bleThrottleIO.throttle1Max;
+                needUpdate = true;
+            }
         }
         
         uint16 = data[6] + data[7] * 256ul;
         if (bleThrottleIO.throttle2Max != uint16)
         {
+            Logger::info("Throttle2Max updated to %i from %i", uint16, bleThrottleIO.throttle2Max);
             bleThrottleIO.throttle2Max = uint16;
-            acceleratorConfig->maximumLevel2 = bleThrottleIO.throttle2Max;    
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->maximumLevel2 = bleThrottleIO.throttle2Max;    
+                needUpdate = true;
+            }
         }
         
         if (bleThrottleIO.numThrottlePots != data[8])
         {
+            Logger::info("numPots updated to %i from %i", data[8], bleThrottleIO.numThrottlePots);
             bleThrottleIO.numThrottlePots = data[8];
-            acceleratorConfig->numberPotMeters = bleThrottleIO.numThrottlePots;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->numberPotMeters = bleThrottleIO.numThrottlePots;
+                needUpdate = true;
+            }
         }
          
         if (bleThrottleIO.throttleType != data[9])
         {
+            Logger::info("Throttle type updated to %i from %i", data[9], bleThrottleIO.throttleType);
             bleThrottleIO.throttleType = data[9];
-            acceleratorConfig->throttleSubType = bleThrottleIO.throttleType;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->throttleSubType = bleThrottleIO.throttleType;
+                needUpdate = true;
+            }
         }
                 
         if (needUpdate)
@@ -1110,56 +1174,84 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
     else if (chars_id == 11) //0x310B
     {
         uint16 = data[0] + data[1] * 256ul;
-        if (bleThrottleMap.throttleRegenMax = uint16)
+        if (bleThrottleMap.throttleRegenMax != uint16)
         {
+            Logger::info("ThrottleRegenMax updated to %i from %i", uint16, bleThrottleMap.throttleRegenMax);
             bleThrottleMap.throttleRegenMax = uint16;
-            acceleratorConfig->positionRegenMaximum = bleThrottleMap.throttleRegenMax;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->positionRegenMaximum = bleThrottleMap.throttleRegenMax;
+                needUpdate = true;
+            }
         }
         
         uint16 = data[2] + data[3] * 256ul;
         if (bleThrottleMap.throttleRegenMin != uint16)
         {
+            Logger::info("ThrottleRegenMin updated to %i from %i", uint16, bleThrottleMap.throttleRegenMin);
             bleThrottleMap.throttleRegenMin = uint16;
-            acceleratorConfig->positionRegenMinimum = bleThrottleMap.throttleRegenMin;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->positionRegenMinimum = bleThrottleMap.throttleRegenMin;
+                needUpdate = true;
+            }
         }
         
         uint16 = data[4] + data[5] * 256ul;
         if (bleThrottleMap.throttleFwd != uint16)
         {
+            Logger::info("ThrottleFwd updated to %i from %i", uint16, bleThrottleMap.throttleFwd);
             bleThrottleMap.throttleFwd = uint16;
-            acceleratorConfig->positionForwardMotionStart = bleThrottleMap.throttleFwd;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->positionForwardMotionStart = bleThrottleMap.throttleFwd;
+                needUpdate = true;
+            }
         }
                 
         uint16 = data[6] + data[7] * 256ul;
         if (bleThrottleMap.throttleMap != uint16)
         {
+            Logger::info("ThrottleMap updated to %i from %i", uint16, bleThrottleMap.throttleMap);
             bleThrottleMap.throttleMap = uint16;
-            acceleratorConfig->positionHalfPower = bleThrottleMap.throttleMap;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->positionHalfPower = bleThrottleMap.throttleMap;
+                needUpdate = true;
+            }
         }
         
         if (bleThrottleMap.throttleLowestRegen != data[8])
         {
+            Logger::info("ThrottleLowestRegen updated to %i from %i", data[8], bleThrottleMap.throttleLowestRegen);
             bleThrottleMap.throttleLowestRegen = data[8];
-            acceleratorConfig->minimumRegen = bleThrottleMap.throttleLowestRegen;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->minimumRegen = bleThrottleMap.throttleLowestRegen;
+                needUpdate = true;
+            }
         }
         
         if (bleThrottleMap.throttleHighestRegen != data[9])
         {        
+            Logger::info("ThrottleHighestRegen updated to %i from %i", data[9], bleThrottleMap.throttleHighestRegen);
             bleThrottleMap.throttleHighestRegen = data[9];
-            acceleratorConfig->maximumRegen = bleThrottleMap.throttleHighestRegen;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {            
+                acceleratorConfig->maximumRegen = bleThrottleMap.throttleHighestRegen;
+                needUpdate = true;
+            }
         }
          
         if (bleThrottleMap.throttleCreep != data[10])
         {
+            Logger::info("ThrottleCreep updated to %i from %i", data[10], bleThrottleMap.throttleCreep);
             bleThrottleMap.throttleCreep = data[10];
-            acceleratorConfig->creep = bleThrottleMap.throttleCreep;
-            needUpdate = true;
+            if (acceleratorConfig)
+            {                        
+                acceleratorConfig->creep = bleThrottleMap.throttleCreep;
+                needUpdate = true;
+            }
         }
         
         if (needUpdate)
@@ -1169,67 +1261,95 @@ void ADAFRUITBLE::gattRX(int32_t chars_id, uint8_t data[], uint16_t len)
         }
     }    
     else if (chars_id == 12) //0x310C
-    {/*
+    {
         uint16 = data[0] + data[1] * 256ul;
         if (bleBrakeParam.brakeMin != uint16)
         {
+            Logger::info("Updating brakemin to %i from %i", uint16, bleBrakeParam.brakeMin);
             bleBrakeParam.brakeMin = uint16;
-            brakeConfig->minimumLevel1 = bleBrakeParam.brakeMin;
-            needUpdate = true;
+            if (brakeConfig)
+            {                        
+                brakeConfig->minimumLevel1 = bleBrakeParam.brakeMin;
+                needUpdate = true;
+            }
         }
         
         uint16 = data[2] + data[3] * 256ul;
         if (bleBrakeParam.brakeMax != uint16)
         {
+            Logger::info("Updating brakemax to %i from %i", uint16, bleBrakeParam.brakeMax);
             bleBrakeParam.brakeMax = uint16;
-            brakeConfig->maximumLevel1 = bleBrakeParam.brakeMax;
-            needUpdate = true;
+            if (brakeConfig)
+            {                                    
+                brakeConfig->maximumLevel1 = bleBrakeParam.brakeMax;
+                needUpdate = true;
+            }
         }
             
-        if (bleBrakeParam.brakeRegenMin = data[4])
+        if (bleBrakeParam.brakeRegenMin != data[4])
         {
+            Logger::info("Updating brakeregenmin to %i from %i", data[4], bleBrakeParam.brakeRegenMin);
             bleBrakeParam.brakeRegenMin = data[4];
-            brakeConfig->minimumRegen = bleBrakeParam.brakeRegenMin;
-            needUpdate = true;
+            if (brakeConfig)
+            {                                    
+                brakeConfig->minimumRegen = bleBrakeParam.brakeRegenMin;
+                needUpdate = true;
+            }
         }
         
         if (bleBrakeParam.brakeRegenMax != data[5])
         {
+            Logger::info("Updating brakeregenmax to %i from %i", data[5], bleBrakeParam.brakeRegenMax);
             bleBrakeParam.brakeRegenMax = data[5];
-            brakeConfig->maximumRegen = bleBrakeParam.brakeRegenMax;
-            needUpdate = true;
+            if (brakeConfig)
+            {                                    
+                brakeConfig->maximumRegen = bleBrakeParam.brakeRegenMax;
+                needUpdate = true;
+            }
         }
 
         if (needUpdate)
         {
             brake->saveConfiguration();
             needUpdate = false;
-        } */
+        } 
     }    
     else if (chars_id == 13) //0x310D
     {
         uint16 = data[0] + data[1] * 256ul;
         if (bleMaxParams.nomVoltage != uint16)
         {
+            Logger::info("Updating nominal voltage to %i from %i", uint16, bleMaxParams.nomVoltage);
             bleMaxParams.nomVoltage = uint16;
-            motorConfig->nominalVolt = bleMaxParams.nomVoltage;
-            needUpdate = true;
+            if (motorConfig)
+            {                                    
+                motorConfig->nominalVolt = bleMaxParams.nomVoltage;
+                needUpdate = true;
+            }
         }
         
         uint16 = data[2] + data[3] * 256ul;
         if (bleMaxParams.maxRPM != uint16)
         {
+            Logger::info("Updating max RPM to %i from %i", uint16, bleMaxParams.maxRPM);
             bleMaxParams.maxRPM = uint16;
-            motorConfig->speedMax = bleMaxParams.maxRPM;
-            needUpdate = true;
+            if (motorConfig)
+            {                                                
+                motorConfig->speedMax = bleMaxParams.maxRPM;
+                needUpdate = true;
+            }
         }
         
         uint16 = data[4] + data[5] * 256ul;
         if (bleMaxParams.maxTorque != uint16)
         {
+            Logger::info("Updating max torque to %i from %i", uint16, bleMaxParams.maxTorque);
             bleMaxParams.maxTorque = uint16;
-            motorConfig->torqueMax = bleMaxParams.maxTorque;
-            needUpdate = true;
+            if (motorConfig)
+            {                                                
+                motorConfig->torqueMax = bleMaxParams.maxTorque;
+                needUpdate = true;
+            }
         }        
         
         if (needUpdate)
@@ -1273,10 +1393,7 @@ void ADAFRUITBLE::loadConfiguration() {
 //		prefsHandler->read(EESYS_WIFI0_SSID, &config->ssid);
     }
     else
-    {
-        ble.factoryReset();        
-        Logger::debug(ADABLUE, "Retrieving Bluetooth module information...");
-        //ble.info();         
+    {       
         setupBLEservice();
         Logger::debug(ADABLUE, "BluefruitLE Initialization Complete....");
         prefsHandler->saveChecksum();
