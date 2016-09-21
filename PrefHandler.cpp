@@ -80,7 +80,7 @@ void PrefHandler::initDevTable()
 {
     uint16_t id;
     
-    Logger::debug("Initializing EEPROM device table");
+    Logger::console("Initializing EEPROM device table");
 
     //initialize table with zeros
     id = 0;
