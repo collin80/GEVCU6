@@ -62,6 +62,8 @@ public:
     bool isEnabled();
     void setEnabledStatus(bool en);
     static bool setDeviceStatus(uint16_t device, bool enabled);
+    static void dumpDeviceTable();
+    static void initDevTable();
 
 private:
     uint32_t base_address; //base address for the parent device
@@ -69,7 +71,7 @@ private:
     bool use_lkg; //use last known good config?
     bool enabled;
     int position; //position within the device table
-    void initDevTable();
+    void checkTableValidity();
 };
 
 #endif

@@ -106,6 +106,8 @@ void SerialConsole::printMenu() {
     SerialUSB.println("s = Scan WiFi for nearby access points");
     SerialUSB.println("A = Autocompensate ADC inputs");
     SerialUSB.println("a = Re-setup Adafruit BLE");
+    SerialUSB.println("q = Dump Device Table");
+    SerialUSB.println("Q = Reinitialize device table");
     SerialUSB.println();
     SerialUSB.println("Config Commands (enter command=newvalue). Current values shown in parenthesis:");
     SerialUSB.println();
@@ -870,9 +872,14 @@ void SerialConsole::handleShortCmd() {
         resetWiReachMini();
         deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); // reload configuration params as they were lost
         break;
-
     case 'X':
         setup(); //this is probably a bad idea. Do not do this while connected to anything you care about - only for debugging in safety!
+        break;
+    case 'q':
+        PrefHandler::dumpDeviceTable();
+        break;
+    case 'Q':
+        PrefHandler::initDevTable();
         break;
     }
 }

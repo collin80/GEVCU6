@@ -55,14 +55,31 @@ void PrefHandler::setEnabledStatus(bool en)
     memCache->Write(EE_DEVICE_TABLE + (2 * position), id);
 }
 
+void PrefHandler::dumpDeviceTable()
+{
+    uint16_t id;
+    
+    for (int x = 0; x < 64; x++) 
+    {
+        memCache->Read(EE_DEVICE_TABLE + (2 * x), &id);
+        Logger::info("Device ID: %X, Enabled = %X", id & 0x7FFF, id & 0x8000);
+    }
+}
 
-void PrefHandler::initDevTable()
+void PrefHandler::checkTableValidity()
 {
     uint16_t id;
 
     memCache->Read(EE_DEVICE_TABLE, &id);
     if (id == 0xDEAD) return;
 
+    initDevTable();
+}
+
+void PrefHandler::initDevTable()
+{
+    uint16_t id;
+    
     Logger::debug("Initializing EEPROM device table");
 
     //initialize table with zeros
@@ -83,7 +100,7 @@ PrefHandler::PrefHandler(DeviceId id_in) {
 
     enabled = false;
 
-    initDevTable();
+    checkTableValidity();
 
     for (int x = 1; x < 64; x++) {
         memCache->Read(EE_DEVICE_TABLE + (2 * x), &id);
@@ -125,7 +142,7 @@ PrefHandler::PrefHandler(DeviceId id_in) {
 bool PrefHandler::setDeviceStatus(uint16_t device, bool enabled)
 {
     uint16_t id;
-    for (int x = 1; x < 64; x++) {
+    for (int x = 1; x < CFG_DEV_MGR_MAX_DEVICES; x++) {
         memCache->Read(EE_DEVICE_TABLE + (2 * x), &id);
         if ((id & 0x7FFF) == (device & 0x7FFF)) {
             Logger::debug("Found a device record to edit");
