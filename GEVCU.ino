@@ -195,6 +195,7 @@ void setup() {
         pinMode(i, OUTPUT);
         digitalWrite(i, LOW);
     }
+    
     pinMode(64, OUTPUT); //DFU for BLE Module
     digitalWrite(64, HIGH);
     pinMode(65, OUTPUT); //reset for BLE module
@@ -226,7 +227,7 @@ void setup() {
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
     Logger::console("LogLevel: %i", loglevel);
-	Logger::setLoglevel((Logger::LogLevel)loglevel);
+	Logger::setLoglevel((Logger::LogLevel)loglevel);    
 	systemIO.setup();  
 	canHandlerEv.setup();
 	canHandlerCar.setup();

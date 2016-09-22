@@ -385,8 +385,8 @@ int SystemIO::numAnalogOutputs()
 Some of the boards are differential and thus require subtracting one ADC from another to obtain the true value. This function
 handles that case. It also applies gain and offset
 */
-uint16_t SystemIO::getDiffADC(uint8_t which) {
-    uint32_t low, high;
+int16_t SystemIO::getDiffADC(uint8_t which) {
+    int32_t low, high;
 
     low = adc_values[adc[which][0]];
     high = adc_values[adc[which][1]];
@@ -420,15 +420,14 @@ uint16_t SystemIO::getDiffADC(uint8_t which) {
 /*
 Exactly like the previous function but for non-differential boards (all the non-prototype boards are non-differential)
 */
-uint16_t SystemIO::getRawADC(uint8_t which) {
-    uint32_t val;
+int16_t SystemIO::getRawADC(uint8_t which) {
+    int32_t val;
 
     if (getSystemType() < GEVCU6)
     {
         val = adc_values[adc[which][0]];
 
         //first remove the bias to bring us back to where it rests at zero input volts
-
         if (val >= adc_comp[which].offset) val -= adc_comp[which].offset;
         else val = 0;
 
@@ -451,7 +450,7 @@ uint16_t SystemIO::getRawADC(uint8_t which) {
         else if (which == 4) valu = getSPIADCReading(CS1, 0);
         else if (which == 5) valu = getSPIADCReading(CS3, 1);
         else if (which == 6) valu = getSPIADCReading(CS3, 2);
-        val = valu >> 8; //cut reading down to 16 bit value
+        val = valu / 2048; //cut reading down to 13 bit signed value +/- 4096 essentially
     }
     return val;
 }
@@ -466,7 +465,7 @@ Gets reading over SPI which is still pretty fast. The SPI connected chip is 24 b
 but too much of the code for GEVCU uses 16 bit integers for storage so the 24 bit values returned
 are knocked down to 16 bit values before being passed along.
 */
-uint16_t SystemIO::getAnalogIn(uint8_t which) {
+int16_t SystemIO::getAnalogIn(uint8_t which) {
     int base;
     if (which > numAnaIn) {
         return 0;
@@ -487,7 +486,7 @@ uint16_t SystemIO::getAnalogIn(uint8_t which) {
             else if (which == 4) valu = getSPIADCReading(CS1, 0);
             else if (which == 5) valu = getSPIADCReading(CS3, 1);
             else if (which == 6) valu = getSPIADCReading(CS3, 2);
-            valu >>= 8;
+            valu = valu / 2048;
             valu -= adc_comp[which].offset;
             valu = (valu * adc_comp[which].gain) / 1024;
             return valu;
@@ -758,7 +757,7 @@ int32_t SystemIO::getSPIADCReading(int CS, int sensor)
 bool SystemIO::calibrateADCOffset(int adc, bool update)
 {
     int32_t accum = 0;
-    for (int j = 0; j < 400; j++)
+    for (int j = 0; j < 500; j++)
     {
         if (adc < 2)
         {
@@ -773,11 +772,11 @@ bool SystemIO::calibrateADCOffset(int adc, bool update)
         //normally one shouldn't call watchdog reset in multiple
         //places but this is a special case.
         watchdogReset();
-        delay(7);
+        delay(4);
     }
-    accum /= 400;
-    accum >>= 8;
-    if (accum > 6) accum -= 6;
+    accum /= 500;
+    accum >>= 11;
+    //if (accum > 2) accum -= 2;
     if (update) sysPrefs->write(EESYS_ADC0_OFFSET + (4*adc), (uint16_t)(accum));    
     Logger::console("ADC %i offset is now %i", adc, accum);
 }
@@ -835,7 +834,7 @@ void SystemIO::setupFastADC() {
 void SystemIO::adcPoll() {
     if (getSystemType() > GEVCU5) return;
     if (obufn != bufn) {
-        uint32_t tempbuff[8] = {0,0,0,0,0,0,0,0}; //make sure its zero'd
+        int32_t tempbuff[8] = {0,0,0,0,0,0,0,0}; //make sure its zero'd
 
         //the eight or four enabled adcs are interleaved in the buffer
         //this is a somewhat unrolled for loop with no incrementer. it's odd but it works

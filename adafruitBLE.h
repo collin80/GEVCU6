@@ -83,9 +83,9 @@ struct BLETrqReqAct
 
 struct BLEThrBrkLevels 
 {
-    uint16_t throttleRawLevel1;
-    uint16_t throttleRawLevel2;
-    uint16_t brakeRawLevel;
+    int16_t throttleRawLevel1;
+    int16_t throttleRawLevel2;
+    int16_t brakeRawLevel;
     int8_t throttlePercentage; // -100 to 100 with regen being negative
     int8_t brakePercentage; //always regen
     uint8_t doUpdate; 
@@ -155,10 +155,10 @@ struct BLEDigIO
 
 struct BLEThrottleIO
 {
-    uint16_t throttle1Min;
-    uint16_t throttle2Min;
-    uint16_t throttle1Max;
-    uint16_t throttle2Max;   
+    int16_t throttle1Min;
+    int16_t throttle2Min;
+    int16_t throttle1Max;
+    int16_t throttle2Max;   
     uint8_t numThrottlePots;
     uint8_t throttleType;
     uint8_t doUpdate; 
@@ -178,8 +178,8 @@ struct BLEThrottleMap
     
 struct BLEBrakeParam
 {
-    uint16_t brakeMin;
-    uint16_t brakeMax;
+    int16_t brakeMin;
+    int16_t brakeMax;
     uint8_t brakeRegenMin;
     uint8_t brakeRegenMax;
     uint8_t doUpdate; 

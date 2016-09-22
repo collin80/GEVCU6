@@ -72,7 +72,7 @@ void Heartbeat::handleTick() {
             Logger::console("Motor Controller Status: isRunning: %T isFaulted: %T", motorController->isRunning(), motorController->isFaulted());
         }
 
-        Logger::console("AIN0: %d, AIN1: %d, AIN2: %d, AIN3: %d", 
+        Logger::console("AIN0: %i, AIN1: %i, AIN2: %i, AIN3: %i", 
                         systemIO.getAnalogIn(0), systemIO.getAnalogIn(1), systemIO.getAnalogIn(2), systemIO.getAnalogIn(3));
         Logger::console("DIN0: %d, DIN1: %d, DIN2: %d, DIN3: %d", 
                         systemIO.getDigitalIn(0), systemIO.getDigitalIn(1), systemIO.getDigitalIn(2), systemIO.getDigitalIn(3));

@@ -165,8 +165,8 @@ void PotBrake::loadConfiguration() {
 #else
     if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
 #endif
-        prefsHandler->read(EETH_BRAKE_MIN, &config->minimumLevel1);
-        prefsHandler->read(EETH_BRAKE_MAX, &config->maximumLevel1);
+        prefsHandler->read(EETH_BRAKE_MIN, (uint16_t *)&config->minimumLevel1);
+        prefsHandler->read(EETH_BRAKE_MAX, (uint16_t *)&config->maximumLevel1);
         prefsHandler->read(EETH_MAX_BRAKE_REGEN, &config->maximumRegen);
         prefsHandler->read(EETH_MIN_BRAKE_REGEN, &config->minimumRegen);
         prefsHandler->read(EETH_ADC_1, &config->AdcPin1);
@@ -194,8 +194,8 @@ void PotBrake::saveConfiguration() {
 
     // we deliberately do not save config via parent class here !
 
-    prefsHandler->write(EETH_BRAKE_MIN, config->minimumLevel1);
-    prefsHandler->write(EETH_BRAKE_MAX, config->maximumLevel1);
+    prefsHandler->write(EETH_BRAKE_MIN, (uint16_t)config->minimumLevel1);
+    prefsHandler->write(EETH_BRAKE_MAX, (uint16_t)config->maximumLevel1);
     prefsHandler->write(EETH_MAX_BRAKE_REGEN, config->maximumRegen);
     prefsHandler->write(EETH_MIN_BRAKE_REGEN, config->minimumRegen);
     prefsHandler->write(EETH_ADC_1, config->AdcPin1);

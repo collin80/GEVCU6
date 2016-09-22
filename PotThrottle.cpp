@@ -227,10 +227,10 @@ void PotThrottle::loadConfiguration() {
     if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
 #endif
         Logger::debug(POTACCELPEDAL, (char *)Constants::validChecksum);
-        prefsHandler->read(EETH_MIN_ONE, &config->minimumLevel1);
-        prefsHandler->read(EETH_MAX_ONE, &config->maximumLevel1);
-        prefsHandler->read(EETH_MIN_TWO, &config->minimumLevel2);
-        prefsHandler->read(EETH_MAX_TWO, &config->maximumLevel2);
+        prefsHandler->read(EETH_MIN_ONE, (uint16_t *)&config->minimumLevel1);
+        prefsHandler->read(EETH_MAX_ONE, (uint16_t *)&config->maximumLevel1);
+        prefsHandler->read(EETH_MIN_TWO, (uint16_t *)&config->minimumLevel2);
+        prefsHandler->read(EETH_MAX_TWO, (uint16_t *)&config->maximumLevel2);
         prefsHandler->read(EETH_NUM_THROTTLES, &config->numberPotMeters);
         prefsHandler->read(EETH_THROTTLE_TYPE, &config->throttleSubType);
         prefsHandler->read(EETH_ADC_1, &config->AdcPin1);
@@ -271,10 +271,10 @@ void PotThrottle::saveConfiguration() {
 
     Throttle::saveConfiguration(); // call parent
 
-    prefsHandler->write(EETH_MIN_ONE, config->minimumLevel1);
-    prefsHandler->write(EETH_MAX_ONE, config->maximumLevel1);
-    prefsHandler->write(EETH_MIN_TWO, config->minimumLevel2);
-    prefsHandler->write(EETH_MAX_TWO, config->maximumLevel2);
+    prefsHandler->write(EETH_MIN_ONE, (uint16_t)config->minimumLevel1);
+    prefsHandler->write(EETH_MAX_ONE, (uint16_t)config->maximumLevel1);
+    prefsHandler->write(EETH_MIN_TWO, (uint16_t)config->minimumLevel2);
+    prefsHandler->write(EETH_MAX_TWO, (uint16_t)config->maximumLevel2);
     prefsHandler->write(EETH_NUM_THROTTLES, config->numberPotMeters);
     prefsHandler->write(EETH_THROTTLE_TYPE, config->throttleSubType);
     prefsHandler->write(EETH_ADC_1, config->AdcPin1);
