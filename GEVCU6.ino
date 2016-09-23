@@ -134,7 +134,7 @@ void initSysEEPROM() {
 	sysPrefs->write(EESYS_CAN0_BAUD, sixteen);
 	sysPrefs->write(EESYS_CAN1_BAUD, sixteen);
 
-	eight = 2;  //0=debug, 1=info,2=warn,3=error,4=off
+	eight = 3;  //0=debug, 1=info,2=warn,3=error,4=off
 	sysPrefs->write(EESYS_LOG_LEVEL, eight);
 
 	sysPrefs->saveChecksum();
