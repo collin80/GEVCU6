@@ -67,44 +67,9 @@ PrefHandler *sysPrefs;
 MemCache *memCache;
 Heartbeat *heartbeat;
 SerialConsole *serialConsole;
-Device *wifiDevice;
 Device *btDevice;
 
 byte i = 0;
-
-void sendWiReach(char* message)
-{
-    Serial2.println(message);
-    delay(700);
-    while (Serial2.available()) {SerialUSB.write(Serial2.read());}
-}
-
-void initWiReach()
-{
-SerialUSB.begin(115200); // use SerialUSB only as the programming port doesn't work
-Serial2.begin(115200); // use Serial3 for GEVCU2, use Serial2 for GEVCU3+4
-
-//sendWiReach("AT+iFD");//Host connection set to serial port
-//delay(5000);
-sendWiReach("AT+iHIF=1");//Host connection set to serial port
-sendWiReach("AT+iBDRF=9");//Automatic baud rate on host serial port
-sendWiReach("AT+iRPG=secret"); //Password for iChip wbsite
-sendWiReach("AT+iWPWD=secret");//Password for our website
-sendWiReach("AT+iWST0=0");//Connection security wap/wep/wap2 to no security
-sendWiReach("AT+iWLCH=4");  //Wireless channel
-sendWiReach("AT+iWLSI=GEVCU");//SSID
-sendWiReach("AT+iWSEC=1");//IF security is used, set for WPA2-AES
-sendWiReach("AT+iSTAP=1");//Act as AP
-sendWiReach("AT+iDIP=192.168.3.10");//default ip - must be 10.x.x.x
-sendWiReach("AT+iDPSZ=8");//DHCP pool size
-sendWiReach("AT+iAWS=1");//Website on
-sendWiReach("AT+iDOWN");//Powercycle reset
-delay(5000);
-SerialUSB.println("WiReach Wireless Module Initialized....");
-}
-
-
-  
 
 //initializes all the system EEPROM values. Chances are this should be broken out a bit but
 //there is only one checksum check for all of them so it's simple to do it all here.
@@ -154,7 +119,6 @@ void createObjects() {
 	BrusaMotorController *bmotorController = new BrusaMotorController();
 	ThinkBatteryManager *BMS = new ThinkBatteryManager();
 	ELM327Emu *emu = new ELM327Emu();
-	ICHIPWIFI *iChip = new ICHIPWIFI();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
     EVIC *eVIC = new EVIC();
     PowerkeyPad *powerKey = new PowerkeyPad();
@@ -203,7 +167,6 @@ void setup() {
 	
     //delay(5000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
        
-    //initWiReach();
 	pinMode(BLINK_LED, OUTPUT);
 	digitalWrite(BLINK_LED, LOW);
     SerialUSB.begin(CFG_SERIAL_SPEED);
@@ -220,7 +183,6 @@ void setup() {
         {
 	      Logger::info("Initializing EEPROM");
 	      initSysEEPROM();
-          // initWiReach();
 	    } 
         else {Logger::info("Using existing EEPROM values");}//checksum is good, read in the values stored in EEPROM
 
@@ -236,9 +198,7 @@ void setup() {
 	initializeDevices();
     serialConsole = new SerialConsole(memCache, heartbeat);
 	serialConsole->printMenu();
-	wifiDevice = deviceManager.getDeviceByID(ICHIP2128);
 	btDevice = deviceManager.getDeviceByID(ELM327EMU);
-    deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); //Load configuration variables into WiFi Web Configuration screen
     deviceManager.sendMessage(DEVICE_WIFI, ADABLUE, MSG_CONFIG_CHANGE, NULL); //Load config into BLE interface
 	Logger::info("System Ready");	
 }
@@ -254,10 +214,6 @@ void loop() {
 	canHandlerCar.process();
 
 	serialConsole->loop();
-	//TODO: this is dumb... shouldn't have to manually do this. Devices should be able to register loop functions
-	if ( wifiDevice != NULL ) {
-		((ICHIPWIFI*)wifiDevice)->loop();
-	}
 
 	//if (btDevice != NULL) {
 	//	((ELM327Emu*)btDevice)->loop();
