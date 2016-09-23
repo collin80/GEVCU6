@@ -62,7 +62,7 @@ void PrefHandler::dumpDeviceTable()
     for (int x = 0; x < 64; x++) 
     {
         memCache->Read(EE_DEVICE_TABLE + (2 * x), &id);
-        Logger::info("Device ID: %X, Enabled = %X", id & 0x7FFF, id & 0x8000);
+        Logger::console("Device ID: %X, Enabled = %X", id & 0x7FFF, id & 0x8000);
     }
 }
 
