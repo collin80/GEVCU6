@@ -218,9 +218,6 @@ void loop() {
 	//if (btDevice != NULL) {
 	//	((ELM327Emu*)btDevice)->loop();
 	//}
-
-	//this should still be here. It checks for a flag set during an interrupt
-	systemIO.adcPoll();
 }
 
 

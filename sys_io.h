@@ -90,7 +90,6 @@ public:
     
     void setup();
     void setup_ADC_params();
-    uint32_t getNextADCBuffer();
 
     int16_t getAnalogIn(uint8_t which); //get value of one of the 4 analog inputs
     boolean setAnalogOut(uint8_t which, int32_t level);
@@ -117,35 +116,19 @@ public:
     SystemType getSystemType();
     bool calibrateADCOffset(int, bool);
 
-    void adcPoll();
-
 private:
-    int32_t getSPIADCReading(int CS, int sensor);    
-    int16_t getDiffADC(uint8_t which);
+    int32_t getSPIADCReading(int CS, int sensor);
     int16_t getRawADC(uint8_t which);
-    void setupFastADC();
     bool setupSPIADC();
 
     uint8_t dig[NUM_DIGITAL];
     uint8_t adc[NUM_ANALOG][2];
     uint8_t out[NUM_OUTPUT];
 
-    volatile int bufn,obufn;
-    volatile int16_t adc_buf[NUM_ANALOG][256];   // 4 buffers of 256 readings
-    int16_t adc_values[NUM_ANALOG * 2];
-    int16_t adc_out_vals[NUM_ANALOG];
-
     SystemType sysType;
-
-    int NumADCSamples;
-
-    //the ADC values fluctuate a lot so smoothing is required.
-    int16_t adc_buffer[NUM_ANALOG][64];
-    uint8_t adc_pointer[NUM_ANALOG]; //pointer to next position to use
 
     ADC_COMP adc_comp[NUM_ANALOG]; //GEVCU 6.2 has 7 adc inputs but three are special
 
-    bool useRawADC;
     bool useSPIADC;
     
     int numDigIn;

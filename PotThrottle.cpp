@@ -64,7 +64,6 @@ void PotThrottle::handleTick() {
  */
 RawSignalData *PotThrottle::acquireRawSignal() {
     PotThrottleConfiguration *config = (PotThrottleConfiguration *) getConfiguration();
-    systemIO.adcPoll();
 
     rawSignal.input1 = systemIO.getAnalogIn(config->AdcPin1);
     rawSignal.input2 = systemIO.getAnalogIn(config->AdcPin2);
