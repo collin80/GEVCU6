@@ -25,6 +25,7 @@
  */
 
 #include "SerialConsole.h"
+template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
 
 extern PrefHandler *sysPrefs;
 
@@ -54,14 +55,7 @@ void SerialConsole::init() {
 }
 
 void SerialConsole::loop() {
-    if(!cancel)
-    {
-        if(loopcount++==350000) {
-            //DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
-            deviceManager.updateWifi();
-            cancel=true;
-        }
-    }
+  
     if (handlingEvent == false) {
         if (SerialUSB.available()) {
             serialEvent();
@@ -73,8 +67,7 @@ void SerialConsole::printMenu() {
     MotorController* motorController = (MotorController*) deviceManager.getMotorController();
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
-    ICHIPWIFI *wifi = (ICHIPWIFI*) deviceManager.getDeviceByType(DEVICE_WIFI);
-
+   
     //Show build # here as well in case people are using the native port and don't get to see the start up messages
     SerialUSB.print("Build number: ");
     SerialUSB.println(CFG_BUILD_NUM);
@@ -82,167 +75,152 @@ void SerialConsole::printMenu() {
         SerialUSB.println(
             "Motor Controller Status: isRunning: " + String(motorController->isRunning()) + " isFaulted: " + String(motorController->isFaulted()));
     }
-    SerialUSB.println("System Menu:");
-    SerialUSB.println();
-    SerialUSB.println("Enable line endings of some sort (LF, CR, CRLF)");
-    SerialUSB.println();
-    SerialUSB.println("Short Commands:");
-    SerialUSB.println("h = help (displays this message)");
-    if (heartbeat != NULL) {
-        SerialUSB.println("L = show raw analog/digital input/output values (toggle)");
-    }
-    SerialUSB.println("K = set all outputs high");
-    SerialUSB.println("J = set all outputs low");
-    //SerialUSB.println("U,I = test EEPROM routines");
-    SerialUSB.println("E = dump system eeprom values");
-    SerialUSB.println("z = detect throttle min/max, num throttles and subtype");
-    SerialUSB.println("Z = save throttle values");
-    SerialUSB.println("b = detect brake min/max");
-    SerialUSB.println("B = save brake values");
-    SerialUSB.println("p = enable wifi passthrough (reboot required to resume normal operation)");
-    SerialUSB.println("S = show possible device IDs");
-    SerialUSB.println("w = GEVCU 4.2 reset wifi to factory defaults, setup GEVCU ad-hoc network");
-    SerialUSB.println("W = GEVCU 5.2 reset wifi to factory defaults, setup GEVCU as Access Point");
-    SerialUSB.println("s = Scan WiFi for nearby access points");
-    SerialUSB.println("A = Autocompensate ADC inputs");
-    SerialUSB.println("a = Re-setup Adafruit BLE");
-    SerialUSB.println("q = Dump Device Table");
-    SerialUSB.println("Q = Reinitialize device table");
-    SerialUSB.println();
-    SerialUSB.println("Config Commands (enter command=newvalue). Current values shown in parenthesis:");
-    SerialUSB.println();
-    Logger::console("LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", Logger::getLogLevel());
+    SerialUSB<<"\n*************SYSTEM MENU *****************\n";
+    SerialUSB<<"Enable line endings of some sort (LF, CR, CRLF)\n";
+    SerialUSB<<"Most commands case sensitive\n\n";
+   SerialUSB<<"GENERAL SYSTEM CONFIGURATION\n\n";
+    SerialUSB.println("   E = dump system EEPROM values");
+    SerialUSB.println("   h = help (displays this message)");
+  
+    Logger::console("   LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", Logger::getLogLevel());
 
-    sysPrefs->read(EESYS_SYSTEM_TYPE, &systype);
-    Logger::console("SYSTYPE=%i - Set board revision (Dued=2, GEVCU3=3, GEVCU4-5=4, GEVCU6.2=6)", systype);
+   SerialUSB<<"\nDEVICE SELECTION AND ACTIVATION\n\n";
+   SerialUSB.println("     a = Re-setup Adafruit BLE");
+   SerialUSB.println("     q = Dump Device Table");
+   SerialUSB.println("     Q = Reinitialize device table");
+   SerialUSB.println("     S = show possible device IDs");
+   Logger::console("     NUKE=1 - Resets all device settings in EEPROM. You have been warned.");
+
+   deviceManager.printDeviceList();
+    
+
+     if (motorController && motorController->getConfiguration()) 
+      {
+        MotorControllerConfiguration *config = (MotorControllerConfiguration *) motorController->getConfiguration(); 
+        SerialUSB<<"\nPRECHARGE CONTROLS\n\n";
+        Logger::console("   PREDELAY=%i - Precharge delay time in milliseconds ", config->prechargeR);
+        Logger::console("   PRELAY=%i - Which output to use for precharge contactor (255 to disable)", config->prechargeRelay);
+        Logger::console("   MRELAY=%i - Which output to use for main contactor (255 to disable)", config->mainContactorRelay);
+          
+        SerialUSB<<"\nMOTOR CONTROLS\n\n";
+        Logger::console("   TORQ=%i - Set torque upper limit (tenths of a Nm)", config->torqueMax);
+        Logger::console("   RPM=%i - Set maximum RPM", config->speedMax);
+        Logger::console("   REVLIM=%i - How much torque to allow in reverse (Tenths of a percent)", config->reversePercent);
+        Logger::console("   ENABLEIN=%i - Digital input to enable motor controller (0-3, 255 for none)", config->enableIn);
+        Logger::console("   REVIN=%i - Digital input to reverse motor rotation (0-3, 255 for none)", config->reverseIn);
+      }
+    
+
+    if (accelerator && accelerator->getConfiguration()) 
+      {
+        PotThrottleConfiguration *config = (PotThrottleConfiguration *) accelerator->getConfiguration();
+        SerialUSB<<"\nTHROTTLE CONTROLS\n\n";
+        SerialUSB.println("   z = detect throttle min/max, num throttles and subtype");
+        SerialUSB.println("   Z = save throttle values");       
+        Logger::console("   TPOT=%i - Number of pots to use (1 or 2)", config->numberPotMeters);
+        Logger::console("   TTYPE=%i - Set throttle subtype (1=std linear, 2=inverse)", config->throttleSubType);
+        Logger::console("   T1ADC=%i - Set throttle 1 ADC pin", config->AdcPin1);
+        Logger::console("   T1MN=%i - Set throttle 1 min value", config->minimumLevel1);
+        Logger::console("   T1MX=%i - Set throttle 1 max value", config->maximumLevel1);
+        Logger::console("   T2ADC=%i - Set throttle 2 ADC pin", config->AdcPin2);
+        Logger::console("   T2MN=%i - Set throttle 2 min value", config->minimumLevel2);
+        Logger::console("   T2MX=%i - Set throttle 2 max value", config->maximumLevel2);
+        Logger::console("   TRGNMAX=%i - Tenths of a percent of pedal where regen is at max", config->positionRegenMaximum);
+        Logger::console("   TRGNMIN=%i - Tenths of a percent of pedal where regen is at min", config->positionRegenMinimum);
+        Logger::console("   TFWD=%i - Tenths of a percent of pedal where forward motion starts", config->positionForwardMotionStart);
+        Logger::console("   TMAP=%i - Tenths of a percent of pedal where 50% throttle will be", config->positionHalfPower);
+        Logger::console("   TMINRN=%i - Percent of full torque to use for min throttle regen", config->minimumRegen);
+        Logger::console("   TMAXRN=%i - Percent of full torque to use for max throttle regen", config->maximumRegen);
+        Logger::console("   TCREEP=%i - Percent of full torque to use for creep (0=disable)", config->creep);
+      }
+
+
+   if (brake && brake->getConfiguration()) 
+    {
+      PotThrottleConfiguration *config = (PotThrottleConfiguration *) brake->getConfiguration();
+      SerialUSB<<"\nBRAKE CONTROLS\n\n";
+      SerialUSB.println("   b = detect brake min/max");
+      SerialUSB.println("   B = save brake values");
+      Logger::console("   B1ADC=%i - Set brake ADC pin", config->AdcPin1);
+      Logger::console("   B1MN=%i - Set brake min value", config->minimumLevel1);
+      Logger::console("   B1MX=%i - Set brake max value", config->maximumLevel1);
+      Logger::console("   BMINR=%i - Percent of full torque for start of brake regen", config->minimumRegen);
+      Logger::console("   BMAXR=%i - Percent of full torque for maximum brake regen", config->maximumRegen);
+    }
+
+    
+   if (motorController && motorController->getConfiguration()) 
+    {
+        MotorControllerConfiguration *config = (MotorControllerConfiguration *) motorController->getConfiguration();
+        SerialUSB<<"\nOTHER VEHICLE CONTROLS\n\n";
+        Logger::console("   COOLFAN=%i - Digital output to turn on cooling fan(0-7, 255 for none)", config->coolFan);
+        Logger::console("   COOLON=%i - Inverter temperature C to turn cooling on", config->coolOn);
+        Logger::console("   COOLOFF=%i - Inverter temperature C to turn cooling off", config->coolOff);
+        Logger::console("   BRAKELT = %i - Digital output to turn on brakelight (0-7, 255 for none)", config->brakeLight);
+        Logger::console("   REVLT=%i - Digital output to turn on reverse light (0-7, 255 for none)", config->revLight);  
+        Logger::console("   NOMV=%i - Fully charged pack voltage that automatically resets kWh counter", config->nominalVolt/10);
+        Logger::console("   CAPACITY=%i - capacity of battery pack in ampere-hours", config->capacity);
+        Logger::console("   kWh=%d - kiloWatt Hours of energy used", config->kilowattHrs/3600000);
+    } 
+  
+    SerialUSB<<"\nANALOG AND DIGITAL IO\n\n";
+    SerialUSB.println("   A = Autocompensate ADC inputs");
+      SerialUSB.println("   J = set all digital outputs low");
+    SerialUSB.println("   K = set all digital outputs high");
+ 
+      if (heartbeat != NULL) 
+       {
+        SerialUSB.println("   L = show raw analog/digital input/output values (toggle)");
+       }
+      Logger::console("   OUTPUT=<0-7> - toggles state of specified digital output");
+   
+   //SerialUSB.println("   U,I = test EEPROM routines");
+    //   sysPrefs->read(EESYS_SYSTEM_TYPE, &systype);
+  //  Logger::console("SYSTYPE=%i - Set board revision (Dued=2, GEVCU3=3, GEVCU4-5=4, GEVCU6.2=6)", systype);
 
     uint16_t val;
     sysPrefs->read(EESYS_ADC0_OFFSET, &val);
-    Logger::console("ADC0OFF=%i - set ADC0 offset", val);
+    Logger::console("   ADC0OFF=%i - set ADC0 offset", val);
     sysPrefs->read(EESYS_ADC0_GAIN, &val);
-    Logger::console("ADC0GAIN=%i - set ADC0 gain (1024 is 1 gain)", val);
+    Logger::console("   ADC0GAIN=%i - set ADC0 gain (1024 is 1 gain)", val);
     sysPrefs->read(EESYS_ADC1_OFFSET, &val);
-    Logger::console("ADC1OFF=%i - set ADC1 offset", val);
+    Logger::console("   ADC1OFF=%i - set ADC1 offset", val);
     sysPrefs->read(EESYS_ADC1_GAIN, &val);
-    Logger::console("ADC1GAIN=%i - set ADC1 gain (1024 is 1 gain)", val);
+    Logger::console("   ADC1GAIN=%i - set ADC1 gain (1024 is 1 gain)", val);
     sysPrefs->read(EESYS_ADC2_OFFSET, &val);
-    Logger::console("ADC2OFF=%i - set ADC2 offset", val);
+    Logger::console("   ADC2OFF=%i - set ADC2 offset", val);
     sysPrefs->read(EESYS_ADC2_GAIN, &val);
-    Logger::console("ADC2GAIN=%i - set ADC2 gain (1024 is 1 gain)", val);
+    Logger::console("   ADC2GAIN=%i - set ADC2 gain (1024 is 1 gain)", val);
     sysPrefs->read(EESYS_ADC3_OFFSET, &val);
-    Logger::console("ADC3OFF=%i - set ADC3 offset", val);
+    Logger::console("   ADC3OFF=%i - set ADC3 offset", val);
     sysPrefs->read(EESYS_ADC3_GAIN, &val);
-    Logger::console("ADC3GAIN=%i - set ADC3 gain (1024 is 1 gain)", val);
+    Logger::console("   ADC3GAIN=%i - set ADC3 gain (1024 is 1 gain)", val);
 
-    if (systype > 4)
-    {
-        sysPrefs->read(EESYS_ADC_PACKH_OFFSET, &val);
-        Logger::console("ADCPACKHOFF=%i - set pack high ADC offset", val);
-        sysPrefs->read(EESYS_ADC_PACKH_GAIN, &val);
-        Logger::console("ADCPACKHGAIN=%i - set pack high ADC gain (1024 is 1 gain)", val);
-        sysPrefs->read(EESYS_ADC_PACKL_OFFSET, &val);
-        Logger::console("ADCPACKLOFF=%i - set pack low ADC offset", val);
-        sysPrefs->read(EESYS_ADC_PACKL_GAIN, &val);
-        Logger::console("ADCPACKLGAIN=%i - set pack low ADC gain (1024 is 1 gain)", val);
-        sysPrefs->read(EESYS_ADC_PACKC_OFFSET, &val);
-        Logger::console("ADCPACKCOFF=%i - set pack current offset", val);
-        sysPrefs->read(EESYS_ADC_PACKC_GAIN, &val);
-        Logger::console("ADCPACKCGAIN=%i - set pack current gain (1024 is 1 gain)", val);
+    sysPrefs->read(EESYS_ADC_PACKH_OFFSET, &val);
+    Logger::console("   ADCPACKHOFF=%i - set pack high ADC offset", val);
+    sysPrefs->read(EESYS_ADC_PACKH_GAIN, &val);
+    Logger::console("   ADCPACKHGAIN=%i - set pack high ADC gain (1024 is 1 gain)", val);
+    sysPrefs->read(EESYS_ADC_PACKL_OFFSET, &val);
+    Logger::console("   ADCPACKLOFF=%i - set pack low ADC offset", val);
+    sysPrefs->read(EESYS_ADC_PACKL_GAIN, &val);
+    Logger::console("   ADCPACKLGAIN=%i - set pack low ADC gain (1024 is 1 gain)", val);
+    sysPrefs->read(EESYS_ADC_PACKC_OFFSET, &val);
+    Logger::console("   ADCPACKCOFF=%i - set pack current offset", val);
+    sysPrefs->read(EESYS_ADC_PACKC_GAIN, &val);
+    Logger::console("   ADCPACKCGAIN=%i - set pack current gain (1024 is 1 gain)", val);
 
-    }
+    
 
-    deviceManager.printDeviceList();
+   
+  
+ 
 
-    if (motorController && motorController->getConfiguration()) {
-        MotorControllerConfiguration *config = (MotorControllerConfiguration *) motorController->getConfiguration();
-
-        SerialUSB.println();
-        SerialUSB.println("MOTOR CONTROLS");
-        SerialUSB.println();
-        Logger::console("TORQ=%i - Set torque upper limit (tenths of a Nm)", config->torqueMax);
-        Logger::console("RPM=%i - Set maximum RPM", config->speedMax);
-        Logger::console("REVLIM=%i - How much torque to allow in reverse (Tenths of a percent)", config->reversePercent);
-
-        Logger::console("COOLFAN=%i - Digital output to turn on cooling fan(0-7, 255 for none)", config->coolFan);
-        Logger::console("COOLON=%i - Inverter temperature C to turn cooling on", config->coolOn);
-        Logger::console("COOLOFF=%i - Inverter temperature C to turn cooling off", config->coolOff);
-        Logger::console("BRAKELT = %i - Digital output to turn on brakelight (0-7, 255 for none)", config->brakeLight);
-        Logger::console("REVLT=%i - Digital output to turn on reverse light (0-7, 255 for none)", config->revLight);
-        Logger::console("ENABLEIN=%i - Digital input to enable motor controller (0-3, 255 for none)", config->enableIn);
-        Logger::console("REVIN=%i - Digital input to reverse motor rotation (0-3, 255 for none)", config->reverseIn);
-
-    }
+       
+       
+          }
 
 
-    if (accelerator && accelerator->getConfiguration()) {
-        PotThrottleConfiguration *config = (PotThrottleConfiguration *) accelerator->getConfiguration();
-        SerialUSB.println();
-        SerialUSB.println("THROTTLE CONTROLS");
-        SerialUSB.println();
 
-        Logger::console("TPOT=%i - Number of pots to use (1 or 2)", config->numberPotMeters);
-        Logger::console("TTYPE=%i - Set throttle subtype (1=std linear, 2=inverse)", config->throttleSubType);
-        Logger::console("T1ADC=%i - Set throttle 1 ADC pin", config->AdcPin1);
-        Logger::console("T1MN=%i - Set throttle 1 min value", config->minimumLevel1);
-        Logger::console("T1MX=%i - Set throttle 1 max value", config->maximumLevel1);
-        Logger::console("T2ADC=%i - Set throttle 2 ADC pin", config->AdcPin2);
-        Logger::console("T2MN=%i - Set throttle 2 min value", config->minimumLevel2);
-        Logger::console("T2MX=%i - Set throttle 2 max value", config->maximumLevel2);
-        Logger::console("TRGNMAX=%i - Tenths of a percent of pedal where regen is at max", config->positionRegenMaximum);
-        Logger::console("TRGNMIN=%i - Tenths of a percent of pedal where regen is at min", config->positionRegenMinimum);
-        Logger::console("TFWD=%i - Tenths of a percent of pedal where forward motion starts", config->positionForwardMotionStart);
-        Logger::console("TMAP=%i - Tenths of a percent of pedal where 50% throttle will be", config->positionHalfPower);
-        Logger::console("TMINRN=%i - Percent of full torque to use for min throttle regen", config->minimumRegen);
-        Logger::console("TMAXRN=%i - Percent of full torque to use for max throttle regen", config->maximumRegen);
-        Logger::console("TCREEP=%i - Percent of full torque to use for creep (0=disable)", config->creep);
-    }
-
-    if (brake && brake->getConfiguration()) {
-        PotThrottleConfiguration *config = (PotThrottleConfiguration *) brake->getConfiguration();
-        SerialUSB.println();
-        SerialUSB.println("BRAKE CONTROLS");
-        SerialUSB.println();
-
-        Logger::console("B1ADC=%i - Set brake ADC pin", config->AdcPin1);
-        Logger::console("B1MN=%i - Set brake min value", config->minimumLevel1);
-        Logger::console("B1MX=%i - Set brake max value", config->maximumLevel1);
-        Logger::console("BMINR=%i - Percent of full torque for start of brake regen", config->minimumRegen);
-        Logger::console("BMAXR=%i - Percent of full torque for maximum brake regen", config->maximumRegen);
-    }
-
-    if (motorController && motorController->getConfiguration()) {
-        MotorControllerConfiguration *config = (MotorControllerConfiguration *) motorController->getConfiguration();
-        SerialUSB.println();
-        SerialUSB.println("PRECHARGE CONTROLS");
-        SerialUSB.println();
-
-        Logger::console("PREDELAY=%i - Precharge delay time in milliseconds ", config->prechargeR);
-        Logger::console("PRELAY=%i - Which output to use for precharge contactor (255 to disable)", config->prechargeRelay);
-        Logger::console("MRELAY=%i - Which output to use for main contactor (255 to disable)", config->mainContactorRelay);
-        SerialUSB.println();
-        SerialUSB.println("WIRELESS LAN COMMANDS");
-        SerialUSB.println();
-        Logger::console("WIREACH=anycommand - sends ATi+anycommand to WiReach Module");
-        Logger::console("SSID=anyname - sets broadcast ID to anyname");
-        Logger::console("IP=192.168.3.10 - sets IP of website to whatever IP is entered");
-        Logger::console("PWD=secret - sets website configuration password to entered string");
-        Logger::console("CHANNEL=4 - sets website wireless channel - 1 to 11");
-        Logger::console("SECURITY=password - sets website wireless connection security for WPA2-AES and password");
-
-        SerialUSB.println();
-        SerialUSB.println("OTHER");
-        SerialUSB.println();
-
-        Logger::console("NOMV=%i - Fully charged pack voltage that automatically resets kWh counter", config->nominalVolt/10);
-        Logger::console("CAPACITY=%i - capacity of battery pack in ampere-hours", config->capacity);
-
-        Logger::console("kWh=%d - kiloWatt Hours of energy used", config->kilowattHrs/3600000);
-        Logger::console("OUTPUT=<0-7> - toggles state of specified digital output");
-        Logger::console("NUKE=1 - Resets all device settings in EEPROM. You have been warned.");
-    }
-
-
-}
 
 /*	There is a help menu (press H or h or ?)
 
@@ -604,58 +582,7 @@ void SerialConsole::handleConfigCmd() {
             Logger::error("Couldn't write log level!");
         sysPrefs->saveChecksum();
 
-    } else if (cmdString == String("WIREACH")) {
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)(cmdBuffer + i));
-        Logger::info("sent \"AT+i%s\" to WiReach wireless LAN device", (cmdBuffer + i));
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
-        updateWifi = false;
-    } else if (cmdString == String("SSID")) {
-        String cmdString = String();
-        cmdString.concat("WLSI");
-        cmdString.concat('=');
-        cmdString.concat((char *)(cmdBuffer + i));
-        Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
-        updateWifi = false;
-    } else if (cmdString == String("IP")) {
-        String cmdString = String();
-        cmdString.concat("DIP");
-        cmdString.concat('=');
-        cmdString.concat((char *)(cmdBuffer + i));
-        Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
-        updateWifi = false;
-    } else if (cmdString == String("CHANNEL")) {
-        String cmdString = String();
-        cmdString.concat("WLCH");
-        cmdString.concat('=');
-        cmdString.concat((char *)(cmdBuffer + i));
-        Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
-        updateWifi = false;
-    } else if (cmdString == String("SECURITY")) {
-        String cmdString = String();
-        cmdString.concat("WLPP");
-        cmdString.concat('=');
-        cmdString.concat((char *)(cmdBuffer + i));
-        Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
-        updateWifi = false;
-
-    } else if (cmdString == String("PWD")) {
-        String cmdString = String();
-        cmdString.concat("WPWD");
-        cmdString.concat('=');
-        cmdString.concat((char *)(cmdBuffer + i));
-        Logger::info("Sent \"%s\" to WiReach wireless LAN device", (cmdString.c_str()));
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)cmdString.c_str());
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN");
-        updateWifi = false;
-
+   
     } else if (cmdString == String("COOLFAN") && motorConfig) {
         Logger::console("Cooling fan output updated to: %i", newValue);
         motorConfig->coolFan = newValue;
@@ -788,21 +715,7 @@ void SerialConsole::handleShortCmd() {
             brake->saveConfiguration();
         }
         break;
-    case 'p':
-        Logger::console("PASSTHROUGH MODE - All traffic Serial3 <-> SerialUSB");
-        //this never stops so basically everything dies. you will have to reboot.
-        int inSerialUSB, inSerial3;
-        while (1 == 1) {
-            inSerialUSB = SerialUSB.read();
-            inSerial3 = Serial3.read();
-            if (inSerialUSB > -1) {
-                Serial3.write((char) inSerialUSB);
-            }
-            if (inSerial3 > -1) {
-                SerialUSB.write((char) inSerial3);
-            }
-        }
-        break;
+    
     case 'A':
         uint32_t accum;
         for (int i = 0; i < 7; i++)
@@ -832,46 +745,8 @@ void SerialConsole::handleShortCmd() {
         Logger::console("WIFI (iChip2128) = %X", ICHIP2128);
         Logger::console("Th!nk City BMS = %X", THINKBMS);
         break;
-    case 's':
-        Logger::console("Finding and listing all nearby WiFi access points");
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"RP20");
-        break;
-    case 'W':
-        Logger::console("Resetting wifi to factory defaults and setting up GEVCU5.2 Access Point");
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"FD");//Reset
-        delay(2000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"HIF=1");  //Set for RS-232 serial.
-        delay(1000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"BDRA");//Auto baud rate selection
-        delay(1000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"WLCH=9"); //use whichever channel an AP wants to use
-        delay(1000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"WLSI=GEVCU"); //set for GEVCU aS AP.
-        delay(1000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"STAP=1"); //enable IP
-        delay(1000);
-
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DIP=192.168.3.10"); //enable IP
-        delay(1000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DPSZ=8"); //set DHCP server for 8
-        delay(1000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"RPG=secret"); // set the configuration password for /ichip
-        delay(1000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"WPWD=secret"); // set the password to update config params
-        delay(1000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"AWS=1"); //turn on web server
-        delay(1000);
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_COMMAND, (void *)"DOWN"); //cause a reset to allow it to come up with the settings
-        delay(5000); // a 5 second delay is required for the chip to come back up ! Otherwise commands will be lost
-
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); // reload configuration params as they were lost
-        Logger::console("Wifi 5.2 initialized");
-        break;
-    case 'w':
-        Logger::console("Resetting wifi to factory defaults and setting up GEVCU4.2 Ad Hoc network");
-        resetWiReachMini();
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL); // reload configuration params as they were lost
-        break;
+    
+    
     case 'X':
         setup(); //this is probably a bad idea. Do not do this while connected to anything you care about - only for debugging in safety!
         break;
@@ -884,50 +759,7 @@ void SerialConsole::handleShortCmd() {
     }
 }
 
-void SerialConsole::resetWiReachMini() {
 
-    //Serial2.begin(115200);
-    while (Serial2.available()) {
-        SerialUSB.write(Serial2.read());
-    }
-    Serial2.println("AT+iFD");
-    getResponse();
-    Serial2.println("AT+iHIF=1");
-    getResponse();
-    Serial2.println("AT+iBDRA");
-    getResponse();
-    Serial2.println("AT+iWLCH=9");
-    getResponse();
-    Serial2.println("AT+iWLSI=!GEVCU");
-    getResponse();
-    Serial2.println("AT+iDIP=192.168.3.10");
-    getResponse();
-    Serial2.println("AT+iDPSZ=8");
-    getResponse();
-    Serial2.println("AT+iRPG=secret");
-    getResponse();
-    Serial2.println("AT+iWPWD=secret");
-    getResponse();
-    Serial2.println("AT+iAWS=1");
-    getResponse();
-    Serial2.println("AT+iDOWN");
-    getResponse();
-    getResponse();
-
-
-
-    Logger::console("Wifi 4.2 initialized");
-}
-
-void SerialConsole::getResponse() {
-
-    while (Serial2.available()) {
-        SerialUSB.write(Serial2.read());
-    }
-    SerialUSB.println();
-    delay(4000);
-
-}
 
 
 

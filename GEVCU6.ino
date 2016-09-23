@@ -1,6 +1,6 @@
 /*
- GEVCU.ino
- 
+ GEVCU6.ino
+ New hardware version 9/20/2016 for Hardware 6.23c
  Created: 1/4/2013 1:34:14 PM
  Author: Collin Kidder
  
@@ -68,6 +68,7 @@ MemCache *memCache;
 Heartbeat *heartbeat;
 SerialConsole *serialConsole;
 Device *btDevice;
+template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
 
 byte i = 0;
 

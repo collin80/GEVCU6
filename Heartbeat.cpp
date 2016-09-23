@@ -81,8 +81,8 @@ void Heartbeat::handleTick() {
                         systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
 
         if (accelerator) {
-            Logger::console("Throttle isFaulted: %T", accelerator->isFaulted());
-            Logger::console("Throttle level: %i", accelerator->getLevel());            
+            Logger::console("Throttle is Faulted:%T", accelerator->isFaulted());
+            Logger::console("Raw throttle torque level: %i", accelerator->getLevel());            
             RawSignalData *rawSignal = accelerator->acquireRawSignal();
             Logger::console("Throttle rawSignal1: %d, rawSignal2: %d", rawSignal->input1, rawSignal->input2);
         }

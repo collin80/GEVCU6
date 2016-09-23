@@ -263,14 +263,14 @@ uint8_t DeviceManager::countDeviceType(DeviceType deviceType) {
 }
 
 void DeviceManager::printDeviceList() {
-    Logger::console("Currently enabled devices: (DISABLE= to disable)");
+    Logger::console("\n  ENABLED devices: (DISABLE=0xFFFF to disable where FFFF is device number)\n");
     for (int i = 0; i < CFG_DEV_MGR_MAX_DEVICES; i++) {
         if (devices[i] && devices[i]->isEnabled()) {
             Logger::console("     %X     %s", devices[i]->getId(), devices[i]->getCommonName());
         }
     }
 
-    Logger::console("Currently disabled devices: (ENABLE= to enable)");
+    Logger::console("\n  DISABLED devices: (ENABLE=0xFFFF to enable where FFFF is device number)\n");
     for (int i = 0; i < CFG_DEV_MGR_MAX_DEVICES; i++) {
         if (devices[i] && !devices[i]->isEnabled()) {
             Logger::console("     %X     %s", devices[i]->getId(), devices[i]->getCommonName());

@@ -35,7 +35,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "TickHandler.h"
 #include "CanHandler.h"
 #include "DeviceManager.h"
-#include "ichip_2128.h"
 #include "DeviceTypes.h"
 
 // CAN bus id's for frames sent to DMC5
