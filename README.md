@@ -3,26 +3,18 @@ GEVCU
 
 Generalized Electric Vehicle Control Unit
 
-Our website can be found at : http://www.gevcu.org
+Our website can be found at : http://www.evtv.me
 
 A project to create a fairly Arduino compatible ECU firmware
-to interface with various electric vehicle hardware over canbus
+to interface with various electric vehicle hardware over CANbus
 (and possibly other comm channels)
 
-The project now builds in the Arduino IDE. So, use it to compile, send the firmware to the Arduino, and monitor serial. It all works very nicely.
-
-The master branch of this project is now switched to support the Due. The master branch is sparsely updated and only when the source tree is in stable shape.
-
-The older Macchina code has been moved to its own branch. This code is now *VERY* old but should work to control a DMOC645.
-
-ArduinoDue branch is more experimental than the master branch and includes the work of Michael Neuweiler.
-
-The WIP branch is sync'd to EVTV's official changes and as such could be considered as a testing ground for the official source code distribution.
+The project now builds in the Arduino IDE. So, use it to compile, send the firmware to the GEVCU hardware, and monitor serial. It all works very nicely.
 
 You will need the following to have any hope of compiling and running the firmware:
-- A GEVCU board. Versions from 2 and up are supported.
-- Arduino IDE 1.5.4 - Do not use newer versions of the IDE
-- due_can library - There is a repo for this under Collin80
+- A GEVCU board. This version supports hardware 6.23c and later.
+- Arduino IDE 1.5.4 - or later
+- due_can library - There is a repo for this under github.com/Collin80
 - due_rtc library - Also under Collin80
 - due_wire library - once again
 - DueTimer library - and again
@@ -30,11 +22,8 @@ You will need the following to have any hope of compiling and running the firmwa
 All libraries belong in %USERPROFILE%\Documents\Arduino\libraries (Windows) or ~/Arduino/libraries (Linux/Mac).
 You will need to remove -master or any other postfixes. Your library folders should be named as above.
 
-The canbus is supposed to be terminated on both ends of the bus. If you are testing with a DMOC and GEVCU then you've got two devices, each on opposing ends of the bus. So, both really should be terminated but for really short canbus lines you will probably get away with terminating just one side.
+The canbus is supposed to be terminated on both ends of the bus. If you are testing with a DMOC and GEVCU then you've got two devices, each on opposing ends of the bus. GEVCU hardware is already terminated internally.
 
-If you are using a custom board then add a terminating resistor. 
-
-If you are using the new prototype shield then it should already be terminated. The DMOC can be terminated by soldering a 120 ohm resistor between the canbus lines. I did this on my DMOC and hid the resistor inside the plug shroud. 
 
 This software is MIT licensed:
 
