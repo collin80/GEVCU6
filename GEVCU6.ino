@@ -205,7 +205,6 @@ void setup() {
 }
 
 void loop() {
-
 #ifdef CFG_TIMER_USE_QUEUING
 	tickHandler.process();
 #endif

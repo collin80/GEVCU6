@@ -43,7 +43,7 @@ they're disabled.
 This means that valid IDs must be under 0x8000 but that still leaves a couple of open IDs ;)
 First device entry is 0xDEAD if valid - otherwise table is initialized
 */
-#define EE_DEVICE_TABLE		0 //where is the table of devices found in EEPROM?
+#define EE_DEVICE_TABLE		512 //where is the table of devices found in EEPROM?
 
 #define EE_DEVICE_SIZE      512 //# of bytes allocated to each device
 #define EE_DEVICES_BASE		1024 //start of where devices in the table can use

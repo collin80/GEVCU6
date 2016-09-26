@@ -100,7 +100,7 @@ PrefHandler::PrefHandler(DeviceId id_in) {
 
     enabled = false;
 
-    checkTableValidity();
+    //checkTableValidity();
 
     for (int x = 1; x < 64; x++) {
         memCache->Read(EE_DEVICE_TABLE + (2 * x), &id);

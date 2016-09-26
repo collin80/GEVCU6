@@ -874,6 +874,25 @@ void ADAFRUITBLE::loadParameters() {
         bleThrottleMap.throttleCreep = acceleratorConfig->creep;
         bleThrottleMap.doUpdate = 1;
     }
+    else
+    {
+        bleThrottleIO.numThrottlePots = 1;
+        bleThrottleIO.throttleType = 1;
+        bleThrottleIO.throttle1Min = 0;
+        bleThrottleIO.throttle2Min = 0;
+        bleThrottleIO.throttle1Max = 0;
+        bleThrottleIO.throttle2Max = 0;
+        bleThrottleIO.doUpdate = 1;
+        bleThrottleMap.throttleRegenMax = 0;
+        bleThrottleMap.throttleRegenMin = 0;
+        bleThrottleMap.throttleFwd = 0;
+        bleThrottleMap.throttleMap = 0;
+        bleThrottleMap.throttleLowestRegen = 0;
+        bleThrottleMap.throttleHighestRegen = 0;
+        bleThrottleMap.throttleCreep = 0;
+        bleThrottleMap.doUpdate = 1;        
+    }
+    
     if (brakeConfig) {
         bleBrakeParam.brakeMin = brakeConfig->minimumLevel1;
         bleBrakeParam.brakeMax = brakeConfig->maximumLevel1;
@@ -881,6 +900,14 @@ void ADAFRUITBLE::loadParameters() {
         bleBrakeParam.brakeRegenMax = brakeConfig->maximumRegen;
         bleBrakeParam.doUpdate = 1;
     }
+    else {
+        bleBrakeParam.brakeMin = 0;
+        bleBrakeParam.brakeMax = 0;
+        bleBrakeParam.brakeRegenMin = 0;
+        bleBrakeParam.brakeRegenMax = 0;
+        bleBrakeParam.doUpdate = 1;
+    }
+    
     if (motorConfig) {
         bleDigIO.coolingRelay = motorConfig->coolFan;
         bleDigIO.coolOnTemp = motorConfig->coolOn;
@@ -898,6 +925,24 @@ void ADAFRUITBLE::loadParameters() {
         bleMaxParams.maxRPM = motorConfig->speedMax;
         bleMaxParams.doUpdate = 1;
     }
+    else {
+        bleDigIO.coolingRelay = 0;
+        bleDigIO.coolOnTemp = 0;
+        bleDigIO.coolOffTemp = 0;
+        bleDigIO.brakeLightOut = 0;
+        bleDigIO.reverseLightOut = 0;
+        bleDigIO.enableIn = 0;
+        bleDigIO.reverseIn = 0;
+        bleDigIO.prechargeDuration = 0;
+        bleDigIO.prechargeRelay = 255;
+        bleDigIO.mainContRelay = 255;
+        bleDigIO.doUpdate = 1;
+        bleMaxParams.nomVoltage = 0;
+        bleMaxParams.maxTorque = 0;
+        bleMaxParams.maxRPM = 0;
+        bleMaxParams.doUpdate = 1;
+    }
+    
     bleModes.logLevel = (uint8_t)Logger::getLogLevel();
     bleModes.doUpdate = 1;
     
