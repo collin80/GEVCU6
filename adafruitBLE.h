@@ -217,8 +217,7 @@ public:
     void gattRX(int32_t chars_id, uint8_t *data, uint16_t len);
 
     void loadConfiguration();
-    void saveConfiguration();
-    void loadParameters();    
+    void saveConfiguration();   
 
 private:
     int tickCounter;
@@ -229,7 +228,9 @@ private:
     int counter;
     char buffer[30]; // a buffer for various string conversions
     ParamCache paramCache;
-    boolean didParamLoad;
+    boolean needParamReload;
+    boolean bOkToWrite;
+    int okWriteCounter;
     BLETrqReqAct bleTrqReqAct;
     BLEThrBrkLevels bleThrBrkLevels;
     BLESpeeds bleSpeeds;
