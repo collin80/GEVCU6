@@ -37,11 +37,11 @@ void FaultHandler::setup()
 
     Logger::info("Initializing Fault Handler", FAULTSYS, this);
 
-    loadFromEEPROM();
+    //loadFromEEPROM();
 
     //Use the heartbeat interval because it's slow and already exists so we can piggyback on the interrupt
     //so as to not create more timers than necessary.
-    tickHandler.attach(this, CFG_TICK_INTERVAL_HEARTBEAT);
+    //tickHandler.attach(this, CFG_TICK_INTERVAL_HEARTBEAT);
 }
 
 

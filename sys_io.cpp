@@ -53,6 +53,27 @@ SystemIO::SystemIO()
     numDigOut = NUM_OUTPUT;
     numAnaIn = NUM_ANALOG;
     numAnaOut = 0;
+    
+    sysioState = SYSSTATE_UNINIT;
+    adc2Initialized = false;
+    adc3Initialized = false;
+    lastInitAttempt = 0;
+}
+
+bool SystemIO::isInitialized()
+{
+    if (sysioState == SYSSTATE_INITIALIZED) return true;
+    return false;
+}
+
+void SystemIO::pollInitialization()
+{
+    if (isInitialized()) return;
+    if (millis() > (lastInitAttempt + 10))
+    {
+        lastInitAttempt = millis();
+        setupSPIADC();
+    }
 }
 
 void SystemIO::setup_ADC_params()
@@ -161,7 +182,102 @@ void SystemIO::setup() {
 
     setup_ADC_params();
 
-    /*if (useSPIADC)*/ setupSPIADC();
+    setupSPIADC();
+}
+
+bool SystemIO::setupSPIADC()
+{
+    byte result;
+    //ADC chips use this format for SPI command byte: 0-1 = reserved set as 0, 2 = read en (0=write), 3-7 = register address
+
+    switch (sysioState)
+    {
+    case SYSSTATE_UNINIT:
+        SPI.beginTransaction(spi_settings);
+        SPI.transfer(0);
+        SPI.endTransaction();
+        Logger::info("Trying to wait ADC1 as ready");
+        SPI.beginTransaction(spi_settings);
+        digitalWrite(CS1, LOW); //select first ADC chip
+        SPI.transfer(ADE7913_READ | ADE7913_STATUS0);
+        result = SPI.transfer(0);
+        digitalWrite(CS1, HIGH);
+        SPI.endTransaction();
+        if (result & 1)  //not ready yet
+        {
+            return false;
+        }
+        else
+        {
+            sysioState = SYSSTATE_ADC1OK;
+            Logger::info("ADC1 is ready. Trying to enable clock out");
+            //Now enable the CLKOUT function on first unit so that the other two will wake up
+            SPI.beginTransaction(spi_settings);
+            digitalWrite(CS1, LOW);
+            SPI.transfer(ADE7913_WRITE |  ADE7913_CONFIG);
+            SPI.transfer(1 | 2 << 4); //Set clock out enable and ADC_FREQ to 2khz
+            digitalWrite(CS1, HIGH);
+            SPI.endTransaction();
+            break;
+        }
+        break;
+    case SYSSTATE_ADC1OK:
+        if (!adc2Initialized)
+        {
+            SPI.beginTransaction(spi_settings);
+            digitalWrite(CS2, LOW); //select second ADC chip
+            SPI.transfer(ADE7913_READ | ADE7913_STATUS0);
+            result = SPI.transfer(0);
+            digitalWrite(CS2, HIGH);
+            SPI.endTransaction();
+            if (result & 1)  //not ready yet
+            {
+               
+            }
+            else
+            {
+                adc2Initialized = true;
+            }
+        }
+        if (!adc3Initialized)
+        {
+            SPI.beginTransaction(spi_settings);
+            digitalWrite(CS3, LOW); //select third ADC chip
+            SPI.transfer(ADE7913_READ | ADE7913_STATUS0);
+            result = SPI.transfer(0);
+            digitalWrite(CS3, HIGH);
+            SPI.endTransaction();
+            if (result & 1)  //not ready yet
+            {
+            }
+            else
+            {
+                adc3Initialized = true;
+            }
+        }
+        if (adc2Initialized && adc3Initialized)
+        {
+            SPI.beginTransaction(spi_settings);
+            digitalWrite(CS2, LOW);
+            SPI.transfer(ADE7913_WRITE |  ADE7913_CONFIG);
+            SPI.transfer(3 << 4 | 1 << 7); //Set ADC_FREQ to 1khz and lower bandwidth to 2khz
+            digitalWrite(CS2, HIGH);
+            SPI.endTransaction();
+            SPI.beginTransaction(spi_settings);
+            digitalWrite(CS3, LOW);
+            SPI.transfer(ADE7913_WRITE |  ADE7913_CONFIG);
+            SPI.transfer(3 << 4 | 1 << 7); //Set ADC_FREQ to 1khz and lower bandwidth to 2khz
+            digitalWrite(CS3, HIGH);
+            SPI.endTransaction();
+      
+            Logger::info("ADC chips 2 and 3 have been successfully started!");
+            sysioState = SYSSTATE_INITIALIZED;
+        }
+        break;
+    case SYSSTATE_INITIALIZED: //nothing to do, already all set!
+        return true;
+        break;
+    }
 }
 
 void SystemIO::installExtendedIO(CANIODevice *device)
@@ -305,6 +421,9 @@ int16_t SystemIO::getRawADC(uint8_t which) {
     int32_t val;
 
     int32_t valu;
+    
+    if (!isInitialized()) return 0;
+    
     //first 4 analog readings must match old methods
     if (which < 2)
     {
@@ -332,6 +451,8 @@ int16_t SystemIO::getAnalogIn(uint8_t which) {
     if (which > numAnaIn) {
         return 0;
     }
+    
+    if (!isInitialized()) return 0;
     
     if (which < NUM_ANALOG) {
         //if (getSystemType() == GEVCU6)
@@ -461,112 +582,13 @@ boolean SystemIO::getDigitalOutput(uint8_t which) {
     }
 }
 
-bool SystemIO::setupSPIADC()
-{
-    bool chip1OK = false, chip2OK = false, chip3OK = false;
-    byte result;
-    //ADC chips use this format for SPI command byte: 0-1 = reserved set as 0, 2 = read en (0=write), 3-7 = register address
-    //delay(100); //yeah, probably evil to do...
-
-    SPI.beginTransaction(spi_settings);
-    SPI.transfer(0);
-    SPI.endTransaction();
-
-    Logger::info("Trying to wait ADC1 as ready");
-    for (int i = 0; i < 10; i++)
-    {
-        SPI.beginTransaction(spi_settings);
-        digitalWrite(CS1, LOW); //select first ADC chip
-        SPI.transfer(ADE7913_READ | ADE7913_STATUS0);
-        result = SPI.transfer(0);
-        digitalWrite(CS1, HIGH);
-        SPI.endTransaction();
-        if (result & 1)  //not ready yet
-        {
-            delay(6);
-            //SerialUSB.println(result);
-        }
-        else
-        {
-            chip1OK = true;
-            break;
-        }
-    }
-    //SerialUSB.println();
-
-    if (!chip1OK) return false;
-
-    Logger::info("ADC1 is ready. Trying to enable clock out");
-
-    //Now enable the CLKOUT function on first unit so that the other two will wake up
-    SPI.beginTransaction(spi_settings);
-    digitalWrite(CS1, LOW);
-    SPI.transfer(ADE7913_WRITE |  ADE7913_CONFIG);
-    SPI.transfer(1 | 2 << 4); //Set clock out enable and ADC_FREQ to 2khz
-    digitalWrite(CS1, HIGH);
-    SPI.endTransaction();
-
-    //Now we've got to wait 100ms plus around 20ms for the other chips to come up.
-    delay(110);
-    for (int i = 0; i < 10; i++)
-    {
-        SPI.beginTransaction(spi_settings);
-        digitalWrite(CS2, LOW); //select second ADC chip
-        SPI.transfer(ADE7913_READ | ADE7913_STATUS0);
-        result = SPI.transfer(0);
-        digitalWrite(CS2, HIGH);
-        SPI.endTransaction();
-        if (result & 1)  //not ready yet
-        {
-            delay(6);
-        }
-        else
-        {
-            chip2OK = true;
-            //break;
-        }
-        SPI.beginTransaction(spi_settings);
-        digitalWrite(CS3, LOW); //select third ADC chip
-        SPI.transfer(ADE7913_READ | ADE7913_STATUS0);
-        result = SPI.transfer(0);
-        digitalWrite(CS3, HIGH);
-        SPI.endTransaction();
-        if (result & 1)  //not ready yet
-        {
-            delay(6);
-        }
-        else
-        {
-            chip3OK = true;
-            //break;
-        }
-        if (chip2OK && chip3OK) break;
-    }
-
-    if (!chip2OK || !chip3OK) return false;
-
-    SPI.beginTransaction(spi_settings);
-    digitalWrite(CS2, LOW);
-    SPI.transfer(ADE7913_WRITE |  ADE7913_CONFIG);
-    SPI.transfer(3 << 4 | 1 << 7); //Set ADC_FREQ to 1khz and lower bandwidth to 2khz
-    digitalWrite(CS2, HIGH);
-    SPI.endTransaction();
-    SPI.beginTransaction(spi_settings);
-    digitalWrite(CS3, LOW);
-    SPI.transfer(ADE7913_WRITE |  ADE7913_CONFIG);
-    SPI.transfer(3 << 4 | 1 << 7); //Set ADC_FREQ to 1khz and lower bandwidth to 2khz
-    digitalWrite(CS3, HIGH);
-    SPI.endTransaction();
-
-    Logger::info("ADC chips 2 and 3 have been successfully started!");
-
-    return true;
-}
-
 int32_t SystemIO::getSPIADCReading(int CS, int sensor)
 {
     int32_t result;
     int32_t byt;
+    
+    if (!isInitialized()) return 0;
+    
     //Logger::debug("SPI Read CS: %i Sensor: %i", CS, sensor);
     SPI.beginTransaction(spi_settings);
     digitalWrite(CS, LOW);

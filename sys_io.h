@@ -76,6 +76,12 @@ enum SystemType {
     GEVCU6 = 6
 };
 
+enum SYSIO_STATE {
+    SYSSTATE_UNINIT,
+    SYSSTATE_ADC1OK,
+    SYSSTATE_INITIALIZED
+};
+
 class ExtendedIODev
 {
 public:
@@ -115,6 +121,8 @@ public:
     void setSystemType(SystemType);
     SystemType getSystemType();
     bool calibrateADCOffset(int, bool);
+    bool isInitialized();
+    void pollInitialization();
 
 private:
     int32_t getSPIADCReading(int CS, int sensor);
@@ -130,6 +138,10 @@ private:
     ADC_COMP adc_comp[NUM_ANALOG]; //GEVCU 6.2 has 7 adc inputs but three are special
 
     bool useSPIADC;
+    bool adc2Initialized;
+    bool adc3Initialized;
+    SYSIO_STATE sysioState;
+    uint32_t lastInitAttempt;
     
     int numDigIn;
     int numDigOut;

@@ -166,7 +166,9 @@ void setup() {
     pinMode(65, OUTPUT); //reset for BLE module
     digitalWrite(65, HIGH);
 	
-    //delay(5000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
+    //delay(2000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
+    
+    //SerialUSB.println(millis());
        
 	pinMode(BLINK_LED, OUTPUT);
 	digitalWrite(BLINK_LED, LOW);
@@ -215,9 +217,7 @@ void loop() {
 
 	serialConsole->loop();
 
-	//if (btDevice != NULL) {
-	//	((ELM327Emu*)btDevice)->loop();
-	//}
+    systemIO.pollInitialization();
 }
 
 
