@@ -187,51 +187,19 @@ void ADAFRUITBLE::setup() {
     //These apply to both UART and SPI versions
     Logger::debug(ADABLUE, "Initializing ADAFruit BLE bluetooth device...");    
     ble.begin(false);  //True = verbose mode for debuggin.   
-    ble.echo(false);
     
-    Logger::debug("Setting GATT callback 4");
-    ble.setBleGattRxCallback(5, BleGattRX);
+    //need to wait 1 second after begin, done via polling instead of a hard delay.
+    resetTime = millis();
+    didResetInit = false;
     
-    //1  2  3  4  5     6     7     8     9      10     11     12     13
-    //1, 2, 4, 8, 0x10, 0x20, 0x40, 0x80, 0x100  0x200  0x400  0x800  0x1000
-    Logger::debug("Setting GATT callback 8");
-    if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x100")) //MeasureCharId[8]
-    {
-        Logger::error("FAILED!");
-    }
-
-    Logger::debug("Setting GATT callback 9");
-    if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x200")) //MeasureCharId[9]
-    {
-        Logger::error("FAILED!");
-    }
-    
-    Logger::debug("Setting GATT callback 10");
-    if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x400")) //MeasureCharId[10]
-    {
-        Logger::error("FAILED!");
-    }
-    
-    Logger::debug("Setting GATT callback 11");
-    if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x800")) //MeasureCharId[11]
-    {
-        Logger::error("FAILED!");
-    }
-    
-    Logger::debug("Setting GATT callback 12");
-    if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x1000")) //MeasureCharId[12]
-    {
-        Logger::error("FAILED!");
-    } 
-    
-    Logger::debug("Setting GATT callback 13");
-    if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x2000")) //MeasureCharId[13]
-    {
-        Logger::error("FAILED!");
-    } 
-    Logger::debug("Done with callbacks");
-
     tickHandler.attach(this, CFG_TICK_INTERVAL_BLE);
+    
+    attachInterrupt(digitalPinToInterrupt(27), BLEInterrupt, RISING);
+}
+
+void BLEInterrupt()
+{
+    //SerialUSB.println("Y!");
 }
 
 void ADAFRUITBLE::setupBLEservice()
@@ -498,7 +466,55 @@ void ADAFRUITBLE::transferUpdates()
 void ADAFRUITBLE::handleTick() {
     uint32_t ms = millis();
     
-    if (ms < 5000) return; //wait 5 seconds for things to settle before doing a thing
+    if ( (ms > (resetTime + 1100)) && !didResetInit )
+    {
+        ble.echo(false);
+    
+        Logger::debug("Setting GATT callback 4");
+        ble.setBleGattRxCallback(5, BleGattRX);
+    
+        //1  2  3  4  5     6     7     8     9      10     11     12     13
+        //1, 2, 4, 8, 0x10, 0x20, 0x40, 0x80, 0x100  0x200  0x400  0x800  0x1000
+        Logger::debug("Setting GATT callback 8");
+        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x100")) //MeasureCharId[8]
+        {
+            Logger::error("FAILED!");
+        }
+
+        Logger::debug("Setting GATT callback 9");
+        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x200")) //MeasureCharId[9]
+        {
+            Logger::error("FAILED!");
+        }
+    
+        Logger::debug("Setting GATT callback 10");
+        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x400")) //MeasureCharId[10]
+        {
+            Logger::error("FAILED!");
+        }
+    
+        Logger::debug("Setting GATT callback 11");
+        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x800")) //MeasureCharId[11]
+        {
+            Logger::error("FAILED!");
+        }
+    
+        Logger::debug("Setting GATT callback 12");
+        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x1000")) //MeasureCharId[12]
+        {
+            Logger::error("FAILED!");
+        } 
+    
+        Logger::debug("Setting GATT callback 13");
+        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x2000")) //MeasureCharId[13]
+        {
+            Logger::error("FAILED!");
+        } 
+        Logger::debug("Done with callbacks");
+        didResetInit = true;
+    }    
+    
+    if (ms < (resetTime + 2000)) return;
     
     MotorController* motorController = deviceManager.getMotorController();
     Throttle *accelerator = deviceManager.getAccelerator();
@@ -594,8 +610,6 @@ void ADAFRUITBLE::handleTick() {
                 bleThrBrkLevels.doUpdate = 1;
             }
         }
-        //checkGattChar(5);
-        //checkGattChar(9);
     }
     
     if (tickCounter == 2) {        
@@ -640,8 +654,6 @@ void ADAFRUITBLE::handleTick() {
                 blePowerStatus.doUpdate = 1;
             }
         }
-        //checkGattChar(10);
-        //checkGattChar(11);
 
     } else if (tickCounter == 3) {
         if (motorController) {
@@ -720,8 +732,6 @@ void ADAFRUITBLE::handleTick() {
                 bleModes.doUpdate = 1;
             }
         }
-        //checkGattChar(12);
-        //checkGattChar(13);
 
     } else if (tickCounter == 4) {        
         if (motorController) {
@@ -778,7 +788,6 @@ void ADAFRUITBLE::handleTick() {
                 bleDigIO.reverseIn = motorController->getReverseIn();
                 bleDigIO.doUpdate = 1;
             }
-            //checkGattChar(14);
         }
     } else if (tickCounter == 5) {     
         if (acceleratorConfig) {

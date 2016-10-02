@@ -202,6 +202,7 @@ struct BLEDeviceEnable
 };
 #pragma pack(pop)
 
+void BLEInterrupt();
 
 class ADAFRUITBLE : public Device {
 public:
@@ -226,6 +227,8 @@ private:
     int32_t LocationCharId;
     boolean success;
     int counter;
+    uint32_t resetTime;
+    boolean didResetInit;
     char buffer[30]; // a buffer for various string conversions
     ParamCache paramCache;
     boolean needParamReload;
