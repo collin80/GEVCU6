@@ -64,13 +64,10 @@ MotorController::MotorController() : Device() {
     donePrecharge = false;
     prelay = false;
     coolflag = false;
-    skipcounter=0;
-    testenableinput=0;
-    testreverseinput=0;
-    premillis=0;
-
-
-
+    skipcounter = 0;
+    testenableinput = 0;
+    testreverseinput = 0;
+    premillis = 0;
 }
 
 void MotorController::setup() {
@@ -81,16 +78,16 @@ void MotorController::setup() {
     statusBitfield3 = 0;
     statusBitfield4 = 0;
     prefsHandler->read(EEMC_KILOWATTHRS, &kiloWattHours); //retrieve kilowatt hours from EEPROM
-    nominalVolts=config->nominalVolt;
-    capacity=config->capacity;
-    donePrecharge=false;
-    premillis=millis();
+    nominalVolts = config->nominalVolt;
+    capacity = config->capacity;
+    donePrecharge = false;
+    premillis = millis();
 
-    if(config->prechargeR==12345)
+    if(config->prechargeR == 12345)
     {
-        torqueActual=2;
-        dcCurrent=1501;
-        dcVoltage=3320;
+        torqueActual = 2;
+        dcCurrent = 1501;
+        dcVoltage = 3320;
 
     }
     Logger::console("PRELAY=%i - Current PreCharge Relay output", config->prechargeRelay);
@@ -101,7 +98,7 @@ void MotorController::setup() {
     Logger::console("PRECHARGING...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
                     systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
                     systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
-    coolflag=false;
+    coolflag = false;
 
     Device::setup();
 
@@ -123,16 +120,18 @@ void MotorController::handleTick() {
     else statusBitfield1 &= ~(1 <<9);
 
     //Calculate killowatts and kilowatt hours
-    mechanicalPower=dcVoltage*dcCurrent/10000; //In kilowatts. DC voltage is x10
-    if (dcVoltage>nominalVolts && torqueActual>0) {
-        kiloWattHours=1;   //If our voltage is higher than fully charged with no regen, zero our kwh meter
+    mechanicalPower = dcVoltage * dcCurrent / 10000; //In kilowatts. DC voltage is x10
+    
+    if (dcVoltage > nominalVolts && torqueActual > 0) {
+        kiloWattHours = 1;   //If our voltage is higher than fully charged with no regen, zero our kwh meter
     }
-    if (milliStamp>millis()) {
-        milliStamp=0;   //In case millis rolls over to zero while running
+    
+    if (milliStamp > millis()) {
+        milliStamp = 0;   //In case millis rolls over to zero while running
     }
-    kiloWattHours+=(millis()-milliStamp)*mechanicalPower;//We assume here that power is at current level since last tick and accrue in kilowattmilliseconds.
-    milliStamp=millis();              //reset our kwms timer for next check
-
+    
+    kiloWattHours += (millis() - milliStamp) * mechanicalPower;//We assume here that power is at current level since last tick and accrue in kilowattmilliseconds.
+    milliStamp = millis();              //reset our kwms timer for next check
 
     //Throttle check
     Throttle *accelerator = deviceManager.getAccelerator();
@@ -143,9 +142,7 @@ void MotorController::handleTick() {
         throttleRequested = brake->getLevel();
     //Logger::debug("Throttle: %d", throttleRequested);
 
-
     if (!donePrecharge)checkPrecharge();
-
 
     if(skipcounter++ > 30)    //A very low priority loop for checks that only need to be done once per second.
     {

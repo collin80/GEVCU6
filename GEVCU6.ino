@@ -176,7 +176,7 @@ void setup() {
 	SerialUSB.println(CFG_VERSION);
 	SerialUSB.print("Build number: ");
 	SerialUSB.println(CFG_BUILD_NUM);
-	Wire.begin((uint32_t)700000);
+	Wire.begin((uint32_t)1000000);
 	Logger::info("TWI init ok");
 	memCache = new MemCache();
 	Logger::info("add MemCache (id: %X, %X)", MEMCACHE, memCache);

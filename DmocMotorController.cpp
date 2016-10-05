@@ -104,10 +104,10 @@ void DmocMotorController::handleCanFrame(CAN_FRAME *frame) {
         temperatureInverter = (invTemp-40) *10;
         //now pick highest of motor temps and report it
         if (RotorTemp > StatorTemp) {
-            temperatureMotor = (RotorTemp-40) *10;
+            temperatureMotor = (RotorTemp - 40) * 10;
         }
         else {
-            temperatureMotor = (StatorTemp-40) *10;
+            temperatureMotor = (StatorTemp - 40) * 10;
         }
         activityCount++;
         break;
@@ -164,7 +164,7 @@ void DmocMotorController::handleCanFrame(CAN_FRAME *frame) {
             faulted=true;
             break;
         }
-        Logger::debug("OpState: %d", temp);
+        Logger::debug("Reported OpState: %d", temp);
         activityCount++;
         break;
 
@@ -194,7 +194,7 @@ void DmocMotorController::handleTick() {
         if (activityCount > 40) //If we are receiving regular CAN messages from DMOC, this will very quickly get to over 40. We'll limit
             // it to 60 so if we lose communications, within 20 ticks we will decrement below this value.
         {
-            Logger::debug("EnableIn=%i and ReverseIn = %i" ,getEnableIn(),getReverseIn());
+            Logger::debug("Enable Input Active? %T         Reverse Input Active? %T" ,systemIO.getDigitalIn(getEnableIn()),systemIO.getDigitalIn(getReverseIn()));
             if(getEnableIn()<0)setOpState(ENABLE); //If we HAVE an enableinput 0-3, we'll let that handle opstate. Otherwise set it to ENABLE
             if(getReverseIn()<0)setSelectedGear(DRIVE); //If we HAVE a reverse input, we'll let that determine forward/reverse.  Otherwise set it to DRIVE
         }
@@ -202,7 +202,6 @@ void DmocMotorController::handleTick() {
     else {
         setSelectedGear(NEUTRAL); //We will stay in NEUTRAL until we get at least 40 frames ahead indicating continous communications.
     }
-
 
     if(!online)  //This routine checks to see if we have received any frames from the inverter.  If so, ONLINE would be true and
     {   //we set the RUNNING light on.  If no frames are received for 2 seconds, we set running OFF.
@@ -264,6 +263,9 @@ void DmocMotorController::sendCmd1() {
     }
 
     output.data.bytes[7] = calcChecksum(output);
+    
+    Logger::debug("DMOC 0x232 tx: %X %X %X %X %X %X %X %X", output.data.bytes[0], output.data.bytes[1], output.data.bytes[2], output.data.bytes[3],
+                  output.data.bytes[4], output.data.bytes[5], output.data.bytes[6], output.data.bytes[7]);
 
     canHandlerEv.sendFrame(output);
 }
@@ -310,8 +312,9 @@ void DmocMotorController::sendCmd2() {
         torqueCommand += config->torqueMax;
         output.data.bytes[0] = (torqueCommand & 0xFF00) >> 8;
         output.data.bytes[1] = (torqueCommand & 0x00FF);
-        output.data.bytes[2] = 0x75; //zero torque
-        output.data.bytes[3] = 0x30;
+        torqueCommand -= (config->torqueMax * 2);
+        output.data.bytes[2] = (torqueCommand & 0xFF00) >> 8;
+        output.data.bytes[3] = (torqueCommand & 0x00FF);
     }
 
     //what the hell is standby torque? Does it keep the transmission spinning for automatics? I don't know.
@@ -326,8 +329,8 @@ void DmocMotorController::sendCmd2() {
 
     canHandlerEv.sendFrame(output);
     timestamp();
-    Logger::debug("Torque command: MSB: %X  LSB: %X  %X  %X  %X  %X  %X  CRC: %X  %d:%d:%d.%d",output.data.bytes[0],
-                  output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],output.data.bytes[5],output.data.bytes[6],output.data.bytes[7], hours, minutes, seconds, milliseconds);
+    Logger::debug("Torque command: MSB: %X  LSB: %X  %X  %X  %X  %X  %X  CRC: %X",output.data.bytes[0],
+                  output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],output.data.bytes[5],output.data.bytes[6],output.data.bytes[7]);
 
 }
 
