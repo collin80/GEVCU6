@@ -292,11 +292,11 @@ void DmocMotorController::sendCmd2() {
     if (actualState == ENABLE) { //don't even try sending torque commands until the DMOC reports it is ready
         if (selectedGear == DRIVE) {
             torqueRequested = (((long) throttleRequested * (long) config->torqueMax) / 1000L);
-            if (speedActual < 200 && torqueRequested < 0) torqueRequested = 0;
+            //if (speedActual < 200 && torqueRequested < 0) torqueRequested = 0;
         }
         if (selectedGear == REVERSE) {
             torqueRequested = (((long) throttleRequested * -1 *(long) config->torqueMax) / 1000L);//If reversed, regen becomes positive torque and positive pedal becomes regen.  Let's reverse this by reversing the sign.  In this way, we'll have gradually diminishing positive torque (in reverse, regen) followed by gradually increasing regen (positive torque in reverse.)
-            if (speedActual < 200 && torqueRequested > 0) torqueRequested = 0;
+           // if (speedActual < 200 && torqueRequested > 0) torqueRequested = 0;
         }        
     }
 
