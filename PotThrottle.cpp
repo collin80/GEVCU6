@@ -174,7 +174,7 @@ bool PotThrottle::validateSignal(RawSignalData *rawSignal) {
 
     // all checks passed -> throttle is ok
     if (status != OK)
-        Logger::info(POTACCELPEDAL, (char *)Constants::normalOperation);
+        if (status != ERR_MISC) Logger::info(POTACCELPEDAL, (char *)Constants::normalOperation);
     status = OK;
     return true;
 }
