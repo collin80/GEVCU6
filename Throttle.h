@@ -88,9 +88,9 @@ public:
 protected:
     ThrottleStatus status;
     virtual bool validateSignal(RawSignalData *);
-    virtual uint16_t calculatePedalPosition(RawSignalData *);
+    virtual int16_t calculatePedalPosition(RawSignalData *);
     virtual int16_t mapPedalPosition(int16_t);
-    uint16_t normalizeAndConstrainInput(int32_t, int32_t, int32_t);
+    int16_t normalizeAndConstrainInput(int32_t, int32_t, int32_t);
     int32_t normalizeInput(int32_t, int32_t, int32_t);
 
 private:

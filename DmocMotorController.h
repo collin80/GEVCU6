@@ -69,6 +69,7 @@ public:
     DmocMotorController();
     DeviceId getId();
     uint32_t getTickInterval();
+    void taperRegen();
 
     virtual void loadConfiguration();
     virtual void saveConfiguration();

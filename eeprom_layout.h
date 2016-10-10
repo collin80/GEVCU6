@@ -86,6 +86,8 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EEMC_ENABLE_IN		44
 #define EEMC_REVERSE_IN		45
 #define EEMC_MOTOR_MODE		46
+#define EEMC_TAPER_UPPER    50 //2 bytes
+#define EEMC_TAPER_LOWER    52 //2 bytes
 
 //throttle data
 #define EETH_MIN_ONE		20 //2 bytes - ADC value of minimum value for first channel

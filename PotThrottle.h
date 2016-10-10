@@ -69,7 +69,7 @@ public:
 
 protected:
     bool validateSignal(RawSignalData *);
-    uint16_t calculatePedalPosition(RawSignalData *);
+    int16_t calculatePedalPosition(RawSignalData *);
 
 private:
     RawSignalData rawSignal;

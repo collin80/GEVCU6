@@ -183,7 +183,7 @@ bool PotThrottle::validateSignal(RawSignalData *rawSignal) {
  * Convert the raw ADC values to a range from 0 to 1000 (per mille) according
  * to the specified range and the type of potentiometer.
  */
-uint16_t PotThrottle::calculatePedalPosition(RawSignalData *rawSignal) {
+int16_t PotThrottle::calculatePedalPosition(RawSignalData *rawSignal) {
     PotThrottleConfiguration *config = (PotThrottleConfiguration *) getConfiguration();
     uint16_t calcThrottle1, calcThrottle2;
 

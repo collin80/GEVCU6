@@ -108,9 +108,11 @@ void SerialConsole::printMenu() {
         Logger::console("   REVLIM=%i - How much torque to allow in reverse (Tenths of a percent)", config->reversePercent);
         Logger::console("   ENABLEIN=%i - Digital input to enable motor controller (0-3, 255 for none)", config->enableIn);
         Logger::console("   REVIN=%i - Digital input to reverse motor rotation (0-3, 255 for none)", config->reverseIn);
+        Logger::console("   TAPERHI=%i - Regen taper upper RPM (0 - 10000)", config->regenTaperUpper);
+        Logger::console("   TAPERLO=%i - Regen taper lower RPM (0 - 10000)", config->regenTaperLower);
       }
     
-
+    
     if (accelerator && accelerator->getConfiguration()) 
       {
         PotThrottleConfiguration *config = (PotThrottleConfiguration *) accelerator->getConfiguration();
@@ -433,6 +435,20 @@ void SerialConsole::handleConfigCmd() {
         Logger::console("Setting Precharge Relay output to DOUT%i", newValue);
         motorConfig->prechargeRelay = newValue;
         motorController->saveConfiguration();
+    } else if (cmdString == String("TAPERLO") && motorConfig) {
+        if (newValue > -1 && newValue < 10001) {
+            Logger::console("Setting taper lower limit to %i", newValue);
+            motorConfig->regenTaperLower = newValue;
+            motorController->saveConfiguration();
+        }
+        else Logger::console("Invalid RPM value. Please enter a value 0 to 10000");
+    } else if (cmdString == String("TAPERHI") && motorConfig) {
+        if (newValue >=  motorConfig->regenTaperLower && newValue < 10001) {
+            Logger::console("Setting taper upper limit to %i", newValue);
+            motorConfig->regenTaperUpper = newValue;
+            motorController->saveConfiguration();
+        }
+        else Logger::console("Invalid RPM value. Please enter a value higher than low limit and under 10000");
     } else if (cmdString == String("ENABLE")) {
         if (PrefHandler::setDeviceStatus(newValue, true)) {
             sysPrefs->forceCacheWrite(); //just in case someone takes us literally and power cycles quickly

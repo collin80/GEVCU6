@@ -98,7 +98,7 @@ bool PotBrake::validateSignal(RawSignalData *rawSignal) {
  * Convert the raw ADC values to a range from 0 to 1000 (per mille) according
  * to the specified range and the type of potentiometer.
  */
-uint16_t PotBrake::calculatePedalPosition(RawSignalData *rawSignal) {
+int16_t PotBrake::calculatePedalPosition(RawSignalData *rawSignal) {
     PotBrakeConfiguration *config = (PotBrakeConfiguration *) getConfiguration();
     uint16_t calcBrake1, clampedLevel;
 

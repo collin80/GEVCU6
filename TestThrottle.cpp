@@ -127,7 +127,7 @@ bool TestThrottle::validateSignal(RawSignalData *rawSignal) {
  * Convert the raw ADC values to a range from 0 to 1000 (per mille) according
  * to the specified range and the type of potentiometer.
  */
-uint16_t TestThrottle::calculatePedalPosition(RawSignalData *rawSignal) {
+int16_t TestThrottle::calculatePedalPosition(RawSignalData *rawSignal) {
     TestThrottleConfiguration *config = (TestThrottleConfiguration *) getConfiguration();
     uint16_t calcThrottle1;
 

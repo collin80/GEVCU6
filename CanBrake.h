@@ -56,7 +56,7 @@ public:
 
 protected:
     bool validateSignal(RawSignalData *);
-    uint16_t calculatePedalPosition(RawSignalData *);
+    int16_t calculatePedalPosition(RawSignalData *);
     int16_t mapPedalPosition(int16_t);
 
 private:

@@ -61,7 +61,8 @@ public:
     uint8_t enableIn;
     uint8_t reverseIn;
     uint8_t capacity;
-
+    uint16_t regenTaperUpper; //upper limit where regen tapering starts
+    uint16_t regenTaperLower; //lower RPM limit below which no regen will happen
 };
 
 class MotorController: public Device {

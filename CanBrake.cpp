@@ -146,7 +146,7 @@ bool CanBrake::validateSignal(RawSignalData* rawSignal) {
     return true;
 }
 
-uint16_t CanBrake::calculatePedalPosition(RawSignalData* rawSignal) {
+int16_t CanBrake::calculatePedalPosition(RawSignalData* rawSignal) {
     CanBrakeConfiguration *config = (CanBrakeConfiguration *) getConfiguration();
 
     if (config->maximumLevel1 == 0) //brake processing disabled if max is 0

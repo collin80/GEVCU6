@@ -263,11 +263,23 @@ void DmocMotorController::sendCmd1() {
     }
 
     output.data.bytes[7] = calcChecksum(output);
-    
+ 
     Logger::debug("DMOC 0x232 tx: %X %X %X %X %X %X %X %X", output.data.bytes[0], output.data.bytes[1], output.data.bytes[2], output.data.bytes[3],
                   output.data.bytes[4], output.data.bytes[5], output.data.bytes[6], output.data.bytes[7]);
 
     canHandlerEv.sendFrame(output);
+}
+
+void DmocMotorController::taperRegen()
+{
+    DmocMotorControllerConfiguration *config = (DmocMotorControllerConfiguration *)getConfiguration();
+    if (speedActual < config->regenTaperLower) torqueRequested = 0;
+    else {        
+        int32_t range = config->regenTaperUpper - config->regenTaperLower; //next phase is to not hard code this
+        int32_t taper = speedActual - config->regenTaperLower;
+        int32_t calc = (torqueRequested * taper) / range;
+        torqueRequested = (int16_t)calc;
+    }
 }
 
 //Torque limits
@@ -292,11 +304,11 @@ void DmocMotorController::sendCmd2() {
     if (actualState == ENABLE) { //don't even try sending torque commands until the DMOC reports it is ready
         if (selectedGear == DRIVE) {
             torqueRequested = (((long) throttleRequested * (long) config->torqueMax) / 1000L);
-            if (speedActual < 200 && torqueRequested < 0) torqueRequested = 0;
+            if (speedActual < config->regenTaperUpper && torqueRequested < 0) taperRegen();
         }
         if (selectedGear == REVERSE) {
             torqueRequested = (((long) throttleRequested * -1 *(long) config->torqueMax) / 1000L);//If reversed, regen becomes positive torque and positive pedal becomes regen.  Let's reverse this by reversing the sign.  In this way, we'll have gradually diminishing positive torque (in reverse, regen) followed by gradually increasing regen (positive torque in reverse.)
-            if (speedActual < 200 && torqueRequested > 0) torqueRequested = 0;
+            if (speedActual < config->regenTaperUpper && torqueRequested > 0) taperRegen();
         }        
     }
 
@@ -335,7 +347,7 @@ void DmocMotorController::sendCmd2() {
 
     canHandlerEv.sendFrame(output);
     timestamp();
-    Logger::debug("Torque command: MSB: %X  LSB: %X  %X  %X  %X  %X  %X  CRC: %X",output.data.bytes[0],
+    Logger::debug("Torque command: %X  %X  %X  %X  %X  %X  %X  CRC: %X",output.data.bytes[0],
                   output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],output.data.bytes[5],output.data.bytes[6],output.data.bytes[7]);
 
 }

@@ -581,9 +581,14 @@ void MotorController::loadConfiguration() {
         prefsHandler->read(EEMC_REV_LIGHT, &config->revLight);
         prefsHandler->read(EEMC_ENABLE_IN, &config->enableIn);
         prefsHandler->read(EEMC_REVERSE_IN, &config->reverseIn);
+        prefsHandler->read(EEMC_TAPER_UPPER, &config->regenTaperUpper);
+        prefsHandler->read(EEMC_TAPER_LOWER, &config->regenTaperLower);
         prefsHandler->read(EESYS_CAPACITY, &config->capacity);
-
-
+        if (config->regenTaperLower < 0 || config->regenTaperLower > 10000 ||
+            config->regenTaperUpper < config->regenTaperLower || config->regenTaperUpper > 10000) {
+            config->regenTaperLower = RegenTaperLower;
+            config->regenTaperUpper = RegenTaperUpper;
+        }
     }
     else { //checksum invalid. Reinitialize values and store to EEPROM
         config->speedMax = MaxRPMValue;
@@ -603,7 +608,8 @@ void MotorController::loadConfiguration() {
         config->revLight = RevLight;
         config->enableIn = EnableIn;
         config->reverseIn = ReverseIn;
-
+        config->regenTaperLower = RegenTaperLower;
+        config->regenTaperUpper = RegenTaperUpper;
     }
     //DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
 
@@ -632,8 +638,9 @@ void MotorController::saveConfiguration() {
     prefsHandler->write(EEMC_REV_LIGHT, config->revLight);
     prefsHandler->write(EEMC_ENABLE_IN, config->enableIn);
     prefsHandler->write(EEMC_REVERSE_IN, config->reverseIn);
+    prefsHandler->write(EEMC_TAPER_LOWER, config->regenTaperLower);
+    prefsHandler->write(EEMC_TAPER_UPPER, config->regenTaperUpper);
     prefsHandler->write(EESYS_CAPACITY, config->capacity);
-
 
     prefsHandler->saveChecksum();
     loadConfiguration();

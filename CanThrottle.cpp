@@ -147,7 +147,7 @@ bool CanThrottle::validateSignal(RawSignalData* rawSignal) {
     return true;
 }
 
-uint16_t CanThrottle::calculatePedalPosition(RawSignalData* rawSignal) {
+int16_t CanThrottle::calculatePedalPosition(RawSignalData* rawSignal) {
     CanThrottleConfiguration *config = (CanThrottleConfiguration *) getConfiguration();
 
     return normalizeAndConstrainInput(rawSignal->input1, config->minimumLevel1, config->maximumLevel1);
