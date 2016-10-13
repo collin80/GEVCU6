@@ -64,14 +64,17 @@ public:
     static bool setDeviceStatus(uint16_t device, bool enabled);
     static void dumpDeviceTable();
     static void initDevTable();
+    void checkTableValidity();
 
 private:
     uint32_t base_address; //base address for the parent device
     uint32_t lkg_address;
+    uint16_t deviceID; //device ID of the device that registered this pref handler instance
     bool use_lkg; //use last known good config?
     bool enabled;
     int position; //position within the device table
-    void checkTableValidity();
+    
+    static void processAutoEntry(uint16_t val, uint16_t pos);
 };
 
 #endif

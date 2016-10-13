@@ -76,15 +76,30 @@ void PrefHandler::checkTableValidity()
     initDevTable();
 }
 
+void PrefHandler::processAutoEntry(uint16_t val, uint16_t pos)
+{
+    if (val < 0x7FFF) val = val | 0x8000;
+        else val = 0;        
+    memCache->Write(EE_DEVICE_TABLE + (2 * pos), val);    
+}
+
 void PrefHandler::initDevTable()
 {
     uint16_t id;
     
     Logger::console("Initializing EEPROM device table");
-
+    
+    //First six are done from entries in config.h to automatically enable those devices
+    processAutoEntry(AUTO_ENABLE_DEV1, 1);
+    processAutoEntry(AUTO_ENABLE_DEV2, 2);
+    processAutoEntry(AUTO_ENABLE_DEV3, 3);
+    processAutoEntry(AUTO_ENABLE_DEV4, 4);
+    processAutoEntry(AUTO_ENABLE_DEV5, 5);
+    processAutoEntry(AUTO_ENABLE_DEV6, 6);
+        
     //initialize table with zeros
     id = 0;
-    for (int x = 1; x < 64; x++) {
+    for (int x = 7; x < 64; x++) {
         memCache->Write(EE_DEVICE_TABLE + (2 * x), id);
     }
 
@@ -94,13 +109,13 @@ void PrefHandler::initDevTable()
 }
 
 //Given a device ID we must search the 64 entry table found in EEPROM to see if the device
-//has a spot in EEPROM. If it does not then
+//has a spot in EEPROM. If it does not then add it
 PrefHandler::PrefHandler(DeviceId id_in) {
     uint16_t id;
 
     enabled = false;
 
-    //checkTableValidity();
+    checkTableValidity();
 
     for (int x = 1; x < 64; x++) {
         memCache->Read(EE_DEVICE_TABLE + (2 * x), &id);
@@ -109,6 +124,7 @@ PrefHandler::PrefHandler(DeviceId id_in) {
             lkg_address = EE_MAIN_OFFSET;
             if (id & 0x8000) enabled = true;
             position = x;
+            deviceID = (uint16_t)id_in;
             Logger::info("Device ID: %X was found in device table at entry: %i", (int)id_in, x);
             return;
         }
@@ -125,6 +141,9 @@ PrefHandler::PrefHandler(DeviceId id_in) {
             id = (int)id_in;
             memCache->Write(EE_DEVICE_TABLE + (2*x), id);
             position = x;
+            deviceID = (uint16_t)id_in;
+            //immediately store our ID into the proper place
+            memCache->Write(EE_DEVICE_ID + base_address + lkg_address, deviceID);
             Logger::info("Device ID: %X was placed into device table at entry: %i", (int)id, x);
             return;
         }
@@ -220,12 +239,31 @@ void PrefHandler::saveChecksum() {
 bool PrefHandler::checksumValid() {
     //get checksum from EEPROM and calculate the current checksum to see if they match
     uint8_t stored_chk, calc_chk;
+    uint16_t stored_id;
 
     memCache->Read(EE_CHECKSUM + base_address + lkg_address, &stored_chk);
+    
     calc_chk = calcChecksum();
-    Logger::info("Stored Checksum: %X Calc: %X", stored_chk, calc_chk);
+    
+    if (calc_chk != stored_chk)
+    {
+        Logger::error("Checksum didn't match        Stored: %X Calc: %X", stored_chk, calc_chk);
+        return false;
+    }    
+    
+    memCache->Read(EE_DEVICE_ID + base_address + lkg_address, &stored_id);
+    if (stored_id == 0xFFFF) //didn't used to store the device ID properly so fix that
+    {
+        stored_id = deviceID;
+        memCache->Write(EE_DEVICE_ID + base_address + lkg_address, deviceID);
+    }
+    if (stored_id != deviceID)
+    {
+        Logger::error("ID mismatch in EEPROM. Resetting settings.        Stored: %X Proper: %X", stored_id, deviceID);
+        return false;
+    }
 
-    return (stored_chk == calc_chk);
+    return true;
 }
 
 void PrefHandler::forceCacheWrite()

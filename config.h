@@ -35,8 +35,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <due_can.h>
 
-#define CFG_BUILD_NUM	1057      //increment this every time a git commit is done. 
-#define CFG_VERSION "GEVCU 2016-09-25"
+#define CFG_BUILD_NUM	1058      //increment this every time a git commit is done. 
+#define CFG_VERSION "GEVCU 2016-10-13"
 
 /*
  * SERIAL CONFIGURATION
@@ -170,7 +170,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CAN_ANALOG_INPUTS 0x608
 #define CAN_DIGITAL_INPUTS 0x609
 
-
+//These allow the code to automatically configure up to 6 devices when the device table is initialized
+//Set to 0xFFFF to not set a device. Device numbers used here are found in DeviceTypes.h
+#define AUTO_ENABLE_DEV1    0x1000 //DMOC645
+#define AUTO_ENABLE_DEV2    0x1031 //pot throttle
+#define AUTO_ENABLE_DEV3    0x1041 //Adafruit BLE
+#define AUTO_ENABLE_DEV4    0xFFFF
+#define AUTO_ENABLE_DEV5    0xFFFF
+#define AUTO_ENABLE_DEV6    0xFFFF
 
 #endif /* CONFIG_H_ */
 
