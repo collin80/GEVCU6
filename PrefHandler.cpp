@@ -69,10 +69,18 @@ void PrefHandler::dumpDeviceTable()
 void PrefHandler::checkTableValidity()
 {
     uint16_t id;
+    uint8_t failures = 0;
 
-    memCache->Read(EE_DEVICE_TABLE, &id);
-    if (id == 0xDEAD) return;
+    while (failures < 3)
+    {
+        memCache->Read(EE_DEVICE_TABLE, &id);
+        if (id == 0xDEAD) return;
+        failures++;
+        delay(5); //just a small delay
+        memCache->InvalidateAll(); //clear the cache so the next read is from EEPROM not the cache
+    }
 
+    //if there were three failures in a row then we have to assume that the device table really is gone
     initDevTable();
 }
 

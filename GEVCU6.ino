@@ -184,10 +184,10 @@ void setup() {
 	sysPrefs = new PrefHandler(SYSTEM);
 	if (!sysPrefs->checksumValid()) 
         {
-	      Logger::info("Initializing EEPROM");
+	      Logger::info("Initializing system EEPROM settings");
 	      initSysEEPROM();
 	    } 
-        else {Logger::info("Using existing EEPROM values");}//checksum is good, read in the values stored in EEPROM
+        else {Logger::info("Using existing EEPROM system values");}//checksum is good, read in the values stored in EEPROM
 
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
