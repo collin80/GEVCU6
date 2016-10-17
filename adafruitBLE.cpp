@@ -160,6 +160,15 @@ ADAFRUITBLE::ADAFRUITBLE() {
     //instantiate more than once. So, don't do it. But, GEVCU doesn't do it so we're OK
     //even though this is really kludgey. Ignore that. Nothing to see here.
     adaRef = this;
+    
+    setNewBLEState(BLE_STATE_STARTUP);
+}
+
+void ADAFRUITBLE::setNewBLEState(BLE_STATE newState)
+{
+    bleState = newState;
+    subState = 0;
+    Logger::debug("Set new BLE state: %i", newState);
 }
 
 /*
@@ -190,91 +199,177 @@ void ADAFRUITBLE::setup() {
     
     //need to wait 1 second after begin, done via polling instead of a hard delay.
     resetTime = millis();
-    didResetInit = false;
+    isWaiting = false;
+    needResetCmd = true;
     
     tickHandler.attach(this, CFG_TICK_INTERVAL_BLE);
     
-    attachInterrupt(digitalPinToInterrupt(27), BLEInterrupt, RISING);
 }
 
-void BLEInterrupt()
+void ADAFRUITBLE::gotLine(char *txtLine)
 {
-    //SerialUSB.println("Y!");
+    Logger::debug("Got a new line: %s", txtLine);
+}
+
+void ADAFRUITBLE::cmdComplete(bool OK)
+{
+    Logger::debug("Cmd completed while in state %i", bleState);
+    isWaiting = false;
+    switch (bleState)
+    {
+    case BLE_STATE_STARTUP:
+        break;
+    case BLE_STATE_FACTORY_RESET:
+        break;
+    case BLE_STATE_SET_POWERLVL:
+        if (OK) setNewBLEState(BLE_STATE_SET_DEVNAME);
+        else Logger::debug("Error setting power level!");
+        break;
+    case BLE_STATE_SET_DEVNAME:
+        if (OK) setNewBLEState(BLE_STATE_ADD_SERVICE);
+        else Logger::debug("Error setting device name!");
+        break;
+    case BLE_STATE_ADD_SERVICE:
+        if (OK) setNewBLEState(BLE_STATE_ADD_CHARS);
+        else Logger::debug("Error adding GEVCU service!");
+        break;
+    case BLE_STATE_ADD_CHARS:
+        if (OK) subState++;
+        else Logger::debug("Error setting characteristics!");
+        break;
+    case BLE_STATE_SET_ADV_DATA:
+        if (OK) setNewBLEState(BLE_STATE_SOFT_RESET);
+        else Logger::debug("Error setting advertising data!");        
+        break;
+    case BLE_STATE_SOFT_RESET:
+        break;
+    case BLE_STATE_DISABLE_ECHO:
+        if (OK) setNewBLEState(BLE_STATE_SET_CALLBACKS);
+        else Logger::debug("Error disabling echo!");
+        break;
+    case BLE_STATE_SET_CALLBACKS:
+        if (OK) subState++;
+        else Logger::debug("Error setting callbacks!");
+        break;
+    case BLE_STATE_IDLE:
+        break;
+    case BLE_STATE_SET_CHAR:
+        break;
+    case BLE_STATE_GET_CHAR:
+        break;        
+    }
+    //transferUpdates();
 }
 
 void ADAFRUITBLE::setupBLEservice()
-{
-//Very important.  Will not work with values less than 5.  This slows down transmission to prevent overflowing 
-//very small UART buffer in nRF chip.  If errors received, try increasing this value.
-//This command only applies to UART version of device.  If SPI selected, comment out
-
-    //UART version only comment out for SPI version
-    if (BLETYPE == 2)
-    {
-        //ble.setInterCharWriteDelay(5);        
-    }
-    
-    Logger::debug("Factory Resetting BLE");
-    ble.factoryReset();
-  
-    //Set peripheral transmit power level -40 minimum -20 -16 -12 -8 -4 0 4 maximum
-    if (! ble.sendCommandCheckOK(F("AT+BLEPOWERLEVEL=4")) ) 
-    {
-        Logger::error(ADABLUE, "Could not set device power level...");
-        return;
-    }
-
-    //Set peripheral name
-    if (! ble.sendCommandCheckOK(F("AT+GAPDEVNAME=GEVCU 6.2 ECU")) ) 
-    {
-        Logger::error(ADABLUE, "Could not set device name...");
-        return;
-    }
-  
-    //Set service ID
-    ServiceId = gatt.addService(0x3100);
-    if (ServiceId == 0) 
-    {
-        Logger::error(ADABLUE, "Could not add service....");   
-        return;
-    }
-    else Logger::debug(ADABLUE, "Service ID: %i", ServiceId);
-
-/* 
-    PROPERTIES: The 8-bit characteristic properties field, as defined by the Bluetooth SIG. The following values can be used:
-      0x02 - Read
-      0x04 - Write Without Response
-      0x08 - Write
-      0x10 - Notify
-      0x20 - Indicate
-
-    DATATYPE: This argument indicates the data type stored in the characteristic, and is used to help parse data properly.  
-     It can be one of the following values:
-      AUTO (0, default)
-      STRING (1)
-      BYTEARRAY (2)
-      INTEGER (3)   
-*/
-    int charCounter = 0;
-    Characteristic charact = characteristics[charCounter];
-    while (charact.minSize != 0)
-    {
-        MeasureCharId[charCounter] = gatt.addCharacteristic(0x3101 + charCounter, charact.properties, charact.minSize, charact.maxSize, charact.dataType, charact.descript, &charact.present);
-        if (MeasureCharId[charCounter] == 0) 
-        {
-            Logger::error(ADABLUE, "Could not add characteristic %x", 0x3101 + charCounter);
-            //return;            
+{   
+    Characteristic charact;
+    switch (bleState) {
+    case BLE_STATE_FACTORY_RESET:    
+        if (needResetCmd) { 
+            needResetCmd = false;
+            Logger::debug("Factory Resetting BLE");
+            ble.detachObj(); //can't stay connected while it is rebooting
+            gatt.clear();
+            resetTime = millis();        
         }
-        else Logger::debug(ADABLUE, "Added characteristic %x id %x", 0x3101 + charCounter, MeasureCharId[charCounter]);
-        charact = characteristics[++charCounter];
-    }           
-    
-    /* Add the  Service to the advertising data (needed for Nordic apps to detect the service) */
-    ble.sendCommandCheckOK( F("AT+GAPSETADVDATA=02-01-06-05-02-00-31-10-31") );
+        break;
+    case BLE_STATE_SET_POWERLVL:
+        //Set peripheral transmit power level -40 minimum -20 -16 -12 -8 -4 0 4 maximum
+        Logger::debug("Sending power level cmd");
+        ble.sendCommandCheckOK(F("AT+BLEPOWERLEVEL=4"));
+        isWaiting = true;
+        break;
+    case BLE_STATE_SET_DEVNAME:
+        //Set peripheral name
+        Logger::debug("Sending device name cmd");
+        ble.sendCommandCheckOK(F("AT+GAPDEVNAME=GEVCU 6.2 ECU"));
+        isWaiting = true;
+        break;
+    case BLE_STATE_ADD_SERVICE:
+        Logger::debug("Sending add service cmd");
+        gatt.addService(0x3100);
+        isWaiting = true;
+        break;
+    case BLE_STATE_ADD_CHARS:
+        /* 
+        PROPERTIES: The 8-bit characteristic properties field, as defined by the Bluetooth SIG. The following values can be used:
+        0x02 - Read
+        0x04 - Write Without Response
+        0x08 - Write
+        0x10 - Notify
+        0x20 - Indicate
 
-    Logger::debug("Resetting BLE to enable new settings.");
-    /* Reset the device for the new service setting changes to take effect */
-    ble.reset();
+        DATATYPE: This argument indicates the data type stored in the characteristic, and is used to help parse data properly.  
+        It can be one of the following values:
+        AUTO (0, default)
+        STRING (1)
+        BYTEARRAY (2)
+        INTEGER (3)   
+        */
+        charact = characteristics[subState];
+        if (charact.minSize != 0)
+        {
+            Logger::debug("Sending characteristic definition");
+            gatt.addCharacteristic(0x3101 + subState, charact.properties, charact.minSize, charact.maxSize, charact.dataType, charact.descript, &charact.present);    
+            isWaiting = true;
+        }
+        else setNewBLEState(BLE_STATE_SET_ADV_DATA);
+        break;
+    case BLE_STATE_SET_ADV_DATA:
+        /* Add the  Service to the advertising data (needed for Nordic apps to detect the service) */
+        Logger::debug("Sending gap advert data cmd");
+        ble.sendCommandCheckOK( F("AT+GAPSETADVDATA=02-01-06-05-02-00-31-10-31") );    
+        isWaiting = true;
+        break;
+    case BLE_STATE_SOFT_RESET:
+        Logger::debug("Resetting BLE to enable new settings.");
+        /* Reset the device for the new service setting changes to take effect */
+        ble.reset();
+        isWaiting = true;
+        resetTime = millis();
+        break;        
+    case BLE_STATE_DISABLE_ECHO:
+        ble.echo(false);
+        isWaiting = true;
+        break;
+    case BLE_STATE_SET_CALLBACKS:
+        switch (subState)
+        {
+        case 0:
+            ble.setBleGattRxCallback(5, BleGattRX);
+            isWaiting = true;
+            break;
+        case 1:
+            ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x100");    
+            isWaiting = true;
+            break;
+        case 2:
+            ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x200");
+            isWaiting = true;
+            break;
+        case 3:
+            ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x400");    
+            isWaiting = true;
+            break;
+        case 4:
+            ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x800");    
+            isWaiting = true;
+            break;
+        case 5:
+            ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x1000");    
+            isWaiting = true;
+            break;
+        case 6:
+            ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x2000");    
+            isWaiting = true;
+            break;
+        case 7:
+            setNewBLEState(BLE_STATE_IDLE);
+            break;
+        }
+        break;
+    }
 }
 
 void ADAFRUITBLE::dumpRawData(uint8_t* data, int len)
@@ -286,235 +381,36 @@ void ADAFRUITBLE::dumpRawData(uint8_t* data, int len)
 }
 
 /*
- * Transfers any changed characteristics over SPI to the BLE module. transCounter is used
- * to periodically transfer each characteristic even if it isn't set as changed. This is because
- * sometimes updates get lost either on our side or the BLE side and so rarely changing values
- * can sometimes get lost if you don't occassionally update each characteristic to make sure it's
- * still fresh.
- */
-void ADAFRUITBLE::transferUpdates()
-{
-    static int transCounter = 0;
-    
-    if (needParamReload) transCounter++;
-    
-    if (bleTrqReqAct.doUpdate != 0 || transCounter == 2)
-    {
-        bleTrqReqAct.doUpdate = 0;
-        if (!gatt.setChar(2, (uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 1))
-        {
-            Logger::error("Could not update bleTrqReqAct 1");
-        }
-        else Logger::debug(ADABLUE, "Updated bleTrqReqAct 1");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 1);
-    }
-    
-    if (bleThrBrkLevels.doUpdate != 0 || transCounter == 4)
-    {
-        bleThrBrkLevels.doUpdate = 0;
-        if (!gatt.setChar(3, (uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 1))
-        {
-            Logger::error("Could not update bleThrBrkLevels 2");
-        }
-
-        else Logger::debug(ADABLUE, "Updated bleThrBrkLevels 2");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 1);
-    }
-    
-    if (bleSpeeds.doUpdate != 0 || transCounter == 6)
-    {
-        bleSpeeds.doUpdate = 0;
-        if (!gatt.setChar(4, (uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 1))
-        {
-            Logger::error("Could not update bleSpeeds 3");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleSpeeds 3");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 1);
-    }
-    
-    if (bleModes.doUpdate != 0  || transCounter == 8)
-    {
-        bleModes.doUpdate = 0;
-        if (!gatt.setChar(5, (uint8_t *)&bleModes, sizeof(bleModes) - 1))
-        {
-            Logger::error("Could not update bleModes 4");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleModes 4");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleModes, sizeof(bleModes) - 1);
-    }
-    
-    if (blePowerStatus.doUpdate != 0  || transCounter == 10)
-    {
-        blePowerStatus.doUpdate = 0;
-        if (!gatt.setChar(6, (uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 1))
-        {
-            Logger::error("Could not update blePowerStatus 5");
-        }            
-        else Logger::debug(ADABLUE, "Updated blePowerStatus 5");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 1);
-    }
-    
-    if (bleBitFields.doUpdate != 0  || transCounter == 12)
-    {
-        bleBitFields.doUpdate = 0;
-        if (!gatt.setChar(7, (uint8_t *)&bleBitFields, sizeof(bleBitFields) - 1))
-        {
-            Logger::error("Could not update bleBitFields 6");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleBitFields 6");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleBitFields, sizeof(bleBitFields) - 1);
-    }
-    
-    if (bleTemperatures.doUpdate != 0  || transCounter == 14)
-    {
-        bleTemperatures.doUpdate = 0;
-        if (!gatt.setChar(8, (uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 1))
-        {
-            Logger::error("Could not update bleTemperatures 7");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleTemperatures 7");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 1);
-    }
-     
-    if (bleDigIO.doUpdate != 0  || transCounter == 16)
-    {
-        bleDigIO.doUpdate = 0;
-        if (!gatt.setChar(9, (uint8_t *)&bleDigIO, sizeof(bleDigIO) - 1))
-        {
-            Logger::error("Could not update bleDigIO 8");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleDigIO 8");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleDigIO, sizeof(bleDigIO) - 1);
-    }
-        
-    if (bleThrottleIO.doUpdate != 0  || transCounter == 18)
-    {
-        bleThrottleIO.doUpdate = 0;
-        if (!gatt.setChar(10, (uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 1))
-        {
-            Logger::error("Could not update bleThrottleIO 9");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleThrottleIO 9");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 1);
-    }
-    
-    if (bleThrottleMap.doUpdate != 0  || transCounter == 20)
-    {
-        bleThrottleMap.doUpdate = 0;
-        if (!gatt.setChar(11, (uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 1))
-        {
-            Logger::error("Could not update bleThrottleMap 10");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleThrottleMap 10");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 1);
-    }    
-
-    if (bleBrakeParam.doUpdate != 0  || transCounter == 22)
-    {
-        bleBrakeParam.doUpdate = 0;
-        if (!gatt.setChar(12, (uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 1))
-        {
-            Logger::error("Could not update bleBrakeParam 11");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleBrakeParam 11");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 1);
-    }
-    
-    if (bleMaxParams.doUpdate != 0  || transCounter == 24)
-    {
-        bleMaxParams.doUpdate = 0;
-        if (!gatt.setChar(13, (uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 1))
-        {
-            Logger::error("Could not update bleMaxParams 12");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleMaxParams 12");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 1);
-    }
-    
-    if (bleDeviceEnable.doUpdate != 0  || transCounter > 26)
-    {
-        bleDeviceEnable.doUpdate = 0;
-        transCounter = 0; //have to reset it at the last characteristic which is currently this one.
-        if (!gatt.setChar(14, (uint8_t *)&bleDeviceEnable, sizeof(bleDeviceEnable) - 1))
-        {
-            Logger::error("Could not update bleDeviceEnable 13");
-        }            
-        else Logger::debug(ADABLUE, "Updated bleDeviceEnable 13");
-        if (!bOkToWrite) okWriteCounter++;
-        //dumpRawData((uint8_t *)&bleDeviceEnable, sizeof(bleDeviceEnable) - 1);        
-        needParamReload = false;
-    }
-}
-
-/*
  * Periodic updates of parameters to ichip RAM.
  * Also query for changed parameters of the config page.
  */
 //TODO: See the processing function below for a more detailed explanation - can't send so many setParam commands in a row
 void ADAFRUITBLE::handleTick() {
     uint32_t ms = millis();
-    
-    if ( (ms > (resetTime + 1100)) && !didResetInit )
-    {
-        ble.echo(false);
-    
-        Logger::debug("Setting GATT callback 4");
-        ble.setBleGattRxCallback(5, BleGattRX);
-    
-        //1  2  3  4  5     6     7     8     9      10     11     12     13
-        //1, 2, 4, 8, 0x10, 0x20, 0x40, 0x80, 0x100  0x200  0x400  0x800  0x1000
-        Logger::debug("Setting GATT callback 8");
-        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x100")) //MeasureCharId[8]
-        {
-            Logger::error("FAILED!");
-        }
 
-        Logger::debug("Setting GATT callback 9");
-        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x200")) //MeasureCharId[9]
-        {
-            Logger::error("FAILED!");
+    if (isWaiting) return;
+
+    if ( ms > (resetTime + 1100) )
+    {
+        if (bleState == BLE_STATE_SOFT_RESET) {
+            ble.attachObj(this);
+            setNewBLEState(BLE_STATE_DISABLE_ECHO);
+        }    
+        if (bleState == BLE_STATE_FACTORY_RESET) {
+            ble.attachObj(this);
+            setNewBLEState(BLE_STATE_SET_POWERLVL);
         }
-    
-        Logger::debug("Setting GATT callback 10");
-        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x400")) //MeasureCharId[10]
-        {
-            Logger::error("FAILED!");
-        }
-    
-        Logger::debug("Setting GATT callback 11");
-        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x800")) //MeasureCharId[11]
-        {
-            Logger::error("FAILED!");
-        }
-    
-        Logger::debug("Setting GATT callback 12");
-        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x1000")) //MeasureCharId[12]
-        {
-            Logger::error("FAILED!");
-        } 
-    
-        Logger::debug("Setting GATT callback 13");
-        if (!ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x2000")) //MeasureCharId[13]
-        {
-            Logger::error("FAILED!");
-        } 
-        Logger::debug("Done with callbacks");
-        didResetInit = true;
+        if (bleState == BLE_STATE_STARTUP) {
+            ble.attachObj(this);
+            setNewBLEState(BLE_STATE_FACTORY_RESET);
+            //setNewBLEState(BLE_STATE_SET_POWERLVL);
+        }    
     }    
     
-    if (ms < (resetTime + 2000)) return;
+    if (bleState < BLE_STATE_IDLE) {
+        setupBLEservice();
+        return;
+    }
     
     MotorController* motorController = deviceManager.getMotorController();
     Throttle *accelerator = deviceManager.getAccelerator();
@@ -536,7 +432,7 @@ void ADAFRUITBLE::handleTick() {
     if (motorController)
         motorConfig = (MotorControllerConfiguration *)motorController->getConfiguration();  
         
-    ble.update(200); //check for updates every 200ms. Does nothing until 200ms has passed since last time.
+    //ble.update(200); //check for updates every 200ms. Does nothing until 200ms has passed since last time.
 
     if (paramCache.timeRunning != (ms / 1000))
     {
@@ -962,6 +858,194 @@ void ADAFRUITBLE::handleTick() {
     transferUpdates(); //send out any updates required
 }
 
+/*
+ * Transfers any changed characteristics over SPI to the BLE module. transCounter is used
+ * to periodically transfer each characteristic even if it isn't set as changed. This is because
+ * sometimes updates get lost either on our side or the BLE side and so rarely changing values
+ * can sometimes get lost if you don't occassionally update each characteristic to make sure it's
+ * still fresh.
+ */
+void ADAFRUITBLE::transferUpdates()
+{
+    static int transCounter = 0;
+    
+    if (ble.isWaitingForReply()) return;
+    
+    if (needParamReload) transCounter++;
+    
+    if (bleTrqReqAct.doUpdate != 0 || transCounter == 2)
+    {
+        bleTrqReqAct.doUpdate = 0;
+        if (!gatt.setChar(2, (uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 1))
+        {
+            Logger::error("Could not update bleTrqReqAct 1");
+        }
+        else Logger::debug(ADABLUE, "Updated bleTrqReqAct 1");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleTrqReqAct, sizeof(bleTrqReqAct) - 1);
+        return;
+    }
+    
+    if (bleThrBrkLevels.doUpdate != 0 || transCounter == 4)
+    {
+        bleThrBrkLevels.doUpdate = 0;
+        if (!gatt.setChar(3, (uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 1))
+        {
+            Logger::error("Could not update bleThrBrkLevels 2");
+        }
+
+        else Logger::debug(ADABLUE, "Updated bleThrBrkLevels 2");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleThrBrkLevels, sizeof(bleThrBrkLevels) - 1);
+        return;
+    }
+    
+    if (bleSpeeds.doUpdate != 0 || transCounter == 6)
+    {
+        bleSpeeds.doUpdate = 0;
+        if (!gatt.setChar(4, (uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 1))
+        {
+            Logger::error("Could not update bleSpeeds 3");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleSpeeds 3");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleSpeeds, sizeof(bleSpeeds) - 1);
+        return;
+    }
+    
+    if (bleModes.doUpdate != 0  || transCounter == 8)
+    {
+        bleModes.doUpdate = 0;
+        if (!gatt.setChar(5, (uint8_t *)&bleModes, sizeof(bleModes) - 1))
+        {
+            Logger::error("Could not update bleModes 4");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleModes 4");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleModes, sizeof(bleModes) - 1);
+        return;
+    }
+    
+    if (blePowerStatus.doUpdate != 0  || transCounter == 10)
+    {
+        blePowerStatus.doUpdate = 0;
+        if (!gatt.setChar(6, (uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 1))
+        {
+            Logger::error("Could not update blePowerStatus 5");
+        }            
+        else Logger::debug(ADABLUE, "Updated blePowerStatus 5");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&blePowerStatus, sizeof(blePowerStatus) - 1);
+        return;
+    }
+    
+    if (bleBitFields.doUpdate != 0  || transCounter == 12)
+    {
+        bleBitFields.doUpdate = 0;
+        if (!gatt.setChar(7, (uint8_t *)&bleBitFields, sizeof(bleBitFields) - 1))
+        {
+            Logger::error("Could not update bleBitFields 6");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleBitFields 6");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleBitFields, sizeof(bleBitFields) - 1);
+        return;
+    }
+    
+    if (bleTemperatures.doUpdate != 0  || transCounter == 14)
+    {
+        bleTemperatures.doUpdate = 0;
+        if (!gatt.setChar(8, (uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 1))
+        {
+            Logger::error("Could not update bleTemperatures 7");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleTemperatures 7");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleTemperatures, sizeof(bleTemperatures) - 1);
+        return;
+    }
+     
+    if (bleDigIO.doUpdate != 0  || transCounter == 16)
+    {
+        bleDigIO.doUpdate = 0;
+        if (!gatt.setChar(9, (uint8_t *)&bleDigIO, sizeof(bleDigIO) - 1))
+        {
+            Logger::error("Could not update bleDigIO 8");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleDigIO 8");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleDigIO, sizeof(bleDigIO) - 1);
+        return;
+    }
+        
+    if (bleThrottleIO.doUpdate != 0  || transCounter == 18)
+    {
+        bleThrottleIO.doUpdate = 0;
+        if (!gatt.setChar(10, (uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 1))
+        {
+            Logger::error("Could not update bleThrottleIO 9");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleThrottleIO 9");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleThrottleIO, sizeof(bleThrottleIO) - 1);
+        return;
+    }
+    
+    if (bleThrottleMap.doUpdate != 0  || transCounter == 20)
+    {
+        bleThrottleMap.doUpdate = 0;
+        if (!gatt.setChar(11, (uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 1))
+        {
+            Logger::error("Could not update bleThrottleMap 10");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleThrottleMap 10");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleThrottleMap, sizeof(bleThrottleMap) - 1);
+        return;
+    }    
+
+    if (bleBrakeParam.doUpdate != 0  || transCounter == 22)
+    {
+        bleBrakeParam.doUpdate = 0;
+        if (!gatt.setChar(12, (uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 1))
+        {
+            Logger::error("Could not update bleBrakeParam 11");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleBrakeParam 11");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleBrakeParam, sizeof(bleBrakeParam) - 1);
+        return;
+    }
+    
+    if (bleMaxParams.doUpdate != 0  || transCounter == 24)
+    {
+        bleMaxParams.doUpdate = 0;
+        if (!gatt.setChar(13, (uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 1))
+        {
+            Logger::error("Could not update bleMaxParams 12");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleMaxParams 12");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleMaxParams, sizeof(bleMaxParams) - 1);
+        return;
+    }
+    
+    if (bleDeviceEnable.doUpdate != 0  || transCounter > 26)
+    {
+        bleDeviceEnable.doUpdate = 0;
+        transCounter = 0; //have to reset it at the last characteristic which is currently this one.
+        if (!gatt.setChar(14, (uint8_t *)&bleDeviceEnable, sizeof(bleDeviceEnable) - 1))
+        {
+            Logger::error("Could not update bleDeviceEnable 13");
+        }            
+        else Logger::debug(ADABLUE, "Updated bleDeviceEnable 13");
+        if (!bOkToWrite) okWriteCounter++;
+        //dumpRawData((uint8_t *)&bleDeviceEnable, sizeof(bleDeviceEnable) - 1);        
+        needParamReload = false;
+        return;
+    }
+}
+
 void ADAFRUITBLE::checkGattChar(uint8_t charact)
 {
     uint16_t len;
@@ -1003,7 +1087,7 @@ char *ADAFRUITBLE::getTimeRunning() {
  */
 void ADAFRUITBLE::handleMessage(uint32_t messageType, void* message) {
     Device::handleMessage(messageType, message);  //Only matters if message is MSG_STARTUP
-
+    
     switch (messageType) {
 
     case MSG_SET_PARAM: {  //Sets a single parameter to a single value

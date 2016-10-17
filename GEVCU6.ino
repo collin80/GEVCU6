@@ -166,7 +166,7 @@ void setup() {
     pinMode(65, OUTPUT); //reset for BLE module
     digitalWrite(65, HIGH);
 	
-    //delay(2000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
+    delay(2500);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
     
     //SerialUSB.println(millis());
        
@@ -192,7 +192,8 @@ void setup() {
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
     Logger::console("LogLevel: %i", loglevel);
-	Logger::setLoglevel((Logger::LogLevel)loglevel);    
+	//Logger::setLoglevel((Logger::LogLevel)loglevel);
+    Logger::setLoglevel((Logger::LogLevel)0);
 	systemIO.setup();  
 	canHandlerEv.setup();
 	canHandlerCar.setup();
