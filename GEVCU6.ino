@@ -72,6 +72,11 @@ template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg);
 
 byte i = 0;
 
+void watchdogSetup(void)
+{
+  watchdogEnable(150);
+}
+
 //initializes all the system EEPROM values. Chances are this should be broken out a bit but
 //there is only one checksum check for all of them so it's simple to do it all here.
 
@@ -166,7 +171,10 @@ void setup() {
     pinMode(65, OUTPUT); //reset for BLE module
     digitalWrite(65, HIGH);
 	
-    delay(2500);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
+    //for (int c = 0; c < 100; c++) {
+    //    delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
+    //    watchdogReset();
+   // }
     
     //SerialUSB.println(millis());
        
@@ -192,8 +200,8 @@ void setup() {
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
     Logger::console("LogLevel: %i", loglevel);
-	//Logger::setLoglevel((Logger::LogLevel)loglevel);
-    Logger::setLoglevel((Logger::LogLevel)0);
+	Logger::setLoglevel((Logger::LogLevel)loglevel);
+    //Logger::setLoglevel((Logger::LogLevel)0);
 	systemIO.setup();  
 	canHandlerEv.setup();
 	canHandlerCar.setup();
@@ -219,6 +227,8 @@ void loop() {
 	serialConsole->loop();
 
     systemIO.pollInitialization();
+    
+    watchdogReset();
 }
 
 
