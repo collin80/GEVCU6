@@ -600,11 +600,12 @@ int32_t SystemIO::getSPIADCReading(int CS, int sensor)
     byt = SPI.transfer(0);
     result = result + (byt << 8);
     byt = SPI.transfer(0);
+    digitalWrite(CS, HIGH);
+    SPI.endTransaction();
+    
     result = result + byt;
     //now we've got the whole 24 bit value but it is a signed 24 bit value so we must sign extend
     if (result & (1 << 23)) result |= (255 << 24);
-    digitalWrite(CS, HIGH);
-    SPI.endTransaction();
     return result;
 }
 
