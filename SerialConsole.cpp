@@ -387,10 +387,10 @@ void SerialConsole::handleConfigCmd() {
         brakeConfig->minimumRegen = newValue;
         brake->saveConfiguration();
     }
-    else if (cmdString == String("B1ADC") && acceleratorConfig) {
+    else if (cmdString == String("B1ADC") && brakeConfig) {
         Logger::console("Setting Brake ADC pin to %i", newValue);
         brakeConfig->AdcPin1 = newValue;
-        accelerator->saveConfiguration();
+        brake->saveConfiguration();
     } else if (cmdString == String("B1MX") && brakeConfig) {
         Logger::console("Setting Brake Max to %i", newValue);
         brakeConfig->maximumLevel1 = newValue;
