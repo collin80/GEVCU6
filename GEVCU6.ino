@@ -170,11 +170,17 @@ void setup() {
     digitalWrite(64, HIGH);
     pinMode(65, OUTPUT); //reset for BLE module
     digitalWrite(65, HIGH);
+    
+    //Activate the supply monitor at 2.8v and make it hold the CPU in reset under that point
+    //That first value is 1.9V + the value for the supply threshold. So, 9 would be 2.8v, A would be 2.9v, etc
+    
+    //               Thresh  Enable   Force Reset
+    SUPC->SUPC_SMMR = 0xA | (1<<8) | (1<<12);
 	
-    //for (int c = 0; c < 100; c++) {
-    //    delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
-    //    watchdogReset();
-   // }
+    /*for (int c = 0; c < 100; c++) {
+        delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
+        watchdogReset();
+    }*/
     
     //SerialUSB.println(millis());
        
