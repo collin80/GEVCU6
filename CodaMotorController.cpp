@@ -244,6 +244,17 @@ void CodaMotorController::sendCmd1()
     else {
         torqueCommand+= torqueRequested/2;   //If at RPM limit, cut torque command in half.
     }
+    
+    if (speedActual < 1700 && torqueCommand < 32128) {
+        Logger::debug(CODAUQM, "Canceling regen at low speed");
+        int32_t working = torqueCommand - 32128; //remove bias;
+        int comp = speedActual - 200;
+        if (comp < 0) comp = 0;
+        working *= comp;
+        working /= 1500;
+        torqueCommand = 32128 + working; //limited regen request
+    }
+    
     output.data.bytes[3] = (torqueCommand & 0xFF00) >> 8;  //Stow torque command in bytes 2 and 3.
     output.data.bytes[2] = (torqueCommand & 0x00FF);
     output.data.bytes[4] = genCodaCRC(output.data.bytes[1], output.data.bytes[2], output.data.bytes[3]); //Calculate security byte
