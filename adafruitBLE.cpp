@@ -1144,7 +1144,12 @@ void ADAFRUITBLE::handleMessage(uint32_t messageType, void* message) {
         //sendCmd((char *)message);
         break;
     case 0xDEADBEEF:
-        setupBLEservice();
+        resetTime = millis();
+        isWaiting = false;
+        needResetCmd = true;
+        lastUpdateTime = 0;
+        gattCharsUpdated = 0;
+        setNewBLEState(BLE_STATE_STARTUP);
         break;        
     }
 }
