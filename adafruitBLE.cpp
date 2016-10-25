@@ -201,6 +201,8 @@ void ADAFRUITBLE::setup() {
     resetTime = millis();
     isWaiting = false;
     needResetCmd = true;
+    lastUpdateTime = 0;
+    gattCharsUpdated = 0;
     
     tickHandler.attach(this, CFG_TICK_INTERVAL_BLE);
     
@@ -209,10 +211,14 @@ void ADAFRUITBLE::setup() {
 void ADAFRUITBLE::gotLine(char *txtLine)
 {
     Logger::debug("Got a new line: %s", txtLine);
+    strcpy(incomingLine, txtLine);
 }
 
 void ADAFRUITBLE::cmdComplete(bool OK)
 {
+    uint32_t system_event, gatts_event;
+    char * p_comma = NULL;
+    
     Logger::debug("Cmd completed while in state %i", bleState);
     isWaiting = false;
     switch (bleState)
@@ -255,7 +261,19 @@ void ADAFRUITBLE::cmdComplete(bool OK)
         break;
     case BLE_STATE_SET_CHAR:
         break;
+    case BLE_STATE_CHECK_CALLBACKS:
+        system_event = strtoul(incomingLine, &p_comma, 16);
+        gatts_event  = strtoul(p_comma+1, NULL, 16);
+        gattCharsUpdated |= gatts_event;
+        break;        
     case BLE_STATE_GET_CHAR:
+        //the result is supposedly raw but what gets returned here?
+        char *cr = incomingLine;
+        while (*cr != 0) {
+            SerialUSB.print((uint8_t)*cr, HEX);
+            cr++;
+        }        
+        SerialUSB.println();
         break;        
     }
     //transferUpdates();
@@ -328,8 +346,10 @@ void ADAFRUITBLE::setupBLEservice()
         ble.reset();
         isWaiting = true;
         resetTime = millis();
+        setNewBLEState(BLE_STATE_SOFT_RESET2);
         break;        
     case BLE_STATE_DISABLE_ECHO:
+        Logger::debug("Disabling echo");
         ble.echo(false);
         isWaiting = true;
         break;
@@ -392,9 +412,9 @@ void ADAFRUITBLE::handleTick() {
 
     if ( ms > (resetTime + 1100) )
     {
-        if (bleState == BLE_STATE_SOFT_RESET) {
+        if (bleState == BLE_STATE_SOFT_RESET2) {
             ble.attachObj(this);
-            setNewBLEState(BLE_STATE_DISABLE_ECHO);
+            setNewBLEState(BLE_STATE_SET_CALLBACKS);
         }    
         if (bleState == BLE_STATE_FACTORY_RESET) {
             ble.attachObj(this);
@@ -412,6 +432,28 @@ void ADAFRUITBLE::handleTick() {
         return;
     }
     
+    //ble.update(200); //check for updates every 200ms. Does nothing until 200ms has passed since last time.
+    if (ms > (lastUpdateTime + 200)) {
+        //ble.sendCommandCheckOK(F("AT+EVENTSTATUS"));
+        //setNewBLEState(BLE_STATE_CHECK_CALLBACKS);
+        //isWaiting = true;
+        lastUpdateTime = millis();
+        return;
+    }
+    
+    //if there are gatt chars that were updated and we got here then nothing is waiting so go ahead and try to fetch one
+    if (gattCharsUpdated != 0) {
+        for (int c = 0; c < 30; c++) {
+            if (gattCharsUpdated & (1 << c)) {
+                gattCharsUpdated &= ~(1 << c);
+                gatt.getChar(c + 1);
+                setNewBLEState(BLE_STATE_GET_CHAR);
+                isWaiting = true;
+                return;
+            }
+        }
+    }
+
     MotorController* motorController = deviceManager.getMotorController();
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
@@ -432,8 +474,6 @@ void ADAFRUITBLE::handleTick() {
     if (motorController)
         motorConfig = (MotorControllerConfiguration *)motorController->getConfiguration();  
         
-    //ble.update(200); //check for updates every 200ms. Does nothing until 200ms has passed since last time.
-
     if (paramCache.timeRunning != (ms / 1000))
     {
         paramCache.timeRunning = ms / 1000;

@@ -211,12 +211,13 @@ enum BLE_STATE {
     BLE_STATE_ADD_CHARS, //5
     BLE_STATE_SET_ADV_DATA, //6
     BLE_STATE_SOFT_RESET, //7
-    BLE_STATE_DISABLE_ECHO, //8
-    BLE_STATE_SET_CALLBACKS, //9
-    BLE_STATE_IDLE, //10
-    BLE_STATE_SET_CHAR, //11
-    BLE_STATE_CHECK_CALLBACKS, //12
-    BLE_STATE_GET_CHAR //13
+    BLE_STATE_SOFT_RESET2, //8
+    BLE_STATE_DISABLE_ECHO, //9
+    BLE_STATE_SET_CALLBACKS, //10
+    BLE_STATE_IDLE, //11
+    BLE_STATE_SET_CHAR, //12
+    BLE_STATE_CHECK_CALLBACKS, //13
+    BLE_STATE_GET_CHAR //14
 };
 
 class ADAFRUITBLE : public Device, BLEListener {
@@ -247,10 +248,13 @@ private:
     int counter;
     uint32_t resetTime;
     boolean isWaiting;
+    uint32_t lastUpdateTime;
+    uint32_t gattCharsUpdated; //which gatt chars were updated on the remote side?
     boolean needResetCmd;
     BLE_STATE bleState;
     uint8_t subState;
     char buffer[30]; // a buffer for various string conversions
+    char incomingLine[80];
     ParamCache paramCache;
     boolean needParamReload;
     boolean bOkToWrite;
