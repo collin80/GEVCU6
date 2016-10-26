@@ -169,6 +169,7 @@ void ADAFRUITBLE::setNewBLEState(BLE_STATE newState)
     bleState = newState;
     subState = 0;
     Logger::debug("Set new BLE state: %i", newState);
+    resetTime = millis();
 }
 
 /*
@@ -180,7 +181,7 @@ void ADAFRUITBLE::setup() {
 
     tickHandler.detach(this);
 
-    tickCounter = 0;
+    tickCounter = 0;    
 
     paramCache.brakeNotAvailable = true;
         
@@ -198,7 +199,7 @@ void ADAFRUITBLE::setup() {
     ble.begin(false);  //True = verbose mode for debuggin.   
     
     //need to wait 1 second after begin, done via polling instead of a hard delay.
-    resetTime = millis();
+    setNewBLEState(BLE_STATE_STARTUP);
     isWaiting = false;
     needResetCmd = true;
     lastUpdateTime = 0;
@@ -212,6 +213,16 @@ void ADAFRUITBLE::gotLine(char *txtLine)
 {
     Logger::debug("Got a new line: %s", txtLine);
     strcpy(incomingLine, txtLine);
+    if (bleState == BLE_STATE_GET_CHAR) {
+        int sl = strlen(txtLine);
+        if (!strncmp(txtLine + sl - 2, "OK", 2)) {
+            txtLine[sl - 2] = 0;
+            cmdComplete(true);
+        }
+        else {
+            cmdComplete(false);
+        }
+    }
 }
 
 void ADAFRUITBLE::cmdComplete(bool OK)
@@ -219,7 +230,7 @@ void ADAFRUITBLE::cmdComplete(bool OK)
     uint32_t system_event, gatts_event;
     char * p_comma = NULL;
     
-    Logger::debug("Cmd completed while in state %i", bleState);
+    Logger::debug("Cmd completed as %T in state %i", OK, bleState);
     isWaiting = false;
     switch (bleState)
     {
@@ -265,15 +276,12 @@ void ADAFRUITBLE::cmdComplete(bool OK)
         system_event = strtoul(incomingLine, &p_comma, 16);
         gatts_event  = strtoul(p_comma+1, NULL, 16);
         gattCharsUpdated |= gatts_event;
+        setNewBLEState(BLE_STATE_IDLE);
         break;        
     case BLE_STATE_GET_CHAR:
-        //the result is supposedly raw but what gets returned here?
-        char *cr = incomingLine;
-        while (*cr != 0) {
-            SerialUSB.print((uint8_t)*cr, HEX);
-            cr++;
-        }        
-        SerialUSB.println();
+        //the line string is a raw version of the GATT data so present it forward as-is
+        gattRX(subState, (uint8_t *)incomingLine, strlen(incomingLine));
+        setNewBLEState(BLE_STATE_IDLE);
         break;        
     }
     //transferUpdates();
@@ -345,7 +353,6 @@ void ADAFRUITBLE::setupBLEservice()
         /* Reset the device for the new service setting changes to take effect */
         ble.reset();
         isWaiting = true;
-        resetTime = millis();
         setNewBLEState(BLE_STATE_SOFT_RESET2);
         break;        
     case BLE_STATE_DISABLE_ECHO:
@@ -357,7 +364,8 @@ void ADAFRUITBLE::setupBLEservice()
         switch (subState)
         {
         case 0:
-            ble.setBleGattRxCallback(5, BleGattRX);
+            ble.sendCommandCheckOK("AT+EVENTENABLE=0x0,0x10"); 
+            //ble.setBleGattRxCallback(5, BleGattRX);
             isWaiting = true;
             break;
         case 1:
@@ -407,6 +415,11 @@ void ADAFRUITBLE::dumpRawData(uint8_t* data, int len)
 //TODO: See the processing function below for a more detailed explanation - can't send so many setParam commands in a row
 void ADAFRUITBLE::handleTick() {
     uint32_t ms = millis();
+    
+    //first things first, if the previous command was supposed to reply 
+    //but has not for 1 second then assume it never will and unlock the ability
+    //to keep going.
+    if (isWaiting && (ms > (resetTime + 1000))) isWaiting = false;
 
     if (isWaiting) return;
 
@@ -434,9 +447,9 @@ void ADAFRUITBLE::handleTick() {
     
     //ble.update(200); //check for updates every 200ms. Does nothing until 200ms has passed since last time.
     if (ms > (lastUpdateTime + 200)) {
-        //ble.sendCommandCheckOK(F("AT+EVENTSTATUS"));
-        //setNewBLEState(BLE_STATE_CHECK_CALLBACKS);
-        //isWaiting = true;
+        ble.sendCommandCheckOK(F("AT+EVENTSTATUS"));
+        setNewBLEState(BLE_STATE_CHECK_CALLBACKS);
+        isWaiting = true;
         lastUpdateTime = millis();
         return;
     }
@@ -446,8 +459,9 @@ void ADAFRUITBLE::handleTick() {
         for (int c = 0; c < 30; c++) {
             if (gattCharsUpdated & (1 << c)) {
                 gattCharsUpdated &= ~(1 << c);
-                gatt.getChar(c + 1);
                 setNewBLEState(BLE_STATE_GET_CHAR);
+                subState = c + 1;
+                gatt.getChar(subState);                
                 isWaiting = true;
                 return;
             }
