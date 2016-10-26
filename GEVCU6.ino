@@ -60,6 +60,8 @@ Random comments on things that should be coded up soon:
 #include <DueTimer.h>
 #include <SPI.h>
 
+//#define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
+
 //RTC_clock rtc_clock(XTAL); //init RTC with the external 32k crystal as a reference
 
 //Evil, global variables
@@ -177,10 +179,12 @@ void setup() {
     //               Thresh  Enable   Force Reset
     SUPC->SUPC_SMMR = 0xA | (1<<8) | (1<<12);
 	
-    /*for (int c = 0; c < 100; c++) {
+#ifdef DEBUG_STARTUP_DELAY
+    for (int c = 0; c < 100; c++) {
         delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
         watchdogReset();
-    }*/
+    }
+#endif
     
     //SerialUSB.println(millis());
        
