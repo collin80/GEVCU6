@@ -91,6 +91,7 @@ public:
     void detach(CanObserver *observer, uint32_t id, uint32_t mask);
     void process();
     void prepareOutputFrame(CAN_FRAME *frame, uint32_t id);
+    void CANIO(CAN_FRAME& frame);
     void sendFrame(CAN_FRAME& frame);
     void sendISOTP(int id, int length, uint8_t *data);
 

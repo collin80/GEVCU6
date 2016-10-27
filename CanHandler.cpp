@@ -28,6 +28,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "CanHandler.h"
+#include "sys_io.h"
 
 CanHandler canHandlerEv = CanHandler(CanHandler::CAN_BUS_EV);
 CanHandler canHandlerCar = CanHandler(CanHandler::CAN_BUS_CAR);
@@ -194,6 +195,8 @@ void CanHandler::process()
     if (bus->rx_avail()) {
         bus->get_rx_buff(frame);
 //      logFrame(frame);
+        
+        if(frame.id == CAN_SWITCH) CANIO(frame);
 
         for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
             observer = observerData[i].observer;
@@ -271,6 +274,52 @@ void CanHandler::prepareOutputFrame(CAN_FRAME *frame, uint32_t id)
     frame->data.bytes[6] = 0;
     frame->data.bytes[7] = 0;
 }
+
+void CanHandler::CANIO(CAN_FRAME& frame) {
+    static CAN_FRAME CANioFrame;
+    int i;
+  
+    CANioFrame.id = CAN_OUTPUTS;
+    CANioFrame.length = 8;
+    CANioFrame.extended = 0; //standard frame
+    CANioFrame.rtr = 0;  
+  
+    //handle the incoming frame to set/unset/leave alone each digital output
+    for(i = 0; i < 8; i++) {
+        if (frame.data.bytes[i] == 0x88) systemIO.setDigitalOutput(i,true);
+        if (frame.data.bytes[i] == 0xFF) systemIO.setDigitalOutput(i,false);
+    }
+  
+    for(i = 0; i < 8; i++) {
+        if (systemIO.getDigitalOutput(i)) CANioFrame.data.bytes[i] = 0x88;
+        else CANioFrame.data.bytes[i] = 0xFF;
+    }
+      
+    sendFrame(CANioFrame);
+        
+    CANioFrame.id = CAN_ANALOG_INPUTS;
+    i = 0;
+    int16_t anaVal;
+       
+    for(int j = 0; j < 8; j += 2) {
+        anaVal = systemIO.getAnalogIn(i++);
+        CANioFrame.data.bytes[j] = highByte (anaVal);
+        CANioFrame.data.bytes[j + 1] = lowByte(anaVal);
+    }
+        
+    sendFrame(CANioFrame);
+
+    CANioFrame.id = CAN_DIGITAL_INPUTS;
+    CANioFrame.length = 4;
+  
+    for(i = 0; i < 4; i++) {
+        if (systemIO.getDigitalIn(i)) CANioFrame.data.bytes[i] = 0x88;
+        else CANioFrame.data.bytes[i] = 0xff;
+    }
+      
+    sendFrame(CANioFrame);
+}
+
 
 //Allow the canbus driver to figure out the proper mailbox to use
 //(whatever happens to be open) or queue it to send (if nothing is open)
