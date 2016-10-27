@@ -55,6 +55,7 @@ Random comments on things that should be coded up soon:
 // identify the required libraries for the build.
 #include <due_rtc.h>
 #include <due_can.h>
+#include <BLE.h>
 #include <FirmwareReceiver.h>
 #include <due_wire.h>
 #include <DueTimer.h>
