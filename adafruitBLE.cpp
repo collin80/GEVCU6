@@ -445,8 +445,8 @@ void ADAFRUITBLE::handleTick() {
         return;
     }
     
-    //ble.update(200); //check for updates every 200ms. Does nothing until 200ms has passed since last time.
-    if (ms > (lastUpdateTime + 200)) {
+    //poll for GATT updates every so often
+    if (ms > (lastUpdateTime + 250)) {
         ble.sendCommandCheckOK(F("AT+EVENTSTATUS"));
         setNewBLEState(BLE_STATE_CHECK_CALLBACKS);
         isWaiting = true;
@@ -1098,21 +1098,6 @@ void ADAFRUITBLE::transferUpdates()
         needParamReload = false;
         return;
     }
-}
-
-void ADAFRUITBLE::checkGattChar(uint8_t charact)
-{
-    uint16_t len;
-    uint8_t buff[40];
-    
-    if (!bOkToWrite) return; // don't check for parameter writes if it isn't OK yet.
-    
-    Logger::debug("Checking %i", charact);
-    ble.print("AT+GATTCHARRAW="); // use RAW command version
-    ble.println(charact);
-    len = ble.readraw(); // readraw swallow OK/ERROR already
-    memcpy(buff, ble.buffer, len);
-    gattRX(charact, buff, len);
 }
 
 /*

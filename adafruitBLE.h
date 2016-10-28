@@ -276,7 +276,6 @@ private:
     void transferUpdates();
     void dumpRawData(uint8_t *data, int len);    
     void buildEnabledDevices();    
-    void checkGattChar(uint8_t charact);
     void setupBLEservice();
     void setNewBLEState(BLE_STATE newState);
 };

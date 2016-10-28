@@ -75,10 +75,12 @@ template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg);
 
 byte i = 0;
 
+
 void watchdogSetup(void)
 {
-  watchdogEnable(150);
+  watchdogEnable(250);
 }
+
 
 //initializes all the system EEPROM values. Chances are this should be broken out a bit but
 //there is only one checksum check for all of them so it's simple to do it all here.
