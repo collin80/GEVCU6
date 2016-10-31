@@ -70,7 +70,7 @@ PrefHandler *sysPrefs;
 MemCache *memCache;
 Heartbeat *heartbeat;
 SerialConsole *serialConsole;
-Device *btDevice;
+ADAFRUITBLE *btDevice;
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
 
 byte i = 0;
@@ -223,7 +223,7 @@ void setup() {
 	initializeDevices();
     serialConsole = new SerialConsole(memCache, heartbeat);
 	serialConsole->printMenu();
-	btDevice = deviceManager.getDeviceByID(ELM327EMU);
+	btDevice = reinterpret_cast<ADAFRUITBLE *>(deviceManager.getDeviceByID(ADABLUE));
     deviceManager.sendMessage(DEVICE_WIFI, ADABLUE, MSG_CONFIG_CHANGE, NULL); //Load config into BLE interface
 	Logger::info("System Ready");	
 }
@@ -240,6 +240,8 @@ void loop() {
 	serialConsole->loop();
 
     systemIO.pollInitialization();
+    
+    btDevice->loop();
     
     watchdogReset();
 }

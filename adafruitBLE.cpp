@@ -1154,6 +1154,7 @@ void ADAFRUITBLE::handleMessage(uint32_t messageType, void* message) {
 }
 
 void ADAFRUITBLE::loop() {
+    ble.pollInterruptFlag();
 }
 
 void ADAFRUITBLE::buildEnabledDevices()
