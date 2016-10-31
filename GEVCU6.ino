@@ -225,6 +225,8 @@ void setup() {
 	serialConsole->printMenu();
 	btDevice = reinterpret_cast<ADAFRUITBLE *>(deviceManager.getDeviceByID(ADABLUE));
     deviceManager.sendMessage(DEVICE_WIFI, ADABLUE, MSG_CONFIG_CHANGE, NULL); //Load config into BLE interface
+
+   
 	Logger::info("System Ready");	
 }
 
