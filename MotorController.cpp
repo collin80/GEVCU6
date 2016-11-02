@@ -99,6 +99,7 @@ void MotorController::setup() {
                     systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
                     systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
     coolflag = false;
+      
 
     Device::setup();
 

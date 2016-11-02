@@ -95,18 +95,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 //#define USE_HARD_CODED
 #define ThrottleNumPots			1		//# of pots to use by default
-#define ThrottleADC1			0		//Which pin to use
+#define ThrottleADC1			2		//Which pin to use
 #define ThrottleADC2			1		//Which pin to use
 #define ThrottleSubtype			1		//subtype 1 is a standard linear pot throttle
 #define ThrottleRegenMinValue	270		//where does Regen stop (1/10 of percent)
-#define ThrottleRegenMaxValue	30		//where Regen is at maximum (1/10 of percent)
-#define ThrottleFwdValue		300		//where does forward motion start
+#define ThrottleRegenMaxValue	0		//where Regen is at maximum (1/10 of percent)
+#define ThrottleFwdValue		280		//where does forward motion start
 #define ThrottleMapValue		750		//Where is the 1/2 way point for throttle
 #define ThrottleMinRegenValue	0		//how many percent of full power to use at minimal regen
-#define ThrottleMaxRegenValue	50		//how many percent of full power to use at maximum regen
+#define ThrottleMaxRegenValue	70		//how many percent of full power to use at maximum regen
 #define ThrottleCreepValue		0		//how many percent of full power to use at creep
 #define ThrottleMaxErrValue		150		//tenths of percentage allowable deviation between pedals
-#define Throttle1MinValue		95		//Value ADC reads when pedal is up
+#define Throttle1MinValue		20		//Value ADC reads when pedal is up
 #define Throttle1MaxValue		3150		//Value ADC reads when pedal fully depressed
 #define Throttle2MinValue		0		//Value ADC reads when pedal is up
 #define Throttle2MaxValue		0	//Value ADC reads when pedal fully depressed
@@ -114,7 +114,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define BrakeMaxValue			3200		//Value ADC reads when brake is pushed all of the way down
 #define BrakeMinRegenValue		0		//percent of full power to use for brake regen (min)
 #define BrakeMaxRegenValue		50		//percent of full power to use for brake regen (max)
-#define BrakeADC				2       //which ADC pin to use
+#define BrakeADC				0       //which ADC pin to use
 
 
 #define MaxTorqueValue      3000 //in tenths of a Nm
@@ -127,7 +127,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define PrechargeRelay      4
 #define MainContactorRelay  5
 #define ReversePercent      50
-#define CoolFan             255  //output to use for cooling fan
+#define CoolFan             6  //output to use for cooling fan
 #define CoolOn              40 //temperature (in C) to turn on cooling fan
 #define BrakeLight          255 //temperature to turn it off
 #define CoolOff             35 //temperature to turn it off

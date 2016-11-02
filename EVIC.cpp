@@ -66,6 +66,8 @@ void EVIC::setup() {
     // register ourselves as observer of all 0x404 and 0x505 can frames from JLD505
     canHandlerCar.attach(this, 0x404, 0x7ff, false);
     canHandlerCar.attach(this, 0x505, 0x7ff, false);
+    canHandlerCar.attach(this, CAN_SWITCH, 0x7ff, false);
+    canHandlerEv.attach(this, CAN_SWITCH, 0x7ff, false);
 
     MotorController* motorController = deviceManager.getMotorController();
     nominalVolt=(motorController->nominalVolts); //Get default nominal volts and capacity from motorcontroller

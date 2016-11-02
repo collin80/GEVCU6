@@ -64,6 +64,7 @@ void CanHandler::setup()
 
     //Mailboxes are default set up initialized with one MB for TX and the rest for RX
     //That's OK with us so no need to initialize those things there.
+  
 
     Logger::info("CAN%d init ok", (canBusNode == CAN_BUS_EV ? 0 : 1));
 }
@@ -194,9 +195,14 @@ void CanHandler::process()
 
     if (bus->rx_avail()) {
         bus->get_rx_buff(frame);
-//      logFrame(frame);
+      
+       Logger::debug("CAN: dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",
+                      frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
+                      frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
+                      frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
         
         if(frame.id == CAN_SWITCH) CANIO(frame);
+       
 
         for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
             observer = observerData[i].observer;
@@ -294,8 +300,8 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
         if (systemIO.getDigitalOutput(i)) CANioFrame.data.bytes[i] = 0x88;
         else CANioFrame.data.bytes[i] = 0xFF;
     }
-      
-    sendFrame(CANioFrame);
+     
+    bus->sendFrame(CANioFrame);
         
     CANioFrame.id = CAN_ANALOG_INPUTS;
     i = 0;
@@ -307,7 +313,7 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
         CANioFrame.data.bytes[j + 1] = lowByte(anaVal);
     }
         
-    sendFrame(CANioFrame);
+    bus->sendFrame(CANioFrame);
 
     CANioFrame.id = CAN_DIGITAL_INPUTS;
     CANioFrame.length = 4;
@@ -317,7 +323,7 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
         else CANioFrame.data.bytes[i] = 0xff;
     }
       
-    sendFrame(CANioFrame);
+    bus->sendFrame(CANioFrame);
 }
 
 
