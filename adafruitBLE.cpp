@@ -273,14 +273,18 @@ void ADAFRUITBLE::cmdComplete(bool OK)
     case BLE_STATE_SET_CHAR:
         break;
     case BLE_STATE_CHECK_CALLBACKS:
-        system_event = strtoul(incomingLine, &p_comma, 16);
-        gatts_event  = strtoul(p_comma+1, NULL, 16);
-        gattCharsUpdated |= gatts_event;
+        if (OK) {
+            system_event = strtoul(incomingLine, &p_comma, 16);
+            gatts_event  = strtoul(p_comma+1, NULL, 16);
+            gattCharsUpdated |= gatts_event;
+        }
         setNewBLEState(BLE_STATE_IDLE);
         break;        
     case BLE_STATE_GET_CHAR:
-        //the line string is a raw version of the GATT data so present it forward as-is
-        gattRX(subState, (uint8_t *)incomingLine, strlen(incomingLine));
+        if (OK) {
+            //the line string is a raw version of the GATT data so present it forward as-is
+            gattRX(subState, (uint8_t *)incomingLine, strlen(incomingLine));
+        }
         setNewBLEState(BLE_STATE_IDLE);
         break;        
     }
@@ -419,7 +423,7 @@ void ADAFRUITBLE::handleTick() {
     //first things first, if the previous command was supposed to reply 
     //but has not for 1 second then assume it never will and unlock the ability
     //to keep going.
-    if (isWaiting && (ms > (resetTime + 1000))) isWaiting = false;
+    if (isWaiting && (ms > (resetTime + 1200))) isWaiting = false;
 
     if (isWaiting) return;
 
@@ -1168,7 +1172,7 @@ void ADAFRUITBLE::buildEnabledDevices()
         if (dev != 0 && dev->isEnabled())
         {
             bitfield |= 1 << idx;
-            Logger::debug(ADABLUE, "Found enabled device: %x", deviceTable[idx]);
+            //Logger::debug(ADABLUE, "Found enabled device: %x", deviceTable[idx]);
         }
         idx++;
         if (idx > 31) break; //force not even supporting the second bitfield yet. TODO: Fix this.
