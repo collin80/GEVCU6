@@ -236,16 +236,31 @@ void CodaMotorController::sendCmd1()
     //Requested throttle is [-1000, 1000]
     //Two byte torque request in 0.1NM Can be positive or negative
 
-    torqueCommand=32128; //Set our zero offset value -torque=0
-    torqueRequested = ((throttleRequested * config->torqueMax) / 1000); //Calculate torque request from throttle position x maximum torque
-    if(speedActual<config->speedMax) {
-        torqueCommand += torqueRequested;   //If actual rpm less than max rpm, add torque command to offset
-    }
-    else {
-        torqueCommand+= torqueRequested/2;   //If at RPM limit, cut torque command in half.
-    }
+     torqueRequested = ((throttleRequested * config->torqueMax) / 1000); //Calculate torque request from throttle position x maximum torque
+ 
+    //If our requested torque is a negative number, we are in regen.  Let's use taper values to taper it below threshold rpm
+    if(torqueRequested < 0 && speedActual < config->regenTaperUpper)  //We are in regen and below regenTaperUpper value
+      {    
+        
+        if (speedActual < config->regenTaperLower) torqueRequested = 0; //If less than lower taper, NO regen
+        
+        else {        
+              int32_t range = config->regenTaperUpper - config->regenTaperLower; 
+              int32_t taper = speedActual - config->regenTaperLower;
+              int32_t calc = (torqueRequested * taper) / range;
+              torqueRequested = (int16_t)calc;  //A tapered REGEN value function of RPM within range upper/lower.
+            }
+      }
+
+    //If overspeed, let's cut torque in half.  If not, add requested torque to torqueCommand
+      
+    if(speedActual>config->speedMax) {torqueRequested /=2;}   //If actual rpm greater than max rpm, add torque command to offset
     
-    if (speedActual < 1700 && torqueCommand < 32128) {
+     torqueCommand = 32128+torqueRequested; //Torque command 32128 is zero torque.  Values below are regen.  Above are torque.
+  
+      
+    
+   /* if (speedActual < 1700 && torqueCommand < 32128) {
         Logger::debug(CODAUQM, "Canceling regen at low speed");
         int32_t working = torqueCommand - 32128; //remove bias;
         int comp = speedActual - 200;
@@ -253,7 +268,7 @@ void CodaMotorController::sendCmd1()
         working *= comp;
         working /= 1500;
         torqueCommand = 32128 + working; //limited regen request
-    }
+    }*/
     
     output.data.bytes[3] = (torqueCommand & 0xFF00) >> 8;  //Stow torque command in bytes 2 and 3.
     output.data.bytes[2] = (torqueCommand & 0x00FF);
