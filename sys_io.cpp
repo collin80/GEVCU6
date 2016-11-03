@@ -507,9 +507,9 @@ int32_t SystemIO::getCurrentReading()
 {
     int32_t valu;
     valu = getSPIADCReading(CS1, 0);
-    valu -= (adc_comp[6].offset * 256);
+    valu -= (adc_comp[6].offset * 2048);
     valu = valu >> 3;
-    valu = (valu * adc_comp[6].gain) / 128;
+    valu = (valu * adc_comp[6].gain) / 1024;
     return valu;
 }
 
@@ -517,9 +517,9 @@ int32_t SystemIO::getPackHighReading()
 {
     int32_t valu;
     valu = getSPIADCReading(CS3, 1);
-    valu -= (adc_comp[4].offset * 256);
-    valu = valu >> 3;
-    valu = (valu * adc_comp[4].gain) / 128;
+    valu -= (adc_comp[4].offset * 2048);
+    valu = valu >> 3; //divide by 8
+    valu = (valu * adc_comp[4].gain) / 1024;
     return valu;
 }
 
@@ -527,9 +527,9 @@ int32_t SystemIO::getPackLowReading()
 {
     int32_t valu;
     valu = getSPIADCReading(CS3, 2);
-    valu -= (adc_comp[5].offset * 256);
+    valu -= (adc_comp[5].offset * 2048);
     valu = valu >> 3;
-    valu = (valu * adc_comp[5].gain) / 128;
+    valu = (valu * adc_comp[5].gain) / 1024;
     return valu;
 }
 
