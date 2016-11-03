@@ -106,7 +106,9 @@ struct BLEModes
     uint8_t isFaulted;
     uint8_t isWarning;
     uint8_t logLevel;
-    uint8_t doUpdate; 
+    uint16_t can0Speed;
+    uint16_t can1Speed;
+    uint8_t doUpdate;     
 };
     
 struct BLEPowerStatus
