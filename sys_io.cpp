@@ -83,6 +83,7 @@ void SystemIO::setup_ADC_params()
     for (i = 0; i < 7; i++) {
         sysPrefs->read(EESYS_ADC0_GAIN + 4*i, &adc_comp[i].gain);
         sysPrefs->read(EESYS_ADC0_OFFSET + 4*i, &adc_comp[i].offset);
+        if (adc_comp[i].gain == 0xFFFF) adc_comp[i].gain = 1024;
         Logger::debug("ADC:%d GAIN: %d Offset: %d", i, adc_comp[i].gain, adc_comp[i].offset);
     }
 }
@@ -507,7 +508,7 @@ int32_t SystemIO::getCurrentReading()
 {
     int32_t valu;
     valu = getSPIADCReading(CS1, 0);
-    valu -= (adc_comp[6].offset * 2048);
+    valu -= (adc_comp[6].offset * 32);
     valu = valu >> 3;
     valu = (valu * adc_comp[6].gain) / 1024;
     return valu;
@@ -517,7 +518,7 @@ int32_t SystemIO::getPackHighReading()
 {
     int32_t valu;
     valu = getSPIADCReading(CS3, 1);
-    valu -= (adc_comp[4].offset * 2048);
+    valu -= (adc_comp[4].offset * 32);
     valu = valu >> 3; //divide by 8
     valu = (valu * adc_comp[4].gain) / 1024;
     return valu;
@@ -527,7 +528,7 @@ int32_t SystemIO::getPackLowReading()
 {
     int32_t valu;
     valu = getSPIADCReading(CS3, 2);
-    valu -= (adc_comp[5].offset * 2048);
+    valu -= (adc_comp[5].offset * 32);
     valu = valu >> 3;
     valu = (valu * adc_comp[5].gain) / 1024;
     return valu;
@@ -633,7 +634,8 @@ bool SystemIO::calibrateADCOffset(int adc, bool update)
         delay(4);
     }
     accum /= 500;
-    accum >>= 11;
+    if (adc < 4) accum >>= 11;
+    else accum >>= 5;
     //if (accum > 2) accum -= 2;
     if (update) sysPrefs->write(EESYS_ADC0_OFFSET + (4*adc), (uint16_t)(accum));    
     Logger::console("ADC %i offset is now %i", adc, accum);
