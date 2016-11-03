@@ -106,8 +106,9 @@ void initSysEEPROM() {
 	sysPrefs->write(EESYS_ADC2_OFFSET, sixteen);
 	sysPrefs->write(EESYS_ADC3_OFFSET, sixteen);
 
-	sixteen = 500; //multiplied by 1000 so 500k baud
+	sixteen = CFG_CAN0_SPEED;
 	sysPrefs->write(EESYS_CAN0_BAUD, sixteen);
+    sixteen = CFG_CAN1_SPEED;
 	sysPrefs->write(EESYS_CAN1_BAUD, sixteen);
 
 	eight = 3;  //0=debug, 1=info,2=warn,3=error,4=off

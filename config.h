@@ -74,11 +74,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /*
  * CAN BUS CONFIGURATION
  */
-#define CFG_CAN0_SPEED CAN_BPS_500K // specify the speed of the CAN0 bus (EV)
-#define CFG_CAN1_SPEED CAN_BPS_250K // specify the speed of the CAN1 bus (Car)
-#define CFG_CAN0_NUM_RX_MAILBOXES 9 // amount of CAN bus receive mailboxes for CAN0
-#define CFG_CAN1_NUM_RX_MAILBOXES 9 // amount of CAN bus receive mailboxes for CAN1
-#define CFG_CANTHROTTLE_MAX_NUM_LOST_MSG 3 // maximum number of lost messages allowed
+#define CFG_CAN0_SPEED                              500 // specify the speed of the CAN0 bus (EV) in thousands. 
+#define CFG_CAN1_SPEED                              250 // specify the speed of the CAN1 bus (Car) in thousands
+#define CFG_CANTHROTTLE_MAX_NUM_LOST_MSG            3 // maximum number of lost messages allowed
 
 /*
  * MISCELLANEOUS

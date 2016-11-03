@@ -51,7 +51,6 @@ void SerialConsole::init() {
     cancel=false;
 
     sysPrefs->read(EESYS_SYSTEM_TYPE, &systype);
-
 }
 
 void SerialConsole::loop() {
@@ -78,24 +77,24 @@ void SerialConsole::printMenu() {
     SerialUSB<<"\n*************SYSTEM MENU *****************\n";
     SerialUSB<<"Enable line endings of some sort (LF, CR, CRLF)\n";
     SerialUSB<<"Most commands case sensitive\n\n";
-   SerialUSB<<"GENERAL SYSTEM CONFIGURATION\n\n";
+    SerialUSB<<"GENERAL SYSTEM CONFIGURATION\n\n";
     SerialUSB.println("   E = dump system EEPROM values");
     SerialUSB.println("   h = help (displays this message)");
   
     Logger::console("   LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", Logger::getLogLevel());
+    Logger::console("   CAN0SPEED=%i - set first CAN bus speed (in thousands)", canHandlerEv.getBusSpeed() / 1000);
+    Logger::console("   CAN1SPEED=%i - set second CAN bus speed (in thousands)", canHandlerCar.getBusSpeed() / 1000);
 
-   SerialUSB<<"\nDEVICE SELECTION AND ACTIVATION\n\n";
-   SerialUSB.println("     a = Re-setup Adafruit BLE");
-   SerialUSB.println("     q = Dump Device Table");
-   SerialUSB.println("     Q = Reinitialize device table");
-   SerialUSB.println("     S = show possible device IDs");
-   Logger::console("     NUKE=1 - Resets all device settings in EEPROM. You have been warned.");
+    SerialUSB<<"\nDEVICE SELECTION AND ACTIVATION\n\n";
+    SerialUSB.println("     a = Re-setup Adafruit BLE");
+    SerialUSB.println("     q = Dump Device Table");
+    SerialUSB.println("     Q = Reinitialize device table");
+    SerialUSB.println("     S = show possible device IDs");
+    Logger::console("     NUKE=1 - Resets all device settings in EEPROM. You have been warned.");
 
-   deviceManager.printDeviceList();
+    deviceManager.printDeviceList();
     
-
-     if (motorController && motorController->getConfiguration()) 
-      {
+    if (motorController && motorController->getConfiguration()) {
         MotorControllerConfiguration *config = (MotorControllerConfiguration *) motorController->getConfiguration(); 
         SerialUSB<<"\nPRECHARGE CONTROLS\n\n";
         Logger::console("   PREDELAY=%i - Precharge delay time in milliseconds ", config->prechargeR);
@@ -110,11 +109,10 @@ void SerialConsole::printMenu() {
         Logger::console("   REVIN=%i - Digital input to reverse motor rotation (0-3, 255 for none)", config->reverseIn);
         Logger::console("   TAPERHI=%i - Regen taper upper RPM (0 - 10000)", config->regenTaperUpper);
         Logger::console("   TAPERLO=%i - Regen taper lower RPM (0 - 10000)", config->regenTaperLower);
-      }
+    }
     
     
-    if (accelerator && accelerator->getConfiguration()) 
-      {
+    if (accelerator && accelerator->getConfiguration()) {
         PotThrottleConfiguration *config = (PotThrottleConfiguration *) accelerator->getConfiguration();
         SerialUSB<<"\nTHROTTLE CONTROLS\n\n";
         SerialUSB.println("   z = detect throttle min/max, num throttles and subtype");
@@ -134,25 +132,23 @@ void SerialConsole::printMenu() {
         Logger::console("   TMINRN=%i - Percent of full torque to use for min throttle regen", config->minimumRegen);
         Logger::console("   TMAXRN=%i - Percent of full torque to use for max throttle regen", config->maximumRegen);
         Logger::console("   TCREEP=%i - Percent of full torque to use for creep (0=disable)", config->creep);
-      }
+    }
 
 
-   if (brake && brake->getConfiguration()) 
-    {
-      PotThrottleConfiguration *config = (PotThrottleConfiguration *) brake->getConfiguration();
-      SerialUSB<<"\nBRAKE CONTROLS\n\n";
-      SerialUSB.println("   b = detect brake min/max");
-      SerialUSB.println("   B = save brake values");
-      Logger::console("   B1ADC=%i - Set brake ADC pin", config->AdcPin1);
-      Logger::console("   B1MN=%i - Set brake min value", config->minimumLevel1);
-      Logger::console("   B1MX=%i - Set brake max value", config->maximumLevel1);
-      Logger::console("   BMINR=%i - Percent of full torque for start of brake regen", config->minimumRegen);
-      Logger::console("   BMAXR=%i - Percent of full torque for maximum brake regen", config->maximumRegen);
+    if (brake && brake->getConfiguration()) {
+        PotThrottleConfiguration *config = (PotThrottleConfiguration *) brake->getConfiguration();
+        SerialUSB<<"\nBRAKE CONTROLS\n\n";
+        SerialUSB.println("   b = detect brake min/max");
+        SerialUSB.println("   B = save brake values");
+        Logger::console("   B1ADC=%i - Set brake ADC pin", config->AdcPin1);
+        Logger::console("   B1MN=%i - Set brake min value", config->minimumLevel1);
+        Logger::console("   B1MX=%i - Set brake max value", config->maximumLevel1);
+        Logger::console("   BMINR=%i - Percent of full torque for start of brake regen", config->minimumRegen);
+        Logger::console("   BMAXR=%i - Percent of full torque for maximum brake regen", config->maximumRegen);
     }
 
     
-   if (motorController && motorController->getConfiguration()) 
-    {
+   if (motorController && motorController->getConfiguration()) {
         MotorControllerConfiguration *config = (MotorControllerConfiguration *) motorController->getConfiguration();
         SerialUSB<<"\nOTHER VEHICLE CONTROLS\n\n";
         Logger::console("   COOLFAN=%i - Digital output to turn on cooling fan(0-7, 255 for none)", config->coolFan);
@@ -167,19 +163,14 @@ void SerialConsole::printMenu() {
   
     SerialUSB<<"\nANALOG AND DIGITAL IO\n\n";
     SerialUSB.println("   A = Autocompensate ADC inputs");
-      SerialUSB.println("   J = set all digital outputs low");
+    SerialUSB.println("   J = set all digital outputs low");
     SerialUSB.println("   K = set all digital outputs high");
  
-      if (heartbeat != NULL) 
-       {
+    if (heartbeat != NULL) {
         SerialUSB.println("   L = show raw analog/digital input/output values (toggle)");
-       }
-      Logger::console("   OUTPUT=<0-7> - toggles state of specified digital output");
+    }
+    Logger::console("   OUTPUT=<0-7> - toggles state of specified digital output");
    
-   //SerialUSB.println("   U,I = test EEPROM routines");
-    //   sysPrefs->read(EESYS_SYSTEM_TYPE, &systype);
-  //  Logger::console("SYSTYPE=%i - Set board revision (Dued=2, GEVCU3=3, GEVCU4-5=4, GEVCU6.2=6)", systype);
-
     uint16_t val;
     sysPrefs->read(EESYS_ADC0_OFFSET, &val);
     Logger::console("   ADC0OFF=%i - set ADC0 offset", val);
@@ -210,19 +201,7 @@ void SerialConsole::printMenu() {
     Logger::console("   ADCPACKCOFF=%i - set pack current offset", val);
     sysPrefs->read(EESYS_ADC_PACKC_GAIN, &val);
     Logger::console("   ADCPACKCGAIN=%i - set pack current gain (1024 is 1 gain)", val);
-
-    
-
-   
-  
- 
-
-       
-       
-          }
-
-
-
+}
 
 /*	There is a help menu (press H or h or ?)
 
@@ -585,6 +564,22 @@ void SerialConsole::handleConfigCmd() {
             Logger::console("Setting Pack Current Gain to %i", newValue);
         }
         else Logger::console("Invalid gain. Enter value from 0 to 65535");
+    } else if (cmdString == String("CAN0SPEED")) {
+        if (newValue >= 33 && newValue <= 1000) {
+            sysPrefs->write(EESYS_CAN0_BAUD, (uint16_t)(newValue));
+            sysPrefs->saveChecksum();
+            canHandlerEv.setup();
+            Logger::console("Setting CAN0 speed to %i", newValue);
+        }
+        else Logger::console("Invalid speed. Enter a value between 33 and 1000");
+    } else if (cmdString == String("CAN1SPEED")) {
+        if (newValue >= 33 && newValue <= 1000) {
+            sysPrefs->write(EESYS_CAN1_BAUD, (uint16_t)(newValue));
+            sysPrefs->saveChecksum();
+            canHandlerCar.setup();
+            Logger::console("Setting CAN1 speed to %i", newValue);
+        }
+        else Logger::console("Invalid speed. Enter a value between 33 and 1000");
     } else if (cmdString == String("LOGLEVEL")) {
         switch (newValue) {
         case 0:

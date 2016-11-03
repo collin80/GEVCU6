@@ -51,6 +51,7 @@ CanHandler::CanHandler(CanBusNode canBusNode)
         observerData[i].observer = NULL;
     }
     masterID = 0x05;
+    busSpeed = 0;
 }
 
 /*
@@ -59,14 +60,27 @@ CanHandler::CanHandler(CanBusNode canBusNode)
 void CanHandler::setup()
 {
     // Initialize the canbus at the specified baudrate
-    bus->begin(canBusNode == CAN_BUS_EV ? CFG_CAN0_SPEED : CFG_CAN1_SPEED, 255);
+    uint16_t storedVal;
+    uint32_t realSpeed;
+    if (canBusNode == CAN_BUS_EV) {
+        sysPrefs->read(EESYS_CAN0_BAUD, &storedVal);
+    }
+    else {
+        sysPrefs->read(EESYS_CAN1_BAUD, &storedVal);
+    }
+    realSpeed = storedVal * 1000; //was stored in thousands, now in actual rate
+    if (realSpeed < 33333ul) realSpeed = 33333u; 
+    if (realSpeed > 1000000ul) realSpeed = 1000000ul;
+    bus->begin(realSpeed, 255);
     bus->setNumTXBoxes(2);
+    
+    busSpeed = realSpeed;
+ 
+    Logger::info("CAN%d init ok. Speed = %i", (canBusNode == CAN_BUS_EV ? 0 : 1), busSpeed);
+}
 
-    //Mailboxes are default set up initialized with one MB for TX and the rest for RX
-    //That's OK with us so no need to initialize those things there.
-  
-
-    Logger::info("CAN%d init ok", (canBusNode == CAN_BUS_EV ? 0 : 1));
+uint32_t CanHandler::getBusSpeed() {
+    return busSpeed;
 }
 
 /*
@@ -164,7 +178,7 @@ int8_t CanHandler::findFreeObserverData()
  */
 int8_t CanHandler::findFreeMailbox()
 {
-    uint8_t numRxMailboxes = (canBusNode == CAN_BUS_EV ? CFG_CAN0_NUM_RX_MAILBOXES : CFG_CAN1_NUM_RX_MAILBOXES);
+    uint8_t numRxMailboxes = 6; //there are 8 total and two are used for TX
 
     for (uint8_t i = 0; i < numRxMailboxes; i++) {
         bool used = false;
