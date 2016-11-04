@@ -507,30 +507,36 @@ int32_t SystemIO::getAnalogOut(uint8_t which)
 int32_t SystemIO::getCurrentReading()
 {
     int32_t valu;
+    int64_t gainTemp;
     valu = getSPIADCReading(CS1, 0);
     valu -= (adc_comp[6].offset * 32);
     valu = valu >> 3;
-    valu = (valu * adc_comp[6].gain) / 1024;
+    gainTemp = (int64_t)((int64_t)valu * adc_comp[6].gain) / 16384ll;
+    valu = (int32_t) gainTemp;
     return valu;
 }
 
 int32_t SystemIO::getPackHighReading()
 {
     int32_t valu;
+    int64_t gainTemp;
     valu = getSPIADCReading(CS3, 1);
     valu -= (adc_comp[4].offset * 32);
     valu = valu >> 3; //divide by 8
-    valu = (valu * adc_comp[4].gain) / 1024;
+    gainTemp = (int64_t)((int64_t)valu * adc_comp[4].gain) / 16384ll;
+    valu = (int32_t) gainTemp;
     return valu;
 }
 
 int32_t SystemIO::getPackLowReading()
 {
     int32_t valu;
+    int64_t gainTemp;
     valu = getSPIADCReading(CS3, 2);
     valu -= (adc_comp[5].offset * 32);
-    valu /= 8;
-    valu = (valu * adc_comp[5].gain) / 1024;
+    valu >>= 3;
+    gainTemp = (int64_t)((int64_t)valu * adc_comp[5].gain) / 16384ll;
+    valu = (int32_t) gainTemp;    
     return valu;
 }
 
@@ -662,9 +668,9 @@ bool SystemIO::calibrateADCGain(int adc, int32_t target, bool update)
         }
         else if (adc < 4) accum += getSPIADCReading(CS2, (adc & 1) + 1);
         //the next three are new though. 4 = current sensor, 5 = pack high (ref to mid), 6 = pack low (ref to mid)
-        else if (adc == 4) accum += getSPIADCReading(CS1, 0);
-        else if (adc == 5) accum += getSPIADCReading(CS3, 1);
-        else if (adc == 6) accum += getSPIADCReading(CS3, 2);
+        else if (adc == 4) accum += getSPIADCReading(CS3, 1);
+        else if (adc == 5) accum += getSPIADCReading(CS3, 2);
+        else if (adc == 6) accum += getSPIADCReading(CS1, 0);
 
         //normally one shouldn't call watchdog reset in multiple
         //places but this is a special case.
@@ -696,7 +702,7 @@ bool SystemIO::calibrateADCGain(int adc, int32_t target, bool update)
     
     //1024 is one to one so all gains are multiplied by that much to bring them into fixed point math.
     //we've got a reading accum and a target. The rational gain is target/accum    
-    adc_comp[adc].gain = (1024 * target) / accum;
+    adc_comp[adc].gain = (int16_t)((16384ull * target) / accum);
     
     if (update) sysPrefs->write(EESYS_ADC0_GAIN + (4*adc), adc_comp[adc].gain);
     Logger::console("Accum: %i    Target: %i", accum, target);

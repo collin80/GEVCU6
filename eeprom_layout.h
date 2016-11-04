@@ -128,11 +128,11 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EESYS_ADC2_OFFSET        40  //2 bytes - ADC offset from zero - ADC reads 12 bit so the offset will be [0,4095] - Offset is subtracted from read ADC value
 #define EESYS_ADC3_GAIN          42  //2 bytes - ADC gain centered at 1024 being 1 to 1 gain, thus 512 is 0.5 gain, 2048 is double, etc
 #define EESYS_ADC3_OFFSET        44  //2 bytes - ADC offset from zero - ADC reads 12 bit so the offset will be [0,4095] - Offset is subtracted from read ADC value
-#define EESYS_ADC_PACKH_GAIN	 46  //2 bytes - GAIN for Pack High to Mid voltage reading
+#define EESYS_ADC_PACKH_GAIN	 46  //2 bytes - GAIN for Pack High to Mid voltage reading - 16384 is the 1 to 1 gain here to give higher resolution
 #define EESYS_ADC_PACKH_OFFSET	 48  //2 bytes - Offset for Pack high to mid voltage reading
-#define EESYS_ADC_PACKL_GAIN	 50  //2 bytes - GAIN for Pack Mid to Low voltage reading
+#define EESYS_ADC_PACKL_GAIN	 50  //2 bytes - GAIN for Pack Mid to Low voltage reading - 16384 is the 1 to 1 gain here to give higher resolution
 #define EESYS_ADC_PACKL_OFFSET	 52  //2 bytes - Offset for Pack Mid to Low voltage reading
-#define EESYS_ADC_PACKC_GAIN	 54  //2 bytes - GAIN for Pack current reading
+#define EESYS_ADC_PACKC_GAIN	 54  //2 bytes - GAIN for Pack current reading - 16384 is the 1 to 1 gain here to give higher resolution
 #define EESYS_ADC_PACKC_OFFSET	 56  //2 bytes - Offset for Pack current reading
 #define EESYS_CAN0_BAUD          80 //2 bytes - Baud rate of CAN0 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN0
 #define EESYS_CAN1_BAUD          82 //2 bytes - Baud rate of CAN1 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN1
