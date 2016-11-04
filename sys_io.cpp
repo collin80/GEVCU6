@@ -529,7 +529,7 @@ int32_t SystemIO::getPackLowReading()
     int32_t valu;
     valu = getSPIADCReading(CS3, 2);
     valu -= (adc_comp[5].offset * 32);
-    valu = valu >> 3;
+    valu /= 8;
     valu = (valu * adc_comp[5].gain) / 1024;
     return valu;
 }
@@ -616,6 +616,9 @@ int32_t SystemIO::getSPIADCReading(int CS, int sensor)
 bool SystemIO::calibrateADCOffset(int adc, bool update)
 {
     int32_t accum = 0;
+    
+    if (adc < 0 || adc > 6) return false;
+    
     for (int j = 0; j < 500; j++)
     {
         if (adc < 2)
@@ -639,6 +642,67 @@ bool SystemIO::calibrateADCOffset(int adc, bool update)
     //if (accum > 2) accum -= 2;
     if (update) sysPrefs->write(EESYS_ADC0_OFFSET + (4*adc), (uint16_t)(accum));    
     Logger::console("ADC %i offset is now %i", adc, accum);
+    return true;
+}
+
+
+//much like the above function but now we use the calculated offset and take readings, average them
+//and figure out how to set the gain such that the average reading turns up to be the target value
+bool SystemIO::calibrateADCGain(int adc, int32_t target, bool update)
+{
+    int32_t accum = 0;
+    
+    if (adc < 0 || adc > 6) return false;
+    
+    for (int j = 0; j < 500; j++)
+    {
+        if (adc < 2)
+        {
+            accum += getSPIADCReading(CS1, (adc & 1) + 1);
+        }
+        else if (adc < 4) accum += getSPIADCReading(CS2, (adc & 1) + 1);
+        //the next three are new though. 4 = current sensor, 5 = pack high (ref to mid), 6 = pack low (ref to mid)
+        else if (adc == 4) accum += getSPIADCReading(CS1, 0);
+        else if (adc == 5) accum += getSPIADCReading(CS3, 1);
+        else if (adc == 6) accum += getSPIADCReading(CS3, 2);
+
+        //normally one shouldn't call watchdog reset in multiple
+        //places but this is a special case.
+        watchdogReset();
+        delay(4);
+    }
+    accum /= 500;
+    Logger::console("Unprocessed accum: %i", accum);
+    
+    //now apply the proper offset we've got set.
+    if (adc < 4) {
+        accum /= 2048;
+        accum -= adc_comp[adc].offset;
+    }
+    else {
+        accum -= adc_comp[adc].offset * 32;
+        accum >>= 3;
+    }
+    
+    if ((target / accum) > 20) {
+        Logger::console("Calibration not possible. Check your target value.");
+        return false;
+    }
+    
+    if (accum < 1000) {
+        Logger::console("Readings are too low. Try applying more voltage/current");
+        return false;
+    }
+    
+    //1024 is one to one so all gains are multiplied by that much to bring them into fixed point math.
+    //we've got a reading accum and a target. The rational gain is target/accum    
+    adc_comp[adc].gain = (1024 * target) / accum;
+    
+    if (update) sysPrefs->write(EESYS_ADC0_GAIN + (4*adc), adc_comp[adc].gain);
+    Logger::console("Accum: %i    Target: %i", accum, target);
+    Logger::console("ADC %i gain is now %i", adc, adc_comp[adc].gain);
+    return true;
+
 }
 
 SystemIO systemIO;

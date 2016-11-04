@@ -193,14 +193,19 @@ void SerialConsole::printMenu() {
     Logger::console("   ADCPACKHOFF=%i - set pack high ADC offset", val);
     sysPrefs->read(EESYS_ADC_PACKH_GAIN, &val);
     Logger::console("   ADCPACKHGAIN=%i - set pack high ADC gain (1024 is 1 gain)", val);
+    Logger::console("   PACKHCAL=1000 - Give as parameter the current voltage on Pack High in 1/100V. 80v = 8000");
+    
     sysPrefs->read(EESYS_ADC_PACKL_OFFSET, &val);
     Logger::console("   ADCPACKLOFF=%i - set pack low ADC offset", val);
     sysPrefs->read(EESYS_ADC_PACKL_GAIN, &val);
     Logger::console("   ADCPACKLGAIN=%i - set pack low ADC gain (1024 is 1 gain)", val);
+    Logger::console("   PACKLCAL=1000 - Give as parameter the current voltage on Pack Low in 1/100V. 80v = 8000");
+    
     sysPrefs->read(EESYS_ADC_PACKC_OFFSET, &val);
     Logger::console("   ADCPACKCOFF=%i - set pack current offset", val);
     sysPrefs->read(EESYS_ADC_PACKC_GAIN, &val);
     Logger::console("   ADCPACKCGAIN=%i - set pack current gain (1024 is 1 gain)", val);
+    Logger::console("   PACKCCAL=1000 - Give as parameter the current amperage across the shunt in 1/100A. 80A = 8000");
 }
 
 /*	There is a help menu (press H or h or ?)
@@ -580,6 +585,12 @@ void SerialConsole::handleConfigCmd() {
             Logger::console("Setting CAN1 speed to %i", newValue);
         }
         else Logger::console("Invalid speed. Enter a value between 33 and 1000");
+    } else if (cmdString == String("PACKHCAL")) {
+        systemIO.calibrateADCGain(4, newValue, true);
+    } else if (cmdString == String("PACKLCAL")) {
+        systemIO.calibrateADCGain(5, newValue, true);
+    } else if (cmdString == String("PACKCCAL")) {
+        systemIO.calibrateADCGain(6, newValue, true);        
     } else if (cmdString == String("LOGLEVEL")) {
         switch (newValue) {
         case 0:
