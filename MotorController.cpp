@@ -584,7 +584,8 @@ void MotorController::loadConfiguration() {
         prefsHandler->read(EEMC_REVERSE_IN, &config->reverseIn);
         prefsHandler->read(EEMC_TAPER_UPPER, &config->regenTaperUpper);
         prefsHandler->read(EEMC_TAPER_LOWER, &config->regenTaperLower);
-        prefsHandler->read(EESYS_CAPACITY, &config->capacity);
+        //prefsHandler->read(EESYS_CAPACITY, &config->capacity);
+        config->capacity = 0;
         if (config->regenTaperLower < 0 || config->regenTaperLower > 10000 ||
             config->regenTaperUpper < config->regenTaperLower || config->regenTaperUpper > 10000) {
             config->regenTaperLower = RegenTaperLower;
@@ -641,7 +642,7 @@ void MotorController::saveConfiguration() {
     prefsHandler->write(EEMC_REVERSE_IN, config->reverseIn);
     prefsHandler->write(EEMC_TAPER_LOWER, config->regenTaperLower);
     prefsHandler->write(EEMC_TAPER_UPPER, config->regenTaperUpper);
-    prefsHandler->write(EESYS_CAPACITY, config->capacity);
+    //prefsHandler->write(EESYS_CAPACITY, config->capacity);
 
     prefsHandler->saveChecksum();
     loadConfiguration();

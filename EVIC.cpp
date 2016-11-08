@@ -422,16 +422,17 @@ void EVIC::loadConfiguration() {
 
     if (prefsHandler->checksumValid())
     {   //checksum is good, read in the values stored in EEPROM
-        prefsHandler->read(EESYS_CAPACITY, &capacity);
-        prefsHandler->read(EESYS_AH, &AH);
-
+        //prefsHandler->read(EESYS_CAPACITY, &capacity);
+        //prefsHandler->read(EESYS_AH, &AH);
+        capacity = BatteryCapacity;
+        AH = 0;
     }
     else
     {
         capacity = BatteryCapacity;  //Get capacity value from config.h
-        prefsHandler->write(EESYS_CAPACITY, capacity); //and write it to EEPROM
+        //prefsHandler->write(EESYS_CAPACITY, capacity); //and write it to EEPROM
         // prefsHandler->write(EESYS_AH,AH);
-        prefsHandler->saveChecksum();
+        //prefsHandler->saveChecksum();
     }
 
 
@@ -443,8 +444,9 @@ void EVIC::saveConfiguration() {
 
     //Device::saveConfiguration();  //call parent save routine
 
-    prefsHandler->write(EESYS_CAPACITY, capacity);  //save current values to EEPROM
-    prefsHandler->write(EESYS_AH, AH);  //save current values to EEPROM
+    //prefsHandler->write(EESYS_CAPACITY, capacity);  //save current values to EEPROM
+    //prefsHandler->write(EESYS_AH, AH);  //save current values to EEPROM
+    
     prefsHandler->saveChecksum();
 
     loadConfiguration();

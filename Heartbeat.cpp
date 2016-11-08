@@ -80,7 +80,7 @@ void Heartbeat::handleTick() {
                         systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
                         systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
         Logger::console("BATTHI: %d, BATTLO: %d, BATTERY: %d, CURRENT: %d", 
-                        systemIO.getPackHighReading(), systemIO.getPackLowReading(), systemIO.getPackHighReading()+systemIO.getPackLowReading(), systemIO.getDigitalOutput(3),
+                        systemIO.getPackHighReading(), systemIO.getPackLowReading(), systemIO.getPackHighReading()+systemIO.getPackLowReading(),
                         systemIO.getCurrentReading());
 
         if (accelerator) {

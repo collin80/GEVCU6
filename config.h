@@ -64,6 +64,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_CODAUQM  10000
 #define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_BRUSA    20000
 #define CFG_TICK_INTERVAL_MEM_CACHE                 40000
+#define CFG_TICK_INTERVAL_BMS_INTERNAL              40000
 #define CFG_TICK_INTERVAL_BMS_THINK                 500000
 #define CFG_TICK_INTERVAL_WIFI                      200000
 #define CFG_TICK_INTERVAL_BLE                       40000
@@ -138,6 +139,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define RegenTaperUpper     500
 #define RegenTaperLower     75
 
+#define DefaultPackCapacity   1000       //in tenths of AH
+#define DefaultPackRemaining  50000000l //in millionths of AH
+#define DefaultHighVLim       3850 //tenths of a V
+#define DefaultLowVLim        2400 //tenths of a V
+#define DefaultHighCellLim    3900 //Hundredths of a V
+#define DefaultLowCellLim     2400 //Hundedths of a V
+#define DefaultHighTempLim    600  //Tenths of a degree. Toasty!
+#define DefaultLowTempLim     -200 //Tenths of a degree. Chilly!
+
 /*
  * ARRAY SIZE
  *
@@ -155,7 +165,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * PIN ASSIGNMENT
  */
 #define CFG_THROTTLE_NONE	255
-#define BLINK_LED          73 //13 is L, 73 is TX, 72 is RX
+#define BLINK_LED           13 //13 is L, 73 is TX, 72 is RX
 
 #define NUM_ANALOG	7
 #define NUM_DIGITAL	4

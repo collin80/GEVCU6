@@ -53,17 +53,15 @@ Random comments on things that should be coded up soon:
 
 // The following includes are required in the .ino file by the Arduino IDE in order to properly
 // identify the required libraries for the build.
-#include <due_rtc.h>
 #include <due_can.h>
 #include <BLE.h>
 #include <FirmwareReceiver.h>
 #include <due_wire.h>
 #include <DueTimer.h>
 #include <SPI.h>
+#include <microsmooth.h>
 
 //#define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
-
-//RTC_clock rtc_clock(XTAL); //init RTC with the external 32k crystal as a reference
 
 //Evil, global variables
 PrefHandler *sysPrefs;
@@ -80,7 +78,6 @@ void watchdogSetup(void)
 {
   watchdogEnable(250);
 }
-
 
 //initializes all the system EEPROM values. Chances are this should be broken out a bit but
 //there is only one checksum check for all of them so it's simple to do it all here.
@@ -129,7 +126,8 @@ void createObjects() {
     TestMotorController *testMotorController = new TestMotorController();
     DCDCController *dcdcController = new DCDCController();
 	BrusaMotorController *bmotorController = new BrusaMotorController();
-	ThinkBatteryManager *BMS = new ThinkBatteryManager();
+	ThinkBatteryManager *thinkBMS = new ThinkBatteryManager();
+    BuiltinBatteryManager *builtinBMS = new BuiltinBatteryManager();
 	ELM327Emu *emu = new ELM327Emu();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
     EVIC *eVIC = new EVIC();
@@ -167,6 +165,7 @@ void initializeDevices() {
 void setup() {
     //Most boards pre 6.2 have outputs on 2-9 and a problem where their outputs can trigger on for just a quick moment
     //upon start up. So, try to pull the outputs low as soon as we can just to be sure.
+    //This project is now GEVCU6.2 specific but still, doesn't hurt to set your outputs properly.
     for (int i = 2; i < 10; i++) {
         pinMode(i, OUTPUT);
         digitalWrite(i, LOW);
@@ -185,12 +184,10 @@ void setup() {
 	
 #ifdef DEBUG_STARTUP_DELAY
     for (int c = 0; c < 100; c++) {
-        delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
+        delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm quickly upon start up
         watchdogReset();
     }
 #endif
-    
-    //SerialUSB.println(millis());
        
 	pinMode(BLINK_LED, OUTPUT);
 	digitalWrite(BLINK_LED, LOW);

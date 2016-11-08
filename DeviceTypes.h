@@ -61,6 +61,7 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     ADABLUE = 0x1041,
     DCDC = 0x1050,
     THINKBMS = 0x2000,
+    BUILTINBMS = 0x2100,
     VEHICLESPECIFIC = 0x3000,
     FAULTSYS = 0x4000,
     SYSTEM = 0x5000,
