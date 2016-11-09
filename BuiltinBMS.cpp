@@ -47,14 +47,20 @@ void BuiltinBatteryManager::setup() {
     tickHandler.detach(this);
 
     Logger::info("add device: Internal BMS (id: %X, %X)", BUILTINBMS, this);
+    
+    loadConfiguration();
 
-    BatteryManager::setup(); // run the parent class version of this function
+    BatteryManager::setup(); // run the Parent class version of this function
 
     tickHandler.attach(this, CFG_TICK_INTERVAL_BMS_INTERNAL);
 }
 
 void BuiltinBatteryManager::handleTick() {
     BatteryManager::handleTick(); //kick the ball up to papa
+    
+    if (!config) {
+        config = (BuiltinBMSConfiguration *)getConfiguration();
+    }
     
     int32_t temp;
     
@@ -66,34 +72,30 @@ void BuiltinBatteryManager::handleTick() {
     temp = systemIO.getPackLowReading();
     //Logger::console("Pack Low: %i", temp);
     packVoltage += packLowerFilteredVoltage->calc(temp);
-    Logger::console("Pack voltage: %i", packVoltage);
+    //Logger::debug("Pack voltage: %i", packVoltage);
     
     packCurrent = packCurrentFiltered->calc(systemIO.getCurrentReading());
-    Logger::console("Pack current: %i", packCurrent);
-    
+    //Logger::debug("Pack current: %i", packCurrent);
+        
     temp = micros();
     int32_t interval = temp - lastUpdate;
     lastUpdate = temp;
     
     //interval in microseconds, current in hundredths of an amp, the AH remaining variable is in millionths of an AH
-    //an hour is 60 minutes of 60 seconds each of which is a million microseconds.
-    //1 amp hour is thus 3600 * 1000000 = 3.6 million Amp microseconds
-    //So, with current in hundredths of an amp you'd need to divide by 100 to get to amps. Then, the interval is in millionths of a second
+    //With current in hundredths of an amp you'd need to divide by 100 to get to amps. Then, the interval is in millionths of a second
     //so, (ampreading / 100) * (interval / 1,000,000) / 60 / 60 = Used amp hours this interval. But, the answer should be in millionths of an AH
     //so multiply by 1,000,000 which cancels the divide by a million above giving:
     //(ampreading / 100) * interval / 3600 = Used microAmpHours this interval. But, to maintain precision take the /100 and /3600 and consolidate:
     //(ampReading * interval) / 360,000 = microampHours
-    //default interval for this BMS is 40ms so assume a perfect interval of 40000us. Now, if 1 amp is flowing out of the battery then
-    //(100 * 40000) / 360,000 = 11.11 which won't happen in the discrete realm (11 instead). which leads to us slightly underestimating the true
-    //usage. It's about a 1% error. That's really not bad. Try a higher current:
-    //84.54 amps = (8454 * 40000) / 360,000 = 939.333, floored to 939 which is less than a tenth of a percent error.
     int32_t usage = (packCurrent * interval) / 360000l;
-    int32_t totalCapacity = (config->packCapacity * 100000l);
+    int32_t totalCapacity = (config->packCapacity * 1000000l);
+    
     if (config->packAHRemaining > usage)  config->packAHRemaining -= usage;
     else config->packAHRemaining = 0;
     if (config->packAHRemaining > totalCapacity) config->packAHRemaining = totalCapacity;
     
-    SOC = (100 * totalCapacity) / config->packAHRemaining;
+    if (totalCapacity > 0) SOC = (100 * config->packAHRemaining) / totalCapacity;
+    else SOC = 50; //Divide by zero is naughty! But, set SOC to 50 in that case.
 }
 
 DeviceId BuiltinBatteryManager::getId()
@@ -140,5 +142,4 @@ void BuiltinBatteryManager::loadConfiguration() {
 
 void BuiltinBatteryManager::saveConfiguration() {
     BatteryManager::saveConfiguration(); // call parent
-    
 }

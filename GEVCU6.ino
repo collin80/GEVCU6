@@ -221,7 +221,7 @@ void setup() {
 	initializeDevices();
     serialConsole = new SerialConsole(memCache, heartbeat);
 	serialConsole->printMenu();
-	btDevice = reinterpret_cast<ADAFRUITBLE *>(deviceManager.getDeviceByID(ADABLUE));
+	btDevice = static_cast<ADAFRUITBLE *>(deviceManager.getDeviceByID(ADABLUE));
     deviceManager.sendMessage(DEVICE_WIFI, ADABLUE, MSG_CONFIG_CHANGE, NULL); //Load config into BLE interface
 
    
@@ -241,7 +241,7 @@ void loop() {
 
     systemIO.pollInitialization();
     
-    btDevice->loop();
+    if (btDevice) btDevice->loop();
     
     watchdogReset();
 }

@@ -66,6 +66,7 @@ void SerialConsole::printMenu() {
     MotorController* motorController = (MotorController*) deviceManager.getMotorController();
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
+    BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
    
     //Show build # here as well in case people are using the native port and don't get to see the start up messages
     SerialUSB.print("Build number: ");
@@ -146,9 +147,21 @@ void SerialConsole::printMenu() {
         Logger::console("   BMINR=%i - Percent of full torque for start of brake regen", config->minimumRegen);
         Logger::console("   BMAXR=%i - Percent of full torque for maximum brake regen", config->maximumRegen);
     }
-
     
-   if (motorController && motorController->getConfiguration()) {
+    if (bms && bms->getConfiguration()) {
+        BatteryManagerConfiguration *config = static_cast<BatteryManagerConfiguration *>(bms->getConfiguration());
+        SerialUSB << "\nBATTERY MANAGEMENT CONTROLS\n\n";
+        Logger::console("   CAPACITY=%i - Capacity of battery pack in tenths ampere-hours", config->packCapacity);
+        Logger::console("   AHLEFT=%i - Number of amp hours remaining in pack in tenths ampere-hours", config->packAHRemaining / 100000);
+        Logger::console("   VOLTLIMHI=%i - High limit for pack voltage in tenths of a volt", config->highVoltLimit);
+        Logger::console("   VOLTLIMLO=%i - Low limit for pack voltage in tenths of a volt", config->lowVoltLimit);
+        Logger::console("   CELLLIMHI=%i - High limit for cell voltage in hundredths of a volt", config->highCellLimit);
+        Logger::console("   CELLLIMLO=%i - Low limit for cell voltage in hundredths of a volt", config->lowCellLimit);
+        Logger::console("   TEMPLIMHI=%i - High limit for pack and cell temperature in tenths of a degree C", config->highTempLimit);
+        Logger::console("   TEMPLIMLO=%i - Low limit for pack and cell temperature in tenths of a degree C", config->lowTempLimit);        
+    }
+
+    if (motorController && motorController->getConfiguration()) {
         MotorControllerConfiguration *config = (MotorControllerConfiguration *) motorController->getConfiguration();
         SerialUSB<<"\nOTHER VEHICLE CONTROLS\n\n";
         Logger::console("   COOLFAN=%i - Digital output to turn on cooling fan(0-7, 255 for none)", config->coolFan);
@@ -156,9 +169,7 @@ void SerialConsole::printMenu() {
         Logger::console("   COOLOFF=%i - Inverter temperature C to turn cooling off", config->coolOff);
         Logger::console("   BRAKELT = %i - Digital output to turn on brakelight (0-7, 255 for none)", config->brakeLight);
         Logger::console("   REVLT=%i - Digital output to turn on reverse light (0-7, 255 for none)", config->revLight);  
-        Logger::console("   NOMV=%i - Fully charged pack voltage that automatically resets kWh counter", config->nominalVolt/10);
-        Logger::console("   CAPACITY=%i - capacity of battery pack in ampere-hours", config->capacity);
-        Logger::console("   kWh=%d - kiloWatt Hours of energy used", config->kilowattHrs/3600000);
+        Logger::console("   NOMV=%i - Fully charged pack voltage that automatically resets kWh counter", config->nominalVolt/10);        
     } 
   
     SerialUSB<<"\nANALOG AND DIGITAL IO\n\n";
@@ -251,10 +262,12 @@ void SerialConsole::handleConfigCmd() {
     PotThrottleConfiguration *acceleratorConfig = NULL;
     PotThrottleConfiguration *brakeConfig = NULL;
     MotorControllerConfiguration *motorConfig = NULL;
+    BatteryManagerConfiguration *bmsConfig = NULL;
 
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
     MotorController *motorController = deviceManager.getMotorController();
+    BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
     int i;
     int newValue;
     bool updateWifi = true;
@@ -284,6 +297,8 @@ void SerialConsole::handleConfigCmd() {
         brakeConfig = (PotThrottleConfiguration *) brake->getConfiguration();
     if (motorController)
         motorConfig = (MotorControllerConfiguration *) motorController->getConfiguration();
+    if (bms)
+        bmsConfig = static_cast<BatteryManagerConfiguration *>(bms->getConfiguration());
 
     // strtol() is able to parse also hex values (e.g. a string "0xCAFE"), useful for enable/disable by device id
     newValue = strtol((char *) (cmdBuffer + i), NULL, 0);
@@ -656,19 +671,62 @@ void SerialConsole::handleConfigCmd() {
                         systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3), 
                         systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
 
-    } else if (cmdString == String("CAPACITY") ) {
-        motorConfig->capacity = newValue;
-        motorController->saveConfiguration();
-        Logger::console("Battery Pack Capacity set to: %d",motorConfig->capacity);
-
-    } else if (cmdString == String("KWH") ) {
-
-        motorController->kiloWattHours = newValue*3600000;
-        motorController->saveConfiguration();
-        Logger::console("kWh set to: %d",motorController->kiloWattHours);
-
-
-
+    } else if (cmdString == String("CAPACITY") && bmsConfig ) {
+        if (newValue >= 0 && newValue <= 6000) {
+            bmsConfig->packCapacity = newValue;
+            bms->saveConfiguration();
+            Logger::console("Battery Pack Capacity set to: %d", bmsConfig->packCapacity);
+        }
+        else Logger::console("Invalid capacity please enter a value between 0 and 6000");
+    } else if (cmdString == String("AHLEFT") && bmsConfig ) {
+        if (newValue >= 0 && newValue <= 6000) {
+            bmsConfig->packAHRemaining = newValue * 100000ul;
+            bms->saveConfiguration();
+            Logger::console("Battery Pack remaining capacity set to: %d", newValue);
+        }
+        else Logger::console("Invalid remaining capacity please enter a value between 0 and 6000");
+    } else if (cmdString == String("VOLTLIMHI") && bmsConfig ) {
+        if (newValue >= 0 && newValue <= 6000) {
+            bmsConfig->highVoltLimit = newValue;
+            bms->saveConfiguration();
+            Logger::console("Battery High Voltage Limit set to: %d", bmsConfig->highVoltLimit);
+        }
+        else Logger::console("Invalid high voltage limit please enter a value between 0 and 6000");
+    } else if (cmdString == String("VOLTLIMLO") && bmsConfig ) {
+        if (newValue >= 0 && newValue <= 6000) {
+            bmsConfig->lowVoltLimit = newValue;
+            bms->saveConfiguration();
+            Logger::console("Battery Low Voltage Limit set to: %d", bmsConfig->lowVoltLimit);
+        }
+        else Logger::console("Invalid low voltage limit please enter a value between 0 and 6000");
+    } else if (cmdString == String("CELLLIMHI") && bmsConfig ) {
+        if (newValue >= 0 && newValue <= 20000) {
+            bmsConfig->highCellLimit = newValue;
+            bms->saveConfiguration();
+            Logger::console("Cell High Voltage Limit set to: %d", bmsConfig->highCellLimit);
+        }
+        else Logger::console("Invalid high voltage limit please enter a value between 0 and 20000");
+    } else if (cmdString == String("CELLLIMLO") && bmsConfig ) {
+        if (newValue >= 0 && newValue <= 20000) {
+            bmsConfig->lowCellLimit = newValue;
+            bms->saveConfiguration();
+            Logger::console("Cell Low Voltage Limit set to: %d", bmsConfig->lowCellLimit);
+        }
+        else Logger::console("Invalid low voltage limit please enter a value between 0 and 20000");
+    } else if (cmdString == String("TEMPLIMHI") && bmsConfig ) {
+        if (newValue >= 0 && newValue <= 2000) {
+            bmsConfig->highTempLimit = newValue;
+            bms->saveConfiguration();
+            Logger::console("Battery Temperature Upper Limit set to: %d", bmsConfig->highTempLimit);
+        }
+        else Logger::console("Invalid temperature upper limit please enter a value between 0 and 2000");
+    } else if (cmdString == String("TEMPLIMLO") && bmsConfig ) {
+        if (newValue >= -2000 && newValue <= 2000) {
+            bmsConfig->lowTempLimit = newValue;
+            bms->saveConfiguration();
+            Logger::console("Battery Temperature Lower Limit set to: %d", bmsConfig->lowTempLimit);
+        }
+        else Logger::console("Invalid temperature lower limit please enter a value between -2000 and 2000");
     } else if (cmdString == String("NUKE")) {
         if (newValue == 1)
         {   //write zero to the checksum location of every device in the table.

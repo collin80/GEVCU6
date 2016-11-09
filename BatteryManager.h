@@ -42,7 +42,7 @@ public:
     uint16_t highCellLimit;
     uint16_t lowCellLimit;
     uint16_t highTempLimit;
-    uint16_t lowTempLimit;
+    int16_t lowTempLimit;
 };
 
 class BatteryManager : public Device {

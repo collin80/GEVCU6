@@ -94,7 +94,7 @@ void BatteryManager::loadConfiguration() {
         prefsHandler->read(EEBMS_HI_CELL_LIM, &config->highCellLimit);
         prefsHandler->read(EEBMS_LO_CELL_LIM, &config->lowCellLimit);
         prefsHandler->read(EEBMS_HI_TEMP_LIM, &config->highTempLimit);
-        prefsHandler->read(EEBMS_LO_TEMP_LIM, &config->lowTempLimit);        
+        prefsHandler->read(EEBMS_LO_TEMP_LIM, (uint16_t *)&config->lowTempLimit);        
     }
     else { //checksum invalid. Reinitialize values and store to EEPROM
         config->packCapacity = DefaultPackCapacity;
@@ -121,7 +121,7 @@ void BatteryManager::saveConfiguration() {
     prefsHandler->write(EEBMS_HI_CELL_LIM, config->highCellLimit);
     prefsHandler->write(EEBMS_LO_CELL_LIM, config->lowCellLimit);
     prefsHandler->write(EEBMS_HI_TEMP_LIM, config->highTempLimit);
-    prefsHandler->write(EEBMS_LO_TEMP_LIM, config->lowTempLimit);    
+    prefsHandler->write(EEBMS_LO_TEMP_LIM, (uint16_t)config->lowTempLimit);    
 
     prefsHandler->saveChecksum();
 }
