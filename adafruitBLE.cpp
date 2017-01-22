@@ -423,7 +423,10 @@ void ADAFRUITBLE::handleTick() {
     //first things first, if the previous command was supposed to reply 
     //but has not for 1 second then assume it never will and unlock the ability
     //to keep going.
-    if (isWaiting && (ms > (resetTime + 1200))) isWaiting = false;
+    if (isWaiting && (ms > (resetTime + 1200))) {
+        isWaiting = false;
+        resetTime = millis();        
+    }
 
     if (isWaiting) return;
 
@@ -450,7 +453,7 @@ void ADAFRUITBLE::handleTick() {
     }
     
     //poll for GATT updates every so often
-    if (ms > (lastUpdateTime + 250)) {
+    if (ms > (lastUpdateTime + 1000)) {
         ble.sendCommandCheckOK(F("AT+EVENTSTATUS"));
         setNewBLEState(BLE_STATE_CHECK_CALLBACKS);
         isWaiting = true;
