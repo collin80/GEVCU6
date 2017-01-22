@@ -307,8 +307,69 @@
 <pad name="P$7" x="1.27" y="6.35" drill="0.8"/>
 <pad name="P$8" x="1.27" y="3.81" drill="0.8"/>
 <pad name="P$9" x="1.27" y="1.27" drill="0.8"/>
-<pad name="P$10" x="21.5392" y="20.447" drill="2.54"/>
-<pad name="P$11" x="21.5392" y="2.54" drill="2.54"/>
+<text x="2.54" y="21.59" size="1.27" layer="21">1</text>
+<pad name="P$10" x="21.59" y="19.05" drill="2.8"/>
+<pad name="P$11" x="21.59" y="3.81" drill="2.8"/>
+</package>
+<package name="BLE_ESP32">
+<wire x1="0" y1="0" x2="25.4" y2="0" width="0.127" layer="21"/>
+<wire x1="25.4" y1="0" x2="25.4" y2="17.78" width="0.127" layer="21"/>
+<wire x1="25.4" y1="17.78" x2="0" y2="17.78" width="0.127" layer="21"/>
+<wire x1="0" y1="17.78" x2="0" y2="0" width="0.127" layer="21"/>
+<smd name="P38" x="17.78" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P37" x="16.51" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P36" x="15.24" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P35" x="13.97" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P34" x="12.7" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P33" x="11.43" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P32" x="10.16" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P31" x="8.89" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P30" x="7.62" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P29" x="6.35" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P28" x="5.08" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P27" x="3.81" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P26" x="2.54" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P25" x="1.27" y="0" dx="1.27" dy="0.635" layer="1" rot="R90"/>
+<smd name="P24" x="0" y="3.302" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P23" x="0" y="4.572" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P22" x="0" y="5.842" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P21" x="0" y="7.112" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P20" x="0" y="8.382" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P19" x="0" y="9.652" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P18" x="0" y="10.922" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P17" x="0" y="12.192" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P16" x="0" y="13.462" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P15" x="0" y="14.732" dx="1.27" dy="0.635" layer="1" rot="R180"/>
+<smd name="P14" x="1.27" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P13" x="2.54" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P12" x="3.81" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P11" x="5.08" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P10" x="6.35" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P9" x="7.62" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P8" x="8.89" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P7" x="10.16" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P6" x="11.43" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P5" x="12.7" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P4" x="13.97" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P3" x="15.24" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P2" x="16.51" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P1" x="17.78" y="17.78" dx="1.27" dy="0.635" layer="1" rot="R270"/>
+<smd name="P39" x="10.16" y="8.89" dx="5.588" dy="5.588" layer="1"/>
+</package>
+<package name="ADABLE_NOHOLE">
+<wire x1="0" y1="0" x2="25.9842" y2="0" width="0.127" layer="21"/>
+<wire x1="25.9842" y1="0" x2="25.9842" y2="22.987" width="0.127" layer="21"/>
+<wire x1="25.9842" y1="22.987" x2="0" y2="22.987" width="0.127" layer="21"/>
+<wire x1="0" y1="22.987" x2="0" y2="0" width="0.127" layer="21"/>
+<pad name="P$1" x="1.27" y="21.59" drill="0.8"/>
+<pad name="P$2" x="1.27" y="19.05" drill="0.8"/>
+<pad name="P$3" x="1.27" y="16.51" drill="0.8"/>
+<pad name="P$4" x="1.27" y="13.97" drill="0.8"/>
+<pad name="P$5" x="1.27" y="11.43" drill="0.8"/>
+<pad name="P$6" x="1.27" y="8.89" drill="0.8"/>
+<pad name="P$7" x="1.27" y="6.35" drill="0.8"/>
+<pad name="P$8" x="1.27" y="3.81" drill="0.8"/>
+<pad name="P$9" x="1.27" y="1.27" drill="0.8"/>
 <text x="2.54" y="21.59" size="1.27" layer="21">1</text>
 </package>
 </packages>
@@ -522,6 +583,51 @@
 <pin name="PCTLZ" x="22.86" y="7.62" length="middle" rot="R180"/>
 <pin name="SDA" x="22.86" y="2.54" length="middle" rot="R180"/>
 </symbol>
+<symbol name="BLE_ESP32">
+<wire x1="0" y1="0" x2="35.56" y2="0" width="0.254" layer="94"/>
+<wire x1="35.56" y1="0" x2="35.56" y2="96.52" width="0.254" layer="94"/>
+<wire x1="35.56" y1="96.52" x2="0" y2="96.52" width="0.254" layer="94"/>
+<wire x1="0" y1="96.52" x2="0" y2="0" width="0.254" layer="94"/>
+<pin name="GND" x="-5.08" y="2.54" visible="pin" length="middle"/>
+<pin name="3V3" x="-5.08" y="7.62" visible="pin" length="middle"/>
+<pin name="EN" x="-5.08" y="12.7" visible="pin" length="middle"/>
+<pin name="S_VP" x="-5.08" y="17.78" visible="pin" length="middle"/>
+<pin name="S_VN" x="-5.08" y="22.86" visible="pin" length="middle"/>
+<pin name="IO34" x="-5.08" y="27.94" visible="pin" length="middle"/>
+<pin name="IO35" x="-5.08" y="33.02" visible="pin" length="middle"/>
+<pin name="IO32" x="-5.08" y="38.1" visible="pin" length="middle"/>
+<pin name="IO33" x="-5.08" y="43.18" visible="pin" length="middle"/>
+<pin name="IO25" x="-5.08" y="48.26" visible="pin" length="middle"/>
+<pin name="IO26" x="-5.08" y="53.34" visible="pin" length="middle"/>
+<pin name="IO27" x="-5.08" y="58.42" visible="pin" length="middle"/>
+<pin name="IO14" x="-5.08" y="63.5" visible="pin" length="middle"/>
+<pin name="IO12" x="-5.08" y="68.58" visible="pin" length="middle"/>
+<pin name="GND2" x="-5.08" y="73.66" visible="pin" length="middle"/>
+<pin name="IO13" x="-5.08" y="78.74" visible="pin" length="middle"/>
+<pin name="SD2" x="-5.08" y="83.82" visible="pin" length="middle"/>
+<pin name="SD3" x="-5.08" y="88.9" visible="pin" length="middle"/>
+<pin name="CMD" x="-5.08" y="93.98" visible="pin" length="middle"/>
+<pin name="CLK" x="40.64" y="93.98" visible="pin" length="middle" rot="R180"/>
+<pin name="SDO" x="40.64" y="88.9" visible="pin" length="middle" rot="R180"/>
+<pin name="SDI" x="40.64" y="83.82" visible="pin" length="middle" rot="R180"/>
+<pin name="IO15" x="40.64" y="78.74" visible="pin" length="middle" rot="R180"/>
+<pin name="IO2" x="40.64" y="73.66" visible="pin" length="middle" rot="R180"/>
+<pin name="IO0" x="40.64" y="68.58" visible="pin" length="middle" rot="R180"/>
+<pin name="IO4" x="40.64" y="63.5" visible="pin" length="middle" rot="R180"/>
+<pin name="IO16" x="40.64" y="58.42" visible="pin" length="middle" rot="R180"/>
+<pin name="IO17" x="40.64" y="53.34" visible="pin" length="middle" rot="R180"/>
+<pin name="IO5" x="40.64" y="48.26" visible="pin" length="middle" rot="R180"/>
+<pin name="IO18" x="40.64" y="43.18" visible="pin" length="middle" rot="R180"/>
+<pin name="IO19" x="40.64" y="38.1" visible="pin" length="middle" rot="R180"/>
+<pin name="NC" x="40.64" y="33.02" visible="pin" length="middle" rot="R180"/>
+<pin name="IO21" x="40.64" y="27.94" visible="pin" length="middle" rot="R180"/>
+<pin name="RXD0" x="40.64" y="22.86" visible="pin" length="middle" rot="R180"/>
+<pin name="TXD0" x="40.64" y="17.78" visible="pin" length="middle" rot="R180"/>
+<pin name="IO22" x="40.64" y="12.7" visible="pin" length="middle" rot="R180"/>
+<pin name="IO23" x="40.64" y="7.62" visible="pin" length="middle" rot="R180"/>
+<pin name="GND3" x="40.64" y="2.54" visible="pin" length="middle" rot="R180"/>
+<pin name="BIGGND" x="15.24" y="-5.08" visible="pin" length="middle" rot="R90"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="ADE7913">
@@ -707,6 +813,82 @@
 <connect gate="G$1" pin="SCL" pad="4"/>
 <connect gate="G$1" pin="SDA" pad="5"/>
 <connect gate="G$1" pin="VCC" pad="1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="ESP32">
+<gates>
+<gate name="G$1" symbol="BLE_ESP32" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="BLE_ESP32">
+<connects>
+<connect gate="G$1" pin="3V3" pad="P2"/>
+<connect gate="G$1" pin="BIGGND" pad="P39"/>
+<connect gate="G$1" pin="CLK" pad="P20"/>
+<connect gate="G$1" pin="CMD" pad="P19"/>
+<connect gate="G$1" pin="EN" pad="P3"/>
+<connect gate="G$1" pin="GND" pad="P1"/>
+<connect gate="G$1" pin="GND2" pad="P15"/>
+<connect gate="G$1" pin="GND3" pad="P38"/>
+<connect gate="G$1" pin="IO0" pad="P25"/>
+<connect gate="G$1" pin="IO12" pad="P14"/>
+<connect gate="G$1" pin="IO13" pad="P16"/>
+<connect gate="G$1" pin="IO14" pad="P13"/>
+<connect gate="G$1" pin="IO15" pad="P23"/>
+<connect gate="G$1" pin="IO16" pad="P27"/>
+<connect gate="G$1" pin="IO17" pad="P28"/>
+<connect gate="G$1" pin="IO18" pad="P30"/>
+<connect gate="G$1" pin="IO19" pad="P31"/>
+<connect gate="G$1" pin="IO2" pad="P24"/>
+<connect gate="G$1" pin="IO21" pad="P33"/>
+<connect gate="G$1" pin="IO22" pad="P36"/>
+<connect gate="G$1" pin="IO23" pad="P37"/>
+<connect gate="G$1" pin="IO25" pad="P10"/>
+<connect gate="G$1" pin="IO26" pad="P11"/>
+<connect gate="G$1" pin="IO27" pad="P12"/>
+<connect gate="G$1" pin="IO32" pad="P8"/>
+<connect gate="G$1" pin="IO33" pad="P9"/>
+<connect gate="G$1" pin="IO34" pad="P6"/>
+<connect gate="G$1" pin="IO35" pad="P7"/>
+<connect gate="G$1" pin="IO4" pad="P26"/>
+<connect gate="G$1" pin="IO5" pad="P29"/>
+<connect gate="G$1" pin="NC" pad="P32"/>
+<connect gate="G$1" pin="RXD0" pad="P34"/>
+<connect gate="G$1" pin="SD2" pad="P17"/>
+<connect gate="G$1" pin="SD3" pad="P18"/>
+<connect gate="G$1" pin="SDI" pad="P22"/>
+<connect gate="G$1" pin="SDO" pad="P21"/>
+<connect gate="G$1" pin="S_VN" pad="P5"/>
+<connect gate="G$1" pin="S_VP" pad="P4"/>
+<connect gate="G$1" pin="TXD0" pad="P35"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="BLE_SPI_NOMOUNTING">
+<gates>
+<gate name="G$1" symbol="BLE_LE_SPI" x="0" y="7.62"/>
+</gates>
+<devices>
+<device name="" package="ADABLE_NOHOLE">
+<connects>
+<connect gate="G$1" pin="P$1" pad="P$1"/>
+<connect gate="G$1" pin="P$2" pad="P$2"/>
+<connect gate="G$1" pin="P$3" pad="P$3"/>
+<connect gate="G$1" pin="P$4" pad="P$4"/>
+<connect gate="G$1" pin="P$5" pad="P$5"/>
+<connect gate="G$1" pin="P$6" pad="P$6"/>
+<connect gate="G$1" pin="P$7" pad="P$7"/>
+<connect gate="G$1" pin="P$8" pad="P$8"/>
+<connect gate="G$1" pin="P$9" pad="P$9"/>
 </connects>
 <technologies>
 <technology name=""/>
