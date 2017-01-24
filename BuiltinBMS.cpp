@@ -67,15 +67,15 @@ void BuiltinBatteryManager::handleTick() {
     //every tick we'll grab the voltages and current and pass them through
     //filters to give us a good value to work with.
     temp = systemIO.getPackHighReading();
-    //Logger::console("Pack high: %i", temp);
+    Logger::warn("Pack high: %i", temp);
     packVoltage = packUpperFilteredVoltage->calc(temp);
     temp = systemIO.getPackLowReading();
-    //Logger::console("Pack Low: %i", temp);
+   Logger::warn("Pack Low: %i", temp);
     packVoltage += packLowerFilteredVoltage->calc(temp);
-    //Logger::debug("Pack voltage: %i", packVoltage);
+    Logger::warn("Pack voltage: %i", packVoltage);
     
     packCurrent = packCurrentFiltered->calc(systemIO.getCurrentReading());
-    //Logger::debug("Pack current: %i", packCurrent);
+    Logger::warn("Pack current: %i", packCurrent);
         
     temp = micros();
     int32_t interval = temp - lastUpdate;
@@ -96,6 +96,9 @@ void BuiltinBatteryManager::handleTick() {
     
     if (totalCapacity > 0) SOC = (100 * config->packAHRemaining) / totalCapacity;
     else SOC = 50; //Divide by zero is naughty! But, set SOC to 50 in that case.
+
+     Logger::warn("AH remaining: %i  SOC:%i", config->packAHRemaining,SOC);
+    
 }
 
 DeviceId BuiltinBatteryManager::getId()
