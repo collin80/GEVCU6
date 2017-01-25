@@ -37,8 +37,8 @@ BuiltinBatteryManager::BuiltinBatteryManager() : BatteryManager() {
     commonName = "GEVCU Internal BMS";
     
     packCurrentFiltered = new EMAFilter(20); //respond fairly quickly
-    packUpperFilteredVoltage = new EMAFilter(5); //very slow change in value
-    packLowerFilteredVoltage = new EMAFilter(5);
+    packUpperFilteredVoltage = new EMAFilter(3); //very slow change in value
+    packLowerFilteredVoltage = new EMAFilter(3);
     
     lastUpdate = micros();
 }
@@ -57,6 +57,8 @@ void BuiltinBatteryManager::setup() {
 
 void BuiltinBatteryManager::handleTick() {
     BatteryManager::handleTick(); //kick the ball up to papa
+
+    static int passes = 0;
     
     if (!config) {
         config = (BuiltinBMSConfiguration *)getConfiguration();
@@ -68,34 +70,44 @@ void BuiltinBatteryManager::handleTick() {
     //filters to give us a good value to work with.
     temp = systemIO.getPackHighReading();
     //Logger::console("Pack high: %i", temp);
-    packVoltage = packUpperFilteredVoltage->calc(temp);
+    packHi = packUpperFilteredVoltage->calc(temp);
     temp = systemIO.getPackLowReading();
     //Logger::console("Pack Low: %i", temp);
-    packVoltage += packLowerFilteredVoltage->calc(temp);
+    packLo = packLowerFilteredVoltage->calc(temp);
+    packVoltage = packHi + packLo;
     //Logger::debug("Pack voltage: %i", packVoltage);
     
     packCurrent = packCurrentFiltered->calc(systemIO.getCurrentReading());
     //Logger::debug("Pack current: %i", packCurrent);
+
+    passes++;
+    if (passes > 10) {
+      passes = 0;
         
-    temp = micros();
-    int32_t interval = temp - lastUpdate;
-    lastUpdate = temp;
+      temp = micros();
+      int32_t interval = temp - lastUpdate;
+      lastUpdate = temp;
     
-    //interval in microseconds, current in hundredths of an amp, the AH remaining variable is in millionths of an AH
-    //With current in hundredths of an amp you'd need to divide by 100 to get to amps. Then, the interval is in millionths of a second
-    //so, (ampreading / 100) * (interval / 1,000,000) / 60 / 60 = Used amp hours this interval. But, the answer should be in millionths of an AH
-    //so multiply by 1,000,000 which cancels the divide by a million above giving:
-    //(ampreading / 100) * interval / 3600 = Used microAmpHours this interval. But, to maintain precision take the /100 and /3600 and consolidate:
-    //(ampReading * interval) / 360,000 = microampHours
-    int32_t usage = (packCurrent * interval) / 360000l;
-    int32_t totalCapacity = (config->packCapacity * 1000000l);
+      //interval in microseconds, current in hundredths of an amp, the AH remaining variable is in millionths of an AH
+      //With current in hundredths of an amp you'd need to divide by 100 to get to amps. Then, the interval is in millionths of a second
+      //so, (ampreading / 100) * (interval / 1,000,000) / 60 / 60 = Used amp hours this interval. But, the answer should be in millionths of an AH
+      //so multiply by 1,000,000 which cancels the divide by a million above giving:
+      //(ampreading / 100) * interval / 3600 = Used microAmpHours this interval. But, to maintain precision take the /100 and /3600 and consolidate:
+      //(ampReading * interval) / 360,000 = microampHours
+      int32_t usage = (packCurrent * interval) / 360000l;
+      int32_t totalCapacity = (config->packCapacity * 1000000l);
+     
+      if (config->packAHRemaining > usage)  config->packAHRemaining -= usage;
+        else config->packAHRemaining = 0;
+      if (config->packAHRemaining > totalCapacity) config->packAHRemaining = totalCapacity;
     
-    if (config->packAHRemaining > usage)  config->packAHRemaining -= usage;
-    else config->packAHRemaining = 0;
-    if (config->packAHRemaining > totalCapacity) config->packAHRemaining = totalCapacity;
-    
-    if (totalCapacity > 0) SOC = (100 * config->packAHRemaining) / totalCapacity;
-    else SOC = 50; //Divide by zero is naughty! But, set SOC to 50 in that case.
+      if (totalCapacity > 0) SOC = (100 * config->packAHRemaining) / totalCapacity;
+        else SOC = 50; //Divide by zero is naughty! But, set SOC to 50 in that case.
+
+      Logger::info("Pack Hi: %i", packHi);
+      Logger::info("Pack Lo: %i", packLo);
+      Logger::info("Pack Total: %i", packVoltage);
+    }
 }
 
 DeviceId BuiltinBatteryManager::getId()

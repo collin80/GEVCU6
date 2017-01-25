@@ -601,11 +601,11 @@ void SerialConsole::handleConfigCmd() {
         }
         else Logger::console("Invalid speed. Enter a value between 33 and 1000");
     } else if (cmdString == String("PACKHCAL")) {
-        systemIO.calibrateADCGain(4, newValue, true);
-    } else if (cmdString == String("PACKLCAL")) {
         systemIO.calibrateADCGain(5, newValue, true);
+    } else if (cmdString == String("PACKLCAL")) {
+        systemIO.calibrateADCGain(6, newValue, true);
     } else if (cmdString == String("PACKCCAL")) {
-        systemIO.calibrateADCGain(6, newValue, true);        
+        systemIO.calibrateADCGain(4, newValue, true);        
     } else if (cmdString == String("LOGLEVEL")) {
         switch (newValue) {
         case 0:

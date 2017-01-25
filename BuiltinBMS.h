@@ -64,6 +64,7 @@ private:
     EMAFilter *packUpperFilteredVoltage;
     EMAFilter *packLowerFilteredVoltage;
     EMAFilter *packCurrentFiltered;
+    int16_t packLo, packHi;
     BuiltinBMSConfiguration *config;
     uint32_t lastUpdate;
 };

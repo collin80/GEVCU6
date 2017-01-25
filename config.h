@@ -67,7 +67,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CFG_TICK_INTERVAL_BMS_INTERNAL              40000
 #define CFG_TICK_INTERVAL_BMS_THINK                 500000
 #define CFG_TICK_INTERVAL_WIFI                      200000
-#define CFG_TICK_INTERVAL_BLE                       40000
+#define CFG_TICK_INTERVAL_BLE                       10000
 #define CFG_TICK_INTERVAL_DCDC                      200000
 #define CFG_TICK_INTERVAL_EVIC                      100000
 #define CFG_TICK_INTERVAL_VEHICLE                   100000
