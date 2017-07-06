@@ -43,6 +43,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "DmocMotorController.h"
 #include "BrusaMotorController.h"
 #include "CKMotorController.h"
+#include "RMSMotorController.h"
 #include "TestMotorController.h"
 #include "Heartbeat.h"
 #include "sys_io.h"

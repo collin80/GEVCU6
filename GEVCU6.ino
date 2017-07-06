@@ -123,6 +123,7 @@ void createObjects() {
 	DmocMotorController *dmotorController = new DmocMotorController();
     CodaMotorController *cmotorController = new CodaMotorController();
 	CKMotorController *ckMotorController = new CKMotorController();
+	RMSMotorController *rmsMotorController = new RMSMotorController();
     TestMotorController *testMotorController = new TestMotorController();
     DCDCController *dcdcController = new DCDCController();
 	BrusaMotorController *bmotorController = new BrusaMotorController();
@@ -210,6 +211,7 @@ void setup() {
 
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
+	//loglevel = 0; //force debugging log level
     Logger::console("LogLevel: %i", loglevel);
 	Logger::setLoglevel((Logger::LogLevel)loglevel);
     //Logger::setLoglevel((Logger::LogLevel)0);
