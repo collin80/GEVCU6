@@ -535,6 +535,7 @@ int32_t SystemIO::getPackLowReading()
     valu = getSPIADCReading(CS3, 2);
     valu -= (adc_comp[6].offset * 32);
     valu >>= 3;
+
     gainTemp = (int64_t)((int64_t)valu * adc_comp[6].gain) / 16384ll;
     valu = (int32_t) -gainTemp;    
     return valu;
@@ -695,7 +696,7 @@ bool SystemIO::calibrateADCGain(int adc, int32_t target, bool update)
         return false;
     }
     
-    if (accum < 1000) {
+    if (accum < 1000 && accum > -1000) {
         Logger::console("Readings are too low. Try applying more voltage/current");
         return false;
     }
