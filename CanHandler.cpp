@@ -147,12 +147,13 @@ void CanHandler::detach(CanObserver* observer, uint32_t id, uint32_t mask)
  */
 void CanHandler::logFrame(CAN_FRAME& frame)
 {
+    /*
     if (Logger::isDebug()) {
         Logger::debug("CAN: dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",
                       frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
                       frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
                       frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
-    }
+    }*/
 }
 
 /*
@@ -209,12 +210,12 @@ void CanHandler::process()
 
     if (bus->rx_avail()) {
         bus->get_rx_buff(frame);
-      
+      /*
        Logger::debug("CAN:%d dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",canBusNode,
                       frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
                       frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
                       frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
-        
+        */
         if(frame.id == CAN_SWITCH) CANIO(frame);
        
 

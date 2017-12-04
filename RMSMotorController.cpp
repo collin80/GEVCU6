@@ -43,6 +43,7 @@ RMSMotorController::RMSMotorController() : MotorController()
     online = 0;
     activityCount = 0;
     sequence = 0;
+    isLockedOut = true;
     commonName = "Rinehart Motion Systems Inverter";
 }
 
@@ -68,7 +69,7 @@ void RMSMotorController::setup()
 void RMSMotorController::handleCanFrame(CAN_FRAME *frame)
 {
     int temp;
-    uint8_t *data = (uint8_t *)frame->data.value;
+    uint8_t *data = &frame->data.bytes[0];
     online = 1; //if a frame got to here then it passed the filter and must come from RMS
 	
     if (!running) //if we're newly running then cancel faults if necessary.
@@ -540,6 +541,10 @@ void RMSMotorController::sendCmdFrame()
     else {
         torqueCommand = torqueRequested/2;   //If at RPM limit, cut torque command in half.
     }
+    
+    if (torqueRequested < 0) torqueRequested = 0;
+    
+    Logger::debug("ThrottleRequested: %d     TorqueRequested: %d", throttleRequested, torqueRequested);
 	
     output.data.bytes[1] = (torqueCommand & 0xFF00) >> 8;  //Stow torque command in bytes 0 and 1.
     output.data.bytes[0] = (torqueCommand & 0x00FF);

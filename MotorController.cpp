@@ -53,7 +53,7 @@ MotorController::MotorController() : Device() {
     mechanicalPower = 0;
 
     selectedGear = NEUTRAL;
-    operationState=ENABLE;
+    operationState = ENABLE;
 
     dcVoltage = 0;
     dcCurrent = 0;
@@ -245,6 +245,9 @@ void MotorController::checkPrecharge()
             throttleRequested = 0; //Keep throttle at zero during precharge
             prelay=true;
             Logger::info("Starting precharge sequence - wait %i milliseconds", prechargetime);
+            Logger::info("PRECHARGE ENABLED...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
+                systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
+                systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
 
         }
     }

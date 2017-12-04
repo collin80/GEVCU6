@@ -628,6 +628,20 @@
 <pin name="GND3" x="40.64" y="2.54" visible="pin" length="middle" rot="R180"/>
 <pin name="BIGGND" x="15.24" y="-5.08" visible="pin" length="middle" rot="R90"/>
 </symbol>
+<symbol name="FAN3227">
+<wire x1="0" y1="0" x2="17.78" y2="0" width="0.254" layer="94"/>
+<wire x1="17.78" y1="0" x2="17.78" y2="20.32" width="0.254" layer="94"/>
+<wire x1="17.78" y1="20.32" x2="0" y2="20.32" width="0.254" layer="94"/>
+<wire x1="0" y1="20.32" x2="0" y2="0" width="0.254" layer="94"/>
+<pin name="ENA" x="-5.08" y="17.78" length="middle"/>
+<pin name="INA" x="-5.08" y="12.7" length="middle"/>
+<pin name="GND" x="-5.08" y="7.62" length="middle"/>
+<pin name="INB" x="-5.08" y="2.54" length="middle"/>
+<pin name="OUTB" x="22.86" y="2.54" length="middle" rot="R180"/>
+<pin name="VDD" x="22.86" y="7.62" length="middle" rot="R180"/>
+<pin name="OUTA" x="22.86" y="12.7" length="middle" rot="R180"/>
+<pin name="ENB" x="22.86" y="17.78" length="middle" rot="R180"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="ADE7913">
@@ -889,6 +903,28 @@
 <connect gate="G$1" pin="P$7" pad="P$7"/>
 <connect gate="G$1" pin="P$8" pad="P$8"/>
 <connect gate="G$1" pin="P$9" pad="P$9"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="FAN3227">
+<gates>
+<gate name="G$1" symbol="FAN3227" x="0" y="2.54"/>
+</gates>
+<devices>
+<device name="" package="SOIC8">
+<connects>
+<connect gate="G$1" pin="ENA" pad="1"/>
+<connect gate="G$1" pin="ENB" pad="8"/>
+<connect gate="G$1" pin="GND" pad="3"/>
+<connect gate="G$1" pin="INA" pad="2"/>
+<connect gate="G$1" pin="INB" pad="4"/>
+<connect gate="G$1" pin="OUTA" pad="7"/>
+<connect gate="G$1" pin="OUTB" pad="5"/>
+<connect gate="G$1" pin="VDD" pad="6"/>
 </connects>
 <technologies>
 <technology name=""/>
