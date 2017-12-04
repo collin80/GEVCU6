@@ -450,6 +450,7 @@ void SerialConsole::handleConfigCmd() {
         else Logger::console("Invalid RPM value. Please enter a value higher than low limit and under 10000");
     } else if (cmdString == String("ENABLE")) {
         if (PrefHandler::setDeviceStatus(newValue, true)) {
+            sysPrefs->saveChecksum();
             sysPrefs->forceCacheWrite(); //just in case someone takes us literally and power cycles quickly
             Logger::console("Successfully enabled device.(%X, %d) Power cycle to activate.", newValue, newValue);
         }
@@ -458,6 +459,7 @@ void SerialConsole::handleConfigCmd() {
         }
     } else if (cmdString == String("DISABLE")) {
         if (PrefHandler::setDeviceStatus(newValue, false)) {
+            sysPrefs->saveChecksum();
             sysPrefs->forceCacheWrite(); //just in case someone takes us literally and power cycles quickly
             Logger::console("Successfully disabled device. Power cycle to deactivate.");
         }
@@ -729,14 +731,9 @@ void SerialConsole::handleConfigCmd() {
         else Logger::console("Invalid temperature lower limit please enter a value between -2000 and 2000");
     } else if (cmdString == String("NUKE")) {
         if (newValue == 1)
-        {   //write zero to the checksum location of every device in the table.
-            //Logger::console("Start of EEPROM Nuke");
-            uint8_t zeroVal = 0;
-            for (int j = 0; j < 64; j++)
-            {
-                memCache->Write(EE_DEVICES_BASE + (EE_DEVICE_SIZE * j), zeroVal);
-                memCache->FlushAllPages();
-            }
+            Logger::console("Start of EEPROM Nuke");
+            memCache->InvalidateAll(); //first force writing of all dirty pages and invalidate them
+            memCache->nukeFromOrbit(); //then completely erase EEPROM
             Logger::console("Device settings have been nuked. Reboot to reload default settings");
         }
     } else {

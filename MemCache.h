@@ -66,6 +66,7 @@ public:
     void InvalidateAll();
     void AgeFullyPage(uint8_t page);
     void AgeFullyAddress(uint32_t address);
+    void nukeFromOrbit();
 
     boolean Write(uint32_t address, uint8_t valu);
     boolean Write(uint32_t address, uint16_t valu);

@@ -96,22 +96,31 @@ void initSysEEPROM() {
 	sysPrefs->write(EESYS_ADC1_GAIN, sixteen);
 	sysPrefs->write(EESYS_ADC2_GAIN, sixteen);
 	sysPrefs->write(EESYS_ADC3_GAIN, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKH_GAIN, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKL_GAIN, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKC_GAIN, sixteen);
+
 
 	sixteen = 0; //no offset
 	sysPrefs->write(EESYS_ADC0_OFFSET, sixteen);
 	sysPrefs->write(EESYS_ADC1_OFFSET, sixteen);
 	sysPrefs->write(EESYS_ADC2_OFFSET, sixteen);
 	sysPrefs->write(EESYS_ADC3_OFFSET, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKH_OFFSET, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKL_OFFSET, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKC_OFFSET, sixteen);
+
 
 	sixteen = CFG_CAN0_SPEED;
 	sysPrefs->write(EESYS_CAN0_BAUD, sixteen);
     sixteen = CFG_CAN1_SPEED;
 	sysPrefs->write(EESYS_CAN1_BAUD, sixteen);
 
-	eight = 3;  //0=debug, 1=info,2=warn,3=error,4=off
+	eight = 2;  //0=debug, 1=info,2=warn,3=error,4=off
 	sysPrefs->write(EESYS_LOG_LEVEL, eight);
 
 	sysPrefs->saveChecksum();
+    sysPrefs->forceCacheWrite();
 }
 
 void createObjects() {
@@ -159,6 +168,7 @@ void initializeDevices() {
 	 *	out there as they initialize. For instance, a motor controller could see if a BMS
 	 *	exists and supports a function that the motor controller wants to access.
 	 */
+    sysPrefs->forceCacheWrite();
 	deviceManager.sendMessage(DEVICE_ANY, INVALID, MSG_STARTUP, NULL);
 
 }
@@ -184,7 +194,7 @@ void setup() {
     SUPC->SUPC_SMMR = 0xA | (1<<8) | (1<<12);
 	
 #ifdef DEBUG_STARTUP_DELAY
-    for (int c = 0; c < 100; c++) {
+    for (int c = 0; c < 200; c++) {
         delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm quickly upon start up
         watchdogReset();
     }

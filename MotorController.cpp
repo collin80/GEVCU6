@@ -568,6 +568,7 @@ void MotorController::loadConfiguration() {
 #else
     if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
 #endif
+        Logger::info((char *)Constants::validChecksum);
         prefsHandler->read(EEMC_MAX_RPM, &config->speedMax);
         prefsHandler->read(EEMC_MAX_TORQUE, &config->torqueMax);
         prefsHandler->read(EEMC_RPM_SLEW_RATE, &config->speedSlewRate);
@@ -596,6 +597,7 @@ void MotorController::loadConfiguration() {
         }
     }
     else { //checksum invalid. Reinitialize values and store to EEPROM
+        Logger::info((char *)Constants::invalidChecksum);
         config->speedMax = MaxRPMValue;
         config->torqueMax = MaxTorqueValue;
         config->speedSlewRate = RPMSlewRateValue;
@@ -615,6 +617,7 @@ void MotorController::loadConfiguration() {
         config->reverseIn = ReverseIn;
         config->regenTaperLower = RegenTaperLower;
         config->regenTaperUpper = RegenTaperUpper;
+        saveConfiguration();
     }
     //DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
 
@@ -648,6 +651,7 @@ void MotorController::saveConfiguration() {
     //prefsHandler->write(EESYS_CAPACITY, config->capacity);
 
     prefsHandler->saveChecksum();
+    prefsHandler->forceCacheWrite();
     loadConfiguration();
 }
 
