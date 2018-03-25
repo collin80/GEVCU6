@@ -730,7 +730,7 @@ void SerialConsole::handleConfigCmd() {
         }
         else Logger::console("Invalid temperature lower limit please enter a value between -2000 and 2000");
     } else if (cmdString == String("NUKE")) {
-        if (newValue == 1)
+        if (newValue == 1) {
             Logger::console("Start of EEPROM Nuke");
             memCache->InvalidateAll(); //first force writing of all dirty pages and invalidate them
             memCache->nukeFromOrbit(); //then completely erase EEPROM
