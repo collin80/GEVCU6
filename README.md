@@ -21,6 +21,7 @@ You will need the following to have any hope of compiling and running the firmwa
 - due_rtc library - Also under Collin80
 - due_wire library - once again
 - DueTimer library - and again
+- Microsmooth library (Also in repos: https://github.com/collin80/Microsmooth)
 - Adafruit_BLE_SPI library - You need the development branch from my repos: https://github.com/collin80/Adafruit_BLE_SPI/tree/development
 
 All libraries belong in %USERPROFILE%\Documents\Arduino\libraries (Windows) or ~/Arduino/libraries (Linux/Mac).
