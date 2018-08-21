@@ -17,9 +17,11 @@ You will need the following to have any hope of compiling and running the firmwa
 - A GEVCU board. This version supports hardware 6.23c and later.
 - Arduino IDE 1.5.4 - or later
 - due_can library - There is a repo for this under github.com/Collin80
+- can_common library - Also under Collin80 repos
 - due_rtc library - Also under Collin80
 - due_wire library - once again
 - DueTimer library - and again
+- Adafruit_BLE_SPI library - You need the development branch from my repos: https://github.com/collin80/Adafruit_BLE_SPI/tree/development
 
 All libraries belong in %USERPROFILE%\Documents\Arduino\libraries (Windows) or ~/Arduino/libraries (Linux/Mac).
 You will need to remove -master or any other postfixes. Your library folders should be named as above.
