@@ -71,7 +71,6 @@ class ELM327Emu : public Device {
 public:
 
     ELM327Emu();
-    ELM327Emu(USARTClass *which);
     void setup(); //initialization on start up
     void handleTick(); //periodic processes
     void handleMessage(uint32_t messageType, void* message);
@@ -84,7 +83,6 @@ public:
     void saveConfiguration();
 
 private:
-    USARTClass *serialInterface; //Allows for retargetting which serial port we use
     ELM327Processor *elmProc;
     char incomingBuffer[128]; //storage for one incoming line
     int tickCounter;
