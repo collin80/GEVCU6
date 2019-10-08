@@ -351,7 +351,7 @@ void BrusaMotorController::loadConfiguration() {
         config->dcCurrentLimitMotor = 0;
         config->dcCurrentLimitRegen = 0;
         config->enableOscillationLimiter = false;
-        saveConfiguration();
+        //saveConfiguration();
     }
     Logger::debug(BRUSA_DMC5, "Max mech power motor: %d kW, max mech power regen: %d ", config->maxMechanicalPowerMotor, config->maxMechanicalPowerRegen);
     Logger::debug(BRUSA_DMC5, "DC limit motor: %d Volt, DC limit regen: %d Volt", config->dcVoltLimitMotor, config->dcVoltLimitRegen);
@@ -374,7 +374,7 @@ void BrusaMotorController::saveConfiguration() {
 //	prefsHandler->write(EEMC_, config->dcCurrentLimitMotor);
 //	prefsHandler->write(EEMC_, config->dcCurrentLimitRegen);
 //	prefsHandler->write(EEMC_, config->enableOscillationLimiter);
-    prefsHandler->saveChecksum();
+    //prefsHandler->saveChecksum();
 }
 
 

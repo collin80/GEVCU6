@@ -77,7 +77,7 @@ void RMSMotorController::handleCanFrame(CAN_FRAME *frame)
         faultHandler.cancelOngoingFault(RINEHARTINV, FAULT_MOTORCTRL_COMM);
     }
     
-    running=true;
+    running = true;
     
     Logger::debug("inverter msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", frame->id, frame->data.bytes[0],
                   frame->data.bytes[1],frame->data.bytes[2],frame->data.bytes[3],frame->data.bytes[4],
@@ -483,12 +483,12 @@ void RMSMotorController::handleTick() {
     {   //we set the RUNNING light on.  If no frames are received for 2 seconds, we set running OFF.
         if (millis()-mss>2000)
         {
-            running=false; // We haven't received any frames for over 2 seconds.  Otherwise online would be true.
+            running = false; // We haven't received any frames for over 2 seconds.  Otherwise online would be true.
             mss=millis();   //Reset our 2 second timer
         }
     }
-    else running=true;
-    online=false;//This flag will be set to true by received frames
+    else running = true;
+    online = false;//This flag will be set to true by received frames
 }
 
 
@@ -516,7 +516,7 @@ void RMSMotorController::sendCmdFrame()
 	output.data.bytes[7] = 0;
 	
 	
-    if(operationState==ENABLE && !isLockedOut)
+    if(operationState == ENABLE && !isLockedOut && selectedGear != NEUTRAL && donePrecharge)
     {
         output.data.bytes[5] = 1;
     }
@@ -525,13 +525,13 @@ void RMSMotorController::sendCmdFrame()
         output.data.bytes[5] = 0;
     }
 
-    if(selectedGear==DRIVE)
+    if(selectedGear == DRIVE)
     {
-        output.data.bytes[4] = 1;
+        output.data.bytes[4] = 0;
     }
     else
     {
-        output.data.bytes[4] = 0;
+        output.data.bytes[4] = 1;
     }
     
     torqueRequested = ((throttleRequested * config->torqueMax) / 1000); //Calculate torque request from throttle position x maximum torque
@@ -539,7 +539,7 @@ void RMSMotorController::sendCmdFrame()
         torqueCommand = torqueRequested;   //If actual rpm less than max rpm, add torque command to offset
     }
     else {
-        torqueCommand = torqueRequested/2;   //If at RPM limit, cut torque command in half.
+        torqueCommand = torqueRequested / 2;   //If at RPM limit, cut torque command in half.
     }
     
     if (torqueRequested < 0) torqueRequested = 0;
