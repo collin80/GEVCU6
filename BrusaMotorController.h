@@ -56,6 +56,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CAN_MASK_2			0x7ff // mask for above id's								11111111111
 #define CAN_MASKED_ID_2		0x458 // masked id for id's from 0x258 to 0x268				10001011000
 
+#define EEMC_MAX_MECHPOWER   80
+#define EEMC_MAX_MECHREGEN   82
+#define EEMC_MAX_VOLTPOWER   84
+#define EEMC_MAX_VOLTREGEN   86
+#define EEMC_CURR_LIM_POWER  88
+#define EEMC_CURR_LIM_REGEN  90
+#define EEMC_EN_OSC_LIMITER  92
+
 class BrusaMotorControllerConfiguration : public MotorControllerConfiguration {
 public:
     // DMC_CTRL2
@@ -184,5 +192,3 @@ private:
 };
 
 #endif /* BRUSAMOTORCONTROLLER_H_ */
-
-
