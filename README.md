@@ -13,11 +13,14 @@ The project now builds in the Arduino IDE. So, use it to compile, send the firmw
 
 You will need the following to have any hope of compiling and running the firmware:
 - A GEVCU board. This version supports hardware 6.23c and later.
-- Arduino IDE 1.5.4 - or later
+- Arduino IDE 1.5.4 - or later even 1.8.13 or such newer IDEs should work fine.
 - due_can library - There is a repo for this under github.com/Collin80
+- can_common library - Also available from Collin80 repos
 - due_rtc library - Also under Collin80
 - due_wire library - once again
 - DueTimer library - and again
+- microsmooth library - also from Collin80
+- Adafruit_BLE_SPI - You need the DEV branch of this library.
 
 All libraries belong in %USERPROFILE%\Documents\Arduino\libraries (Windows) or ~/Arduino/libraries (Linux/Mac).
 You will need to remove -master or any other postfixes. Your library folders should be named as above.
