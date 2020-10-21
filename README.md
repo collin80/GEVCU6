@@ -1,11 +1,11 @@
-View this project on [CADLAB.io](https://cadlab.io/project/1056). 
-
 GEVCU
 =====
 
 Generalized Electric Vehicle Control Unit
 
 Our website can be found at : http://www.evtv.me
+
+NOTE: This branch is quite old and not really supported at this point. Use the DEV branch of this project if at all possible. It is newer and better supported. Eventually the DEV branch will be merged back into this master branch.
 
 A project to create a fairly Arduino compatible ECU firmware
 to interface with various electric vehicle hardware over CANbus
