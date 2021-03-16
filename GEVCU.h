@@ -45,6 +45,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "CKMotorController.h"
 #include "RMSMotorController.h"
 #include "TestMotorController.h"
+#include "C300MotorController.h"
 #include "Heartbeat.h"
 #include "sys_io.h"
 #include "CanHandler.h"

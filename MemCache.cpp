@@ -213,7 +213,7 @@ boolean MemCache::Write(uint32_t address, void* data, uint16_t len)
             if (c != 0xFF) c = cache_readpage(addr); //and populate it with the existing data
         }
         if (c != 0xFF) { //could we find a suitable cache page to write to?
-            pages[c].data[(uint16_t)((address+count) & 0x00FF)] = *(uint8_t *)(data + count);
+            pages[c].data[(uint16_t)((address+count) & 0x00FF)] = *(uint8_t *)( ((uint8_t *)data) + count);
             pages[c].dirty = true;
             pages[c].address = addr; //set this in case we actually are setting up a new cache page
         }
@@ -273,7 +273,7 @@ boolean MemCache::Read(uint32_t address, void* data, uint16_t len)
             c = cache_readpage(addr);
         }
         if (c != 0xFF) {
-            *(uint8_t *)(data + count) = pages[c].data[(uint16_t)((address+count) & 0x00FF)];
+            *(uint8_t *)( ((uint8_t *)data) + count) = pages[c].data[(uint16_t)((address + count) & 0x00FF)];
             if (!pages[c].dirty) pages[c].age = 0; //reset age since we just used it
         }
         else break; //bust the for loop if we run into trouble
