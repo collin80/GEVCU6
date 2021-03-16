@@ -70,15 +70,44 @@ void C300MotorController::handleCanFrame(CAN_FRAME *frame) {
     switch (frame->id) 
     {
     case 0x0CFF7902: //MCU status, mode, output torque, etc
+        //byte 0 first three bits are error status. 0 = good, higher numbers are progressively worse
+        //Upper nibble of byte 0 is counter
+        //Byte 1 bits 0-1 are mode. 0 = standby, 1 = Speed ctrl, 2 = torque ctrl, 3 = discharge
+        //Byte 1 bit 2 is enable status (1 = enabled)
+        //Byte 1 bit 3 = precharge allowed (1 = yes, 0 = no)
+        //byte 1 bit 4 = precharge complete (0 = unfinished, 1 = done!)
+        //bytes 2-3 = motor torque (0.25nm scale 5000 offset just like command)
+        //bytes 4-5 = motor speed (12000 offset, 1 RPM scale just like command)
         activityCount++;
         break;
     case 0x0CFF7B02: //torque limits and temperatures
+        //byte 0 upper nibble = counter
+        //bytes 1-2 = Torque limit in generate mode (1 scale, 5000 offset)
+        //bytes 3-4 = Torque limit in motoring mode (1 scale, no offset)
+        //byte 5 = IGBT temperature (-40 offset)
+        //byte 6 = Motor temperature (-40 offset)
+        //byte 7 = Motor controller temperature (-40 offset)
         activityCount++;
         break;
     case 0x0CFF7A02: //input voltage and current
+        //byte 0 upper nibble = counter
+        //byte 1-2 = controller input DC voltage (1 scale, no offset)
+        //byte 3-4 = controller input DC amperage (1 scale 1000 offset)
         activityCount++;
         break;
     case 0x0CFF7C02: //fault reporting
+        //byte 0 bits 0-1 = motor overspeed fault (0 = no, 3 = its bad!)
+        //byte 0 bits 4-5 = motor over temp (0 = no, progressively worse 1,2,3)
+        //byte 1 bits 4-5 = HW fault (0 = no, 1= warning, 3 = BAD)
+        //byte 2 bits 4-5 = IGBT fault (0 = no, 3 = DOOM)
+        //byte 2 bits 6-7 = IGBT overtemp (0 = no, 3 = crispy!)
+        //byte 3 bits 0-1 = Over current (0 = no, 3 = slag)
+        //byte 3 bits 2-3 = DC over voltage (same as all the above)
+        //byte 3 bits 4-5 = DC under voltage
+        //Byte 3 bits 6-7 = IGBT temp sensor fault?
+        //byte 4 bits 0-1 = CAN Fault (HTF would we know that then?!)
+        //Byte 4 bits 2-3 = motor temperature sensor fault
+        //Byte 5 bits 4-5 = motor tuning fault (position faulty?)
         activityCount++;
         break;
     }
@@ -128,7 +157,8 @@ void C300MotorController::handleTick() {
 //byte 1, bit 1-7 then bytes 2,3 are all reserved. Send 0's
 //Byte 4-5 is torque request in 0.25NM with a -5000 offset
 //Byte 6-7 is speed request in 1RPM with -12000 offset but speed mode is not likely supported so probably just send a value of 12000 here
-void C300MotorController::sendCmd() {
+void C300MotorController::sendCmd() 
+{
     C300MotorControllerConfiguration *config = (C300MotorControllerConfiguration *)getConfiguration();
     CAN_FRAME output;
     OperationState newstate;
@@ -138,6 +168,32 @@ void C300MotorController::sendCmd() {
     output.extended = 1; //29 bit ID, extended frame
     output.rtr = 0;
 
+    torqueCommand = 20000; //set offset  for zero torque commanded (5000 / 0.25)
+
+    Logger::debug("Throttle requested: %i", throttleRequested);
+
+    torqueRequested = 0;
+    if (actualState == ENABLE) { //don't even try sending torque commands until the DMOC reports it is ready
+        //if (selectedGear == DRIVE) {
+            //torqueMax is in 1/10 of a Nm, throttle is -1000 to +1000 but we want the output to be
+            //in 1/4 of a Nm. 10 * 1000 / 25 = 2500 as the divisor
+            torqueRequested = (((long) throttleRequested * (long) config->torqueMax) / 2500);
+            //if (speedActual < config->regenTaperUpper && torqueRequested < 0) taperRegen();
+        //}
+        //if (selectedGear == REVERSE) {
+        //    torqueRequested = (((long) throttleRequested * -1 *(long) config->torqueMax) / 1000L);//If reversed, regen becomes positive torque and positive pedal becomes regen.  Let's reverse this by reversing the sign.  In this way, we'll have gradually diminishing positive torque (in reverse, regen) followed by gradually increasing regen (positive torque in reverse.)
+            //if (speedActual < config->regenTaperUpper && torqueRequested > 0) taperRegen();
+        // }
+    }
+
+    if(speedActual < config->speedMax) {
+        torqueCommand+=torqueRequested;   //If actual rpm is less than max rpm, add torque to offset
+    }
+    else 
+    {
+        torqueCommand += (torqueRequested / 1.3f);   // else torque is reduced
+    }
+    
     speedRequested = 12000;
     if (selectedGear == NEUTRAL) setOpState(DISABLED);
     output.data.bytes[0] = (operationState == ENABLE)?1:0 | (selectedGear == DRIVE)?0:2 | (2 << 2) | (alive << 4);
@@ -153,38 +209,10 @@ void C300MotorController::sendCmd() {
                   output.data.bytes[4], output.data.bytes[5], output.data.bytes[6], output.data.bytes[7]);
 
     canHandlerEv.sendFrame(output);
-
-    torqueCommand = 30000; //set offset  for zero torque commanded
-
-    Logger::debug("Throttle requested: %i", throttleRequested);
-
-    torqueRequested=0;
-    if (actualState == ENABLE) { //don't even try sending torque commands until the DMOC reports it is ready
-        if (selectedGear == DRIVE) {
-            torqueRequested = (((long) throttleRequested * (long) config->torqueMax) / 1000L);
-            //if (speedActual < config->regenTaperUpper && torqueRequested < 0) taperRegen();
-        }
-        if (selectedGear == REVERSE) {
-            torqueRequested = (((long) throttleRequested * -1 *(long) config->torqueMax) / 1000L);//If reversed, regen becomes positive torque and positive pedal becomes regen.  Let's reverse this by reversing the sign.  In this way, we'll have gradually diminishing positive torque (in reverse, regen) followed by gradually increasing regen (positive torque in reverse.)
-            //if (speedActual < config->regenTaperUpper && torqueRequested > 0) taperRegen();
-        }
-    }
-
-    if (powerMode == modeTorque)
-    {
-        if(speedActual < config->speedMax) {
-            torqueCommand+=torqueRequested;   //If actual rpm is less than max rpm, add torque to offset
-        }
-        else {
-            torqueCommand += torqueRequested /1.3;   // else torque is reduced
-        }
-        output.data.bytes[0] = (torqueCommand & 0xFF00) >> 8;
-        output.data.bytes[1] = (torqueCommand & 0x00FF);
-        output.data.bytes[2] = output.data.bytes[0];
-        output.data.bytes[3] = output.data.bytes[1];
-    }
 }
 
+//I don't believe motor controllers need to handle regen taper themselves. 
+//The other classes in series (Throttle and base class) should handle that. Check into why this is here.
 void C300MotorController::taperRegen()
 {
     C300MotorControllerConfiguration *config = (C300MotorControllerConfiguration *)getConfiguration();
