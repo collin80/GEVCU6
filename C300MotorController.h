@@ -64,6 +64,7 @@ private:
     int activityCount;
     uint16_t torqueCommand;
     uint32_t ms;
+    bool prechargeComplete;
     void timestamp();
 
     void sendCmd();

@@ -227,7 +227,7 @@ void setup() {
 
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
-	//loglevel = 0; //force debugging log level
+	loglevel = 0; //force debugging log level
     Logger::console("LogLevel: %i", loglevel);
 	Logger::setLoglevel((Logger::LogLevel)loglevel);
     //Logger::setLoglevel((Logger::LogLevel)0);
@@ -263,7 +263,3 @@ void loop() {
     
     watchdogReset();
 }
-
-
-
-

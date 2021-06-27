@@ -78,6 +78,11 @@ void C300MotorController::handleCanFrame(CAN_FRAME *frame) {
         //byte 1 bit 4 = precharge complete (0 = unfinished, 1 = done!)
         //bytes 2-3 = motor torque (0.25nm scale 5000 offset just like command)
         //bytes 4-5 = motor speed (12000 offset, 1 RPM scale just like command)
+        faulted = ((frame->data.bytes[0] & 7) > 0)?true:false;
+        ready = ((frame->data.bytes[1] & 3) == 2)?true:false;
+        prechargeComplete = ((frame->data.bytes[1] & 8) == 8) ? true : false;
+        speedActual = ((frame->data.bytes[4] * 256) + frame->data.bytes[5]) - 12000;
+        torqueActual = (((frame->data.bytes[2] * 256) + frame->data.bytes[3]) / 4) - 5000;
         activityCount++;
         break;
     case 0x0CFF7B02: //torque limits and temperatures
@@ -87,12 +92,18 @@ void C300MotorController::handleCanFrame(CAN_FRAME *frame) {
         //byte 5 = IGBT temperature (-40 offset)
         //byte 6 = Motor temperature (-40 offset)
         //byte 7 = Motor controller temperature (-40 offset)
+        torqueAvailable = ((frame->data.bytes[3] * 256) + frame->data.bytes[4]);
+        temperatureMotor = frame->data.bytes[6] - 40;
+        temperatureInverter = frame->data.bytes[5] - 40;
+        temperatureSystem = frame->data.bytes[7] - 40;
         activityCount++;
         break;
     case 0x0CFF7A02: //input voltage and current
         //byte 0 upper nibble = counter
         //byte 1-2 = controller input DC voltage (1 scale, no offset)
         //byte 3-4 = controller input DC amperage (1 scale 1000 offset)
+        dcVoltage = ((frame->data.bytes[1] * 256) + frame->data.bytes[2]) * 10;
+        dcCurrent = (((frame->data.bytes[3] * 256) + frame->data.bytes[4]) * 10) - 10000;
         activityCount++;
         break;
     case 0x0CFF7C02: //fault reporting
@@ -196,7 +207,8 @@ void C300MotorController::sendCmd()
     
     speedRequested = 12000;
     if (selectedGear == NEUTRAL) setOpState(DISABLED);
-    output.data.bytes[0] = (operationState == ENABLE)?1:0 | (selectedGear == DRIVE)?0:2 | (2 << 2) | (alive << 4);
+                                                                                          // torque mode
+    output.data.bytes[0] = ((operationState == ENABLE)?1:0) | ((selectedGear == DRIVE)?0:2) | (2 << 2) | (alive << 4);
     output.data.bytes[1] = 0; //0 at the low bit means brake valid. What brake?
     output.data.bytes[2] = 0; //all reserved bits
     output.data.bytes[3] = 0; //also all reserved bits
