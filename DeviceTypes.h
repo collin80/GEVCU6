@@ -52,6 +52,7 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     BRUSACHARGE = 0x1010,
     TCCHCHARGE = 0x1011,
     LEAR=0x1012,
+    OVARCHARGE = 0x1013,
     THROTTLE = 0x1030,
     POTACCELPEDAL = 0x1031,
     POTBRAKEPEDAL = 0x1032,

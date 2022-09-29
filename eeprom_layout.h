@@ -146,6 +146,9 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EEBMS_HI_TEMP_LIM        34 //2 bytes - Cell temperature over which a fault is raised - In tenths of a degree C
 #define EEBMS_LO_TEMP_LIM        36 //2 bytes - Cell temperature under which a fault is raised - Tenths of a degree C
 
+#define EECHARGER_MAX_V          20 //2 bytes - maximum allowable voltage while charging. in 1/10 volt increments
+#define EECHARGER_MAX_A          22 //2 bytes - maximum allowable current while charging in 1/10 amp increments
+
 #define EEFAULT_VALID            0 //1 byte - Set to value of 0xB2 if fault data has been initialized
 #define EEFAULT_READPTR          1 //2 bytes - index where reading should start (first unacknowledged fault)
 #define EEFAULT_WRITEPTR         3 //2 bytes - index where writing should occur for new faults

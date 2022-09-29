@@ -551,7 +551,7 @@ void RMSMotorController::sendCmdFrame()
     
     canHandlerEv.sendFrame(output);  //Mail it.
 
-    Logger::debug("CAN Command Frame: %X  %X  %X  %X  %X  %X  %X  %X",output.id, output.data.bytes[0],
+    Logger::debug("RMS Command Frame: %X  %X  %X  %X  %X  %X  %X  %X",output.id, output.data.bytes[0],
                   output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],
 				  output.data.bytes[5],output.data.bytes[6],output.data.bytes[7]);
 }

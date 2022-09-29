@@ -39,6 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "DmocMotorController.h" //TODO: direct reference to dmoc must be removed
 #include "ThrottleDetector.h"
 #include "BatteryManager.h"
+#include "OvarChargerDCDC.h"
 
 class SerialConsole {
 public:
