@@ -40,6 +40,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ThrottleDetector.h"
 #include "BatteryManager.h"
 #include "OvarChargerDCDC.h"
+#include "PotGearSelector.h"
 
 class SerialConsole {
 public:

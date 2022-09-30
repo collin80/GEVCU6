@@ -42,6 +42,8 @@ enum DeviceType {
 };
 
 enum DeviceId { //unique device ID for every piece of hardware possible
+    ELM327EMU = 0x650,
+    POWERKEYPRO = 0x700,
     DMOC645 = 0x1000,
     BRUSA_DMC5 = 0x1001,
     CODAUQM = 0x1002,
@@ -58,21 +60,20 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     POTBRAKEPEDAL = 0x1032,
     CANACCELPEDAL = 0x1033,
     CANBRAKEPEDAL = 0x1034,
-    TESTACCEL = 0x104F,
-    EVICTUS = 0x4400,
     ICHIP2128 = 0x1040,
     ADABLUE = 0x1041,
+    TESTACCEL = 0x104F,
     DCDC = 0x1050,
+    POTGEAR = 0x1100,
     THINKBMS = 0x2000,
     BUILTINBMS = 0x2100,
     VEHICLESPECIFIC = 0x3000,
     FAULTSYS = 0x4000,
+    EVICTUS = 0x4400,
     SYSTEM = 0x5000,
     HEARTBEAT = 0x5001,
     MEMCACHE = 0x5002,
     PIDLISTENER = 0x6000,
-    ELM327EMU = 0x650,
-    POWERKEYPRO = 0x700,
     INVALID = 0xFFFF
 };
 

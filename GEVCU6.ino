@@ -150,6 +150,7 @@ void createObjects() {
     PowerkeyPad *powerKey = new PowerkeyPad();
     VehicleSpecific *vehicleSpecific = new VehicleSpecific();
     OvarCharger *ovarcharge = new OvarCharger();
+    PotGearSelector *potgear = new PotGearSelector();
 }
 
 void initializeDevices() {

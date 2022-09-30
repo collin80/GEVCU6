@@ -149,6 +149,13 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EECHARGER_MAX_V          20 //2 bytes - maximum allowable voltage while charging. in 1/10 volt increments
 #define EECHARGER_MAX_A          22 //2 bytes - maximum allowable current while charging in 1/10 amp increments
 
+#define EEGEARSEL_ADC            20 //1 byte - # of the ADC we're reading
+#define EEGEARSEL_PARK           21 //2 bytes - ADC value of nominal position of park
+#define EEGEARSEL_REVERSE        23 //2 bytes - ADC value of nominal position of park
+#define EEGEARSEL_NEUTRAL        25 //2 bytes - ADC value of nominal position of park
+#define EEGEARSEL_DRIVE          27 //2 bytes - ADC value of nominal position of park
+#define EEGEARSEL_HYST           29 //2 bytes - hysteresis around each of the above positions.
+
 #define EEFAULT_VALID            0 //1 byte - Set to value of 0xB2 if fault data has been initialized
 #define EEFAULT_READPTR          1 //2 bytes - index where reading should start (first unacknowledged fault)
 #define EEFAULT_WRITEPTR         3 //2 bytes - index where writing should occur for new faults
