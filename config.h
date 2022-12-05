@@ -124,16 +124,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define KilowattHrs         11000 //not currently used
 #define PrechargeR          3000 //millliseconds precharge
 #define NominalVolt         3300 //a reasonable figure for a lithium cell pack driving the DMOC (in tenths of a volt)
-#define PrechargeRelay      4
-#define MainContactorRelay  5
+#define PrechargeRelay      4 // precharge relay pin digital out
+#define MainContactorRelay  5 // main contactor realy pin - digital out
 #define ReversePercent      50
 #define CoolFan             255  //output to use for cooling fan
 #define CoolOn              40 //temperature (in C) to turn on cooling fan
 #define BrakeLight          255 //temperature to turn it off
 #define CoolOff             35 //temperature to turn it off
 #define RevLight            255 //temperature to turn it off
-#define EnableIn            255//temperature to turn it off
-#define ReverseIn           255 //temperature to turn it off
+#define EnableIn            0 //enable  digital input pin
+#define ReverseIn           1 //reverse digital input pin
 #define MaxRegenWatts       40000 //in actual watts, there is no scale here
 #define MaxAccelWatts       150000
 #define BatteryCapacity     100
