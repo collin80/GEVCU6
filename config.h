@@ -104,7 +104,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ThrottleMapValue		750		//Where is the 1/2 way point for throttle
 #define ThrottleMinRegenValue	0		//how many percent of full power to use at minimal regen
 #define ThrottleMaxRegenValue	50		//how many percent of full power to use at maximum regen
-#define ThrottleCreepValue		0		//how many percent of full power to use at creep
+#define ThrottleCreepValue		0		//percentage of torque used for creep function (imitate creep of automatic transmission, set 0 to disable)
 #define ThrottleMaxErrValue		150		//tenths of percentage allowable deviation between pedals
 #define Throttle1MinValue		95		//Value ADC reads when pedal is up
 #define Throttle1MaxValue		3150		//Value ADC reads when pedal fully depressed
