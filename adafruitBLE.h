@@ -46,10 +46,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Logger.h"
 #include "DeviceTypes.h"
 #include "PrefHandler.h"
-#include "Adafruit_BLE.h"
-#include "Adafruit_BluefruitLE_UART.h"
-#include "Adafruit_BluefruitLE_SPI.h"
-#include "Adafruit_BLEGatt.h"
+#include "BLE.h"
+#include "BluefruitLE_SPI.h"
+#include "BLEGatt.h"
+#include "ATParser.h"
 #include "BluefruitConfig.h"
 #include "paramcache.h"
 //#include "sys_io.h"
@@ -106,7 +106,9 @@ struct BLEModes
     uint8_t isFaulted;
     uint8_t isWarning;
     uint8_t logLevel;
-    uint8_t doUpdate; 
+    uint16_t can0Speed;
+    uint16_t can1Speed;
+    uint8_t doUpdate;     
 };
     
 struct BLEPowerStatus
@@ -202,9 +204,25 @@ struct BLEDeviceEnable
 };
 #pragma pack(pop)
 
-void BLEInterrupt();
+enum BLE_STATE {
+    BLE_STATE_STARTUP,  //0
+    BLE_STATE_FACTORY_RESET, //1
+    BLE_STATE_SET_POWERLVL, //2
+    BLE_STATE_SET_DEVNAME, //3
+    BLE_STATE_ADD_SERVICE, //4
+    BLE_STATE_ADD_CHARS, //5
+    BLE_STATE_SET_ADV_DATA, //6
+    BLE_STATE_SOFT_RESET, //7
+    BLE_STATE_SOFT_RESET2, //8
+    BLE_STATE_DISABLE_ECHO, //9
+    BLE_STATE_SET_CALLBACKS, //10
+    BLE_STATE_IDLE, //11
+    BLE_STATE_SET_CHAR, //12
+    BLE_STATE_CHECK_CALLBACKS, //13
+    BLE_STATE_GET_CHAR //14
+};
 
-class ADAFRUITBLE : public Device {
+class ADAFRUITBLE : public Device, BLEListener {
 public:
 
     ADAFRUITBLE();
@@ -218,7 +236,10 @@ public:
     void gattRX(int32_t chars_id, uint8_t *data, uint16_t len);
 
     void loadConfiguration();
-    void saveConfiguration();   
+    void saveConfiguration();
+    
+    void gotLine(char *txtLine);
+    void cmdComplete(bool OK);
 
 private:
     int tickCounter;
@@ -228,8 +249,14 @@ private:
     boolean success;
     int counter;
     uint32_t resetTime;
-    boolean didResetInit;
+    boolean isWaiting;
+    uint32_t lastUpdateTime;
+    uint32_t gattCharsUpdated; //which gatt chars were updated on the remote side?
+    boolean needResetCmd;
+    BLE_STATE bleState;
+    uint8_t subState;
     char buffer[30]; // a buffer for various string conversions
+    char incomingLine[80];
     ParamCache paramCache;
     boolean needParamReload;
     boolean bOkToWrite;
@@ -251,8 +278,8 @@ private:
     void transferUpdates();
     void dumpRawData(uint8_t *data, int len);    
     void buildEnabledDevices();    
-    void checkGattChar(uint8_t charact);
     void setupBLEservice();
+    void setNewBLEState(BLE_STATE newState);
 };
 
 #endif

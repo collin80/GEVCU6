@@ -33,6 +33,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config.h"
 #include "Device.h"
 
+class BatteryManagerConfiguration : public DeviceConfiguration {
+public:
+    uint16_t packCapacity;
+    int32_t packAHRemaining;
+    uint16_t highVoltLimit;
+    uint16_t lowVoltLimit;
+    uint16_t highCellLimit;
+    uint16_t lowCellLimit;
+    uint16_t highTempLimit;
+    int16_t lowTempLimit;
+};
+
 class BatteryManager : public Device {
 public:
     BatteryManager();
@@ -45,6 +57,10 @@ public:
     DeviceType getType();
     void setup();
     void handleTick();
+    
+    void loadConfiguration();
+    void saveConfiguration();
+    
     //a bunch of boolean functions. Derived classes must implment
     //these functions to tell everyone else what they support
     virtual bool hasPackVoltage() = 0;

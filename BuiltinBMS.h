@@ -1,7 +1,10 @@
 /*
- * GEVCU.h
+ * InternalBMS.h
  *
-Copyright (c) 2013 Collin Kidder, Michael Neuweiler, Charles Galpin
+ * Provides the appropriate interface to the pack voltage and current monitoring capabilities of
+ * GEVCU6 hardware.
+ *
+Copyright (c) 2016 Collin Kidder, Michael Neuweiler, Charles Galpin
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -24,57 +27,46 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
  */
 
-#ifndef GEVCU_H_
-#define GEVCU_H_
+#ifndef BUILTINBMS_H_
+#define BUILTINBMS_H_
 
 #include <Arduino.h>
 #include "config.h"
 #include "Device.h"
-#include "Throttle.h"
-#include "CanThrottle.h"
-#include "CanBrake.h"
-#include "PotThrottle.h"
-#include "TestThrottle.h"
-#include "PotBrake.h"
-#include "BatteryManager.h"
-#include "ThinkBatteryManager.h"
-#include "BuiltinBMS.h"
-#include "MotorController.h"
-#include "DmocMotorController.h"
-#include "BrusaMotorController.h"
-#include "CKMotorController.h"
-#include "RMSMotorController.h"
-#include "TestMotorController.h"
-#include "C300MotorController.h"
-#include "Heartbeat.h"
-#include "sys_io.h"
-#include "CanHandler.h"
-#include "MemCache.h"
-#include "ThrottleDetector.h"
 #include "DeviceManager.h"
-#include "SerialConsole.h"
-#include "ELM327_Emu.h"
-#include "adafruitBLE.h"
-#include "Sys_Messages.h"
-#include "CodaMotorController.h"
-#include "FaultHandler.h"
-#include "DCDCController.h"
-#include "EVIC.h"
-#include "Powerkeypad.h"
-#include "VehicleSpecific.h"
-#include "OvarChargerDCDC.h"
-#include "PotGearSelector.h"
+#include "BatteryManager.h"
+#include "CanHandler.h"
+#include <microsmooth.h>
 
-#ifdef __cplusplus
-extern "C" {
+class BuiltinBMSConfiguration : public BatteryManagerConfiguration {
+public:
+
+};
+
+class BuiltinBatteryManager : public BatteryManager
+{
+public:
+    BuiltinBatteryManager();
+    void setup();
+    void handleTick();
+    void handleCanFrame(CAN_FRAME *frame);
+    DeviceId getId();
+    bool hasPackVoltage();
+    bool hasPackCurrent();
+    bool hasTemperatures();
+    bool isChargeOK();
+    bool isDischargeOK();
+    
+    void loadConfiguration();
+    void saveConfiguration();
+protected:
+private:
+    EMAFilter *packUpperFilteredVoltage;
+    EMAFilter *packLowerFilteredVoltage;
+    EMAFilter *packCurrentFiltered;
+    int16_t packLo, packHi;
+    BuiltinBMSConfiguration *config;
+    uint32_t lastUpdate;
+};
+
 #endif
-void loop();
-void setup();
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
-
-#endif /* GEVCU_H_ */
-
-

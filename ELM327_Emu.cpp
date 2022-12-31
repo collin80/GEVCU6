@@ -31,7 +31,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "ELM327_Emu.h"
+#include "adafruitBLE.h"
 
+extern Adafruit_BluefruitLE_SPI ble;
 
 /*
  * Constructor. Assign serial interface to use for comm with bluetooth adapter we're emulating with
@@ -39,24 +41,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ELM327Emu::ELM327Emu() {
     prefsHandler = new PrefHandler(ELM327EMU);
 
-    uint8_t sys_type;
-    sysPrefs->read(EESYS_SYSTEM_TYPE, &sys_type);
-    if (sys_type == 3 || sys_type == 4)
-        serialInterface = &Serial2;
-    else //older hardware used this instead
-        serialInterface = &Serial3;
-
-    commonName = "ELM327 Emulator over Bluetooth";
+    commonName = "ELM327 Emulator over BLE";
 }
-
-/*
- * Constructor. Pass serial interface to use
- */
-ELM327Emu::ELM327Emu(USARTClass *which) {
-    prefsHandler = new PrefHandler(ELM327EMU);
-    serialInterface = which;
-}
-
 
 /*
  * Initialization of hardware and parameters
@@ -69,9 +55,12 @@ void ELM327Emu::setup() {
 
     tickCounter = 0;
     ibWritePtr = 0;
-    serialInterface->begin(9600);
 
     elmProc = new ELM327Processor();
+
+    //These apply to both UART and SPI versions
+    Logger::debug(ELM327EMU, "Initializing ADAFruit BLE bluetooth device...");    
+    ble.begin(true);  //True = verbose mode for debuggin.   
 
     //this isn't a wifi link but the timer interval can be the same
     //because it serves a similar function and has similar timing requirements
@@ -82,9 +71,15 @@ void ELM327Emu::setup() {
  * Send a command to ichip. The "AT+i" part will be added.
  */
 void ELM327Emu::sendCmd(String cmd) {
-    serialInterface->write("AT");
-    serialInterface->print(cmd);
-    serialInterface->write(13);
+    char buff[50];
+    int slen;
+    buff[0] = 'A';
+    buff[1] = 'T';
+    strcat(buff, cmd.c_str());
+    slen = strlen(buff);
+    buff[slen++] = 13;
+    buff[slen++] = 0;
+    ble.writeBLEUart((unsigned char *)buff, slen);
     loop(); // parse the response
 }
 
@@ -122,8 +117,8 @@ void ELM327Emu::handleMessage(uint32_t messageType, void* message) {
 
 void ELM327Emu::loop() {
     int incoming;
-    while (serialInterface->available()) {
-        incoming = serialInterface->read();
+    while (ble.available()) {
+        incoming = ble.read();
         if (incoming != -1) { //and there is no reason it should be -1
             if (incoming == 13 || ibWritePtr > 126) { // on CR or full buffer, process the line
                 incomingBuffer[ibWritePtr] = 0; //null terminate the string
@@ -149,13 +144,11 @@ void ELM327Emu::loop() {
 void ELM327Emu::processCmd() {
     String retString = elmProc->processELMCmd(incomingBuffer);
 
-    serialInterface->print(retString);
+    char *ret = (char *)retString.c_str();
+    ble.writeBLEUart((unsigned char *)ret, strlen(ret));
     if (Logger::isDebug()) {
-        char buff[30];
-        retString.toCharArray(buff, 30);
-        Logger::debug(ELM327EMU, buff);
+        Logger::debug(ELM327EMU, ret);
     }
-
 }
 
 DeviceType ELM327Emu::getType() {

@@ -28,6 +28,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #include "CanHandler.h"
+#include "sys_io.h"
 
 CanHandler canHandlerEv = CanHandler(CanHandler::CAN_BUS_EV);
 CanHandler canHandlerCar = CanHandler(CanHandler::CAN_BUS_CAR);
@@ -50,6 +51,7 @@ CanHandler::CanHandler(CanBusNode canBusNode)
         observerData[i].observer = NULL;
     }
     masterID = 0x05;
+    busSpeed = 0;
 }
 
 /*
@@ -58,13 +60,27 @@ CanHandler::CanHandler(CanBusNode canBusNode)
 void CanHandler::setup()
 {
     // Initialize the canbus at the specified baudrate
-    bus->begin(canBusNode == CAN_BUS_EV ? CFG_CAN0_SPEED : CFG_CAN1_SPEED, 255);
+    uint16_t storedVal;
+    uint32_t realSpeed;
+    if (canBusNode == CAN_BUS_EV) {
+        sysPrefs->read(EESYS_CAN0_BAUD, &storedVal);
+    }
+    else {
+        sysPrefs->read(EESYS_CAN1_BAUD, &storedVal);
+    }
+    realSpeed = storedVal * 1000; //was stored in thousands, now in actual rate
+    if (realSpeed < 33333ul) realSpeed = 33333u; 
+    if (realSpeed > 1000000ul) realSpeed = 1000000ul;
+    bus->begin(realSpeed, 255);
     bus->setNumTXBoxes(2);
+    
+    busSpeed = realSpeed;
+ 
+    Logger::info("CAN%d init ok. Speed = %i", (canBusNode == CAN_BUS_EV ? 0 : 1), busSpeed);
+}
 
-    //Mailboxes are default set up initialized with one MB for TX and the rest for RX
-    //That's OK with us so no need to initialize those things there.
-
-    Logger::info("CAN%d init ok", (canBusNode == CAN_BUS_EV ? 0 : 1));
+uint32_t CanHandler::getBusSpeed() {
+    return busSpeed;
 }
 
 /*
@@ -131,12 +147,13 @@ void CanHandler::detach(CanObserver* observer, uint32_t id, uint32_t mask)
  */
 void CanHandler::logFrame(CAN_FRAME& frame)
 {
+    /*
     if (Logger::isDebug()) {
         Logger::debug("CAN: dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",
                       frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
                       frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
                       frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
-    }
+    }*/
 }
 
 /*
@@ -162,7 +179,7 @@ int8_t CanHandler::findFreeObserverData()
  */
 int8_t CanHandler::findFreeMailbox()
 {
-    uint8_t numRxMailboxes = (canBusNode == CAN_BUS_EV ? CFG_CAN0_NUM_RX_MAILBOXES : CFG_CAN1_NUM_RX_MAILBOXES);
+    uint8_t numRxMailboxes = 6; //there are 8 total and two are used for TX
 
     for (uint8_t i = 0; i < numRxMailboxes; i++) {
         bool used = false;
@@ -193,7 +210,14 @@ void CanHandler::process()
 
     if (bus->rx_avail()) {
         bus->get_rx_buff(frame);
-//      logFrame(frame);
+      /*
+       Logger::debug("CAN:%d dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",canBusNode,
+                      frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
+                      frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
+                      frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
+        */
+        if(frame.id == CAN_SWITCH) CANIO(frame);
+       
 
         for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
             observer = observerData[i].observer;
@@ -271,6 +295,56 @@ void CanHandler::prepareOutputFrame(CAN_FRAME *frame, uint32_t id)
     frame->data.bytes[6] = 0;
     frame->data.bytes[7] = 0;
 }
+
+void CanHandler::CANIO(CAN_FRAME& frame) {
+    static CAN_FRAME CANioFrame;
+    int i;
+
+  Logger::warn("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", canBusNode,frame.id, frame.data.bytes[0],
+                  frame.data.bytes[1],frame.data.bytes[2],frame.data.bytes[3],frame.data.bytes[4],
+                  frame.data.bytes[5],frame.data.bytes[6],frame.data.bytes[7]);
+
+    CANioFrame.id = CAN_OUTPUTS;
+    CANioFrame.length = 8;
+    CANioFrame.extended = 0; //standard frame
+    CANioFrame.rtr = 0;  
+  
+    //handle the incoming frame to set/unset/leave alone each digital output
+    for(i = 0; i < 8; i++) {
+        if (frame.data.bytes[i] == 0x88) systemIO.setDigitalOutput(i,true);
+        if (frame.data.bytes[i] == 0xFF) systemIO.setDigitalOutput(i,false);
+    }
+  
+    for(i = 0; i < 8; i++) {
+        if (systemIO.getDigitalOutput(i)) CANioFrame.data.bytes[i] = 0x88;
+        else CANioFrame.data.bytes[i] = 0xFF;
+    }
+     
+    bus->sendFrame(CANioFrame);
+        
+    CANioFrame.id = CAN_ANALOG_INPUTS;
+    i = 0;
+    int16_t anaVal;
+       
+    for(int j = 0; j < 8; j += 2) {
+        anaVal = systemIO.getAnalogIn(i++);
+        CANioFrame.data.bytes[j] = highByte (anaVal);
+        CANioFrame.data.bytes[j + 1] = lowByte(anaVal);
+    }
+        
+    bus->sendFrame(CANioFrame);
+
+    CANioFrame.id = CAN_DIGITAL_INPUTS;
+    CANioFrame.length = 4;
+  
+    for(i = 0; i < 4; i++) {
+        if (systemIO.getDigitalIn(i)) CANioFrame.data.bytes[i] = 0x88;
+        else CANioFrame.data.bytes[i] = 0xff;
+    }
+      
+    bus->sendFrame(CANioFrame);
+}
+
 
 //Allow the canbus driver to figure out the proper mailbox to use
 //(whatever happens to be open) or queue it to send (if nothing is open)

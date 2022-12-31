@@ -66,6 +66,10 @@ void EVIC::setup() {
     // register ourselves as observer of all 0x404 and 0x505 can frames from JLD505
     canHandlerCar.attach(this, 0x404, 0x7ff, false);
     canHandlerCar.attach(this, 0x505, 0x7ff, false);
+    
+    //This is just a handy place to load the CAN_SWITCH message ID for CANIO.  CANIO will not work without EVIC then.
+    canHandlerCar.attach(this, CAN_SWITCH, 0x7ff, false);
+    canHandlerEv.attach(this, CAN_SWITCH, 0x7ff, false);
 
     MotorController* motorController = deviceManager.getMotorController();
     nominalVolt=(motorController->nominalVolts); //Get default nominal volts and capacity from motorcontroller
@@ -420,16 +424,17 @@ void EVIC::loadConfiguration() {
 
     if (prefsHandler->checksumValid())
     {   //checksum is good, read in the values stored in EEPROM
-        prefsHandler->read(EESYS_CAPACITY, &capacity);
-        prefsHandler->read(EESYS_AH, &AH);
-
+        //prefsHandler->read(EESYS_CAPACITY, &capacity);
+        //prefsHandler->read(EESYS_AH, &AH);
+        capacity = BatteryCapacity;
+        AH = 0;
     }
     else
     {
         capacity = BatteryCapacity;  //Get capacity value from config.h
-        prefsHandler->write(EESYS_CAPACITY, capacity); //and write it to EEPROM
+        //prefsHandler->write(EESYS_CAPACITY, capacity); //and write it to EEPROM
         // prefsHandler->write(EESYS_AH,AH);
-        prefsHandler->saveChecksum();
+        //prefsHandler->saveChecksum();
     }
 
 
@@ -441,8 +446,9 @@ void EVIC::saveConfiguration() {
 
     //Device::saveConfiguration();  //call parent save routine
 
-    prefsHandler->write(EESYS_CAPACITY, capacity);  //save current values to EEPROM
-    prefsHandler->write(EESYS_AH, AH);  //save current values to EEPROM
+    //prefsHandler->write(EESYS_CAPACITY, capacity);  //save current values to EEPROM
+    //prefsHandler->write(EESYS_AH, AH);  //save current values to EEPROM
+    
     prefsHandler->saveChecksum();
 
     loadConfiguration();

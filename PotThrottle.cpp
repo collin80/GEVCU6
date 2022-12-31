@@ -94,6 +94,7 @@ bool PotThrottle::validateSignal(RawSignalData *rawSignal) {
     }
     else
     {
+        if (calcThrottle1 > 1000) calcThrottle1 = 1000;
         faultHandler.cancelOngoingFault(POTACCELPEDAL, FAULT_THROTTLE_HIGH_A);
     }
 
@@ -106,6 +107,7 @@ bool PotThrottle::validateSignal(RawSignalData *rawSignal) {
     }
     else
     {
+        if (calcThrottle1 < 0) calcThrottle1 = 0;
         faultHandler.cancelOngoingFault(POTACCELPEDAL, FAULT_THROTTLE_LOW_A);
     }
 
@@ -121,6 +123,7 @@ bool PotThrottle::validateSignal(RawSignalData *rawSignal) {
         }
         else
         {
+            if (calcThrottle2 > 1000) calcThrottle2 = 1000;
             faultHandler.cancelOngoingFault(POTACCELPEDAL, FAULT_THROTTLE_HIGH_B);
         }
 
@@ -133,6 +136,7 @@ bool PotThrottle::validateSignal(RawSignalData *rawSignal) {
         }
         else
         {
+            if (calcThrottle2 < 0) calcThrottle2 = 0;
             faultHandler.cancelOngoingFault(POTACCELPEDAL, FAULT_THROTTLE_LOW_B);
         }
 
@@ -279,6 +283,7 @@ void PotThrottle::saveConfiguration() {
     prefsHandler->write(EETH_ADC_1, config->AdcPin1);
     prefsHandler->write(EETH_ADC_2, config->AdcPin2);
     prefsHandler->saveChecksum();
+    prefsHandler->forceCacheWrite();
 }
 
 

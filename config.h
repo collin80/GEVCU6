@@ -35,8 +35,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <due_can.h>
 
-#define CFG_BUILD_NUM	1058      //increment this every time a git commit is done. 
-#define CFG_VERSION "GEVCU 2016-10-13"
+#define CFG_BUILD_NUM	1061      //increment this every time a git commit is done. 
+#define CFG_VERSION "GEVCU 2021-03-12"
 
 /*
  * SERIAL CONFIGURATION
@@ -63,10 +63,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC     40000
 #define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_CODAUQM  10000
 #define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_BRUSA    20000
+#define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_C300     20000
 #define CFG_TICK_INTERVAL_MEM_CACHE                 40000
+#define CFG_TICK_INTERVAL_BMS_INTERNAL              40000
 #define CFG_TICK_INTERVAL_BMS_THINK                 500000
 #define CFG_TICK_INTERVAL_WIFI                      200000
-#define CFG_TICK_INTERVAL_BLE                       40000
+#define CFG_TICK_INTERVAL_BLE                       10000
 #define CFG_TICK_INTERVAL_DCDC                      200000
 #define CFG_TICK_INTERVAL_EVIC                      100000
 #define CFG_TICK_INTERVAL_VEHICLE                   100000
@@ -74,11 +76,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /*
  * CAN BUS CONFIGURATION
  */
-#define CFG_CAN0_SPEED CAN_BPS_500K // specify the speed of the CAN0 bus (EV)
-#define CFG_CAN1_SPEED CAN_BPS_500K // specify the speed of the CAN1 bus (Car)
-#define CFG_CAN0_NUM_RX_MAILBOXES 9 // amount of CAN bus receive mailboxes for CAN0
-#define CFG_CAN1_NUM_RX_MAILBOXES 9 // amount of CAN bus receive mailboxes for CAN1
-#define CFG_CANTHROTTLE_MAX_NUM_LOST_MSG 3 // maximum number of lost messages allowed
+#define CFG_CAN0_SPEED                              500 // specify the speed of the CAN0 bus (EV) in thousands. 
+#define CFG_CAN1_SPEED                              500 // specify the speed of the CAN1 bus (Car) in thousands
+#define CFG_CANTHROTTLE_MAX_NUM_LOST_MSG            3 // maximum number of lost messages allowed
 
 /*
  * MISCELLANEOUS
@@ -99,14 +99,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ThrottleADC2			1		//Which pin to use
 #define ThrottleSubtype			1		//subtype 1 is a standard linear pot throttle
 #define ThrottleRegenMinValue	270		//where does Regen stop (1/10 of percent)
-#define ThrottleRegenMaxValue	30		//where Regen is at maximum (1/10 of percent)
-#define ThrottleFwdValue		300		//where does forward motion start
+#define ThrottleRegenMaxValue	0		//where Regen is at maximum (1/10 of percent)
+#define ThrottleFwdValue		280		//where does forward motion start
 #define ThrottleMapValue		750		//Where is the 1/2 way point for throttle
 #define ThrottleMinRegenValue	0		//how many percent of full power to use at minimal regen
+<<<<<<< HEAD
+#define ThrottleMaxRegenValue	70		//how many percent of full power to use at maximum regen
+#define ThrottleCreepValue		0		//how many percent of full power to use at creep
+=======
 #define ThrottleMaxRegenValue	50		//how many percent of full power to use at maximum regen
 #define ThrottleCreepValue		0		//percentage of torque used for creep function (imitate creep of automatic transmission, set 0 to disable)
+>>>>>>> master
 #define ThrottleMaxErrValue		150		//tenths of percentage allowable deviation between pedals
-#define Throttle1MinValue		95		//Value ADC reads when pedal is up
+#define Throttle1MinValue		20		//Value ADC reads when pedal is up
 #define Throttle1MaxValue		3150		//Value ADC reads when pedal fully depressed
 #define Throttle2MinValue		0		//Value ADC reads when pedal is up
 #define Throttle2MaxValue		0	//Value ADC reads when pedal fully depressed
@@ -114,7 +119,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define BrakeMaxValue			3200		//Value ADC reads when brake is pushed all of the way down
 #define BrakeMinRegenValue		0		//percent of full power to use for brake regen (min)
 #define BrakeMaxRegenValue		50		//percent of full power to use for brake regen (max)
-#define BrakeADC				2       //which ADC pin to use
+#define BrakeADC				0       //which ADC pin to use
 
 
 #define MaxTorqueValue      3000 //in tenths of a Nm
@@ -122,23 +127,42 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define RPMSlewRateValue    10000 // rpm/sec the requested speed should change (speed mode)
 #define TorqueSlewRateValue 6000 // 0.1Nm/sec the requested torque output should change (torque mode)
 #define KilowattHrs         11000 //not currently used
-#define PrechargeR          3000 //millliseconds precharge
+#define PrechargeR          6000 //millliseconds precharge
 #define NominalVolt         3300 //a reasonable figure for a lithium cell pack driving the DMOC (in tenths of a volt)
+<<<<<<< HEAD
+#define PrechargeRelay      0
+#define MainContactorRelay  1
+=======
 #define PrechargeRelay      4 // precharge relay pin digital out
 #define MainContactorRelay  5 // main contactor realy pin - digital out
+>>>>>>> master
 #define ReversePercent      50
-#define CoolFan             255  //output to use for cooling fan
+#define CoolFan             6  //output to use for cooling fan
 #define CoolOn              40 //temperature (in C) to turn on cooling fan
 #define BrakeLight          255 //temperature to turn it off
 #define CoolOff             35 //temperature to turn it off
 #define RevLight            255 //temperature to turn it off
+<<<<<<< HEAD
+#define EnableIn            0//temperature to turn it off
+#define ReverseIn           1 //temperature to turn it off
+=======
 #define EnableIn            0 //enable  digital input pin
 #define ReverseIn           1 //reverse digital input pin
+>>>>>>> master
 #define MaxRegenWatts       40000 //in actual watts, there is no scale here
 #define MaxAccelWatts       150000
 #define BatteryCapacity     100
 #define RegenTaperUpper     500
 #define RegenTaperLower     75
+
+#define DefaultPackCapacity   1000       //in tenths of AH
+#define DefaultPackRemaining  50000000l //in millionths of AH
+#define DefaultHighVLim       3850 //tenths of a V
+#define DefaultLowVLim        2400 //tenths of a V
+#define DefaultHighCellLim    3900 //Hundredths of a V
+#define DefaultLowCellLim     2400 //Hundedths of a V
+#define DefaultHighTempLim    600  //Tenths of a degree. Toasty!
+#define DefaultLowTempLim     -200 //Tenths of a degree. Chilly!
 
 /*
  * ARRAY SIZE
@@ -157,7 +181,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * PIN ASSIGNMENT
  */
 #define CFG_THROTTLE_NONE	255
-#define BLINK_LED          73 //13 is L, 73 is TX, 72 is RX
+#define BLINK_LED           13 //13 is L, 73 is TX, 72 is RX
 
 #define NUM_ANALOG	7
 #define NUM_DIGITAL	4
@@ -175,7 +199,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define AUTO_ENABLE_DEV1    0x1000 //DMOC645
 #define AUTO_ENABLE_DEV2    0x1031 //pot throttle
 #define AUTO_ENABLE_DEV3    0x1041 //Adafruit BLE
-#define AUTO_ENABLE_DEV4    0xFFFF
+#define AUTO_ENABLE_DEV4    0x4400  //EVIC 
 #define AUTO_ENABLE_DEV5    0xFFFF
 #define AUTO_ENABLE_DEV6    0xFFFF
 

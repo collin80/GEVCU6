@@ -86,9 +86,16 @@ void PrefHandler::checkTableValidity()
 
 void PrefHandler::processAutoEntry(uint16_t val, uint16_t pos)
 {
-    if (val < 0x7FFF) val = val | 0x8000;
-        else val = 0;        
-    memCache->Write(EE_DEVICE_TABLE + (2 * pos), val);    
+    if (val < 0x7FFF) val = val | 0x8000; //automatically set enabled bit
+        else val = 0;
+
+    memCache->Write(EE_DEVICE_TABLE + (2 * pos), val);
+
+    if (val == 0) return;
+    val &= 0x7FFF;
+    //immediately store our ID into the proper place
+    memCache->Write(EE_DEVICE_ID + EE_DEVICES_BASE + (EE_DEVICE_SIZE * pos), val);
+    Logger::info("Device ID: %X was placed into device table at entry: %i", (int)val, pos);      
 }
 
 void PrefHandler::initDevTable()
@@ -114,6 +121,7 @@ void PrefHandler::initDevTable()
     //write out magic entry
     id = 0xDEAD;
     memCache->Write(EE_DEVICE_TABLE, id);
+    memCache->FlushAllPages();
 }
 
 //Given a device ID we must search the 64 entry table found in EEPROM to see if the device
@@ -258,6 +266,8 @@ bool PrefHandler::checksumValid() {
         Logger::error("Checksum didn't match        Stored: %X Calc: %X", stored_chk, calc_chk);
         return false;
     }    
+
+    Logger::info("Checksum matches Value: %X", calc_chk);
     
     memCache->Read(EE_DEVICE_ID + base_address + lkg_address, &stored_id);
     if (stored_id == 0xFFFF) //didn't used to store the device ID properly so fix that

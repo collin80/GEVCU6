@@ -74,7 +74,7 @@ void MemCache::FlushSinglePage()
     }
 }
 
-//Flush every dirty page. It will block for 7ms per page so maybe things will be blocked for a long, long time
+//Flush every dirty page. It will block for 10ms per page so maybe things will be blocked for a long, long time
 //DO NOT USE THIS FUNCTION UNLESS YOU CAN ACCEPT THAT!
 void MemCache::FlushAllPages()
 {
@@ -84,6 +84,7 @@ void MemCache::FlushAllPages()
             cache_writepage(c);
             pages[c].dirty = false;
             delay(10); //10ms is longest it would take to write a page according to datasheet
+            watchdogReset();
         }
     }
 }
@@ -136,6 +137,7 @@ void MemCache::InvalidateAll()
     uint8_t c;
     for (c=0; c<NUM_CACHED_PAGES; c++) {
         InvalidatePage(c);
+        watchdogReset();
     }
 }
 
@@ -211,7 +213,7 @@ boolean MemCache::Write(uint32_t address, void* data, uint16_t len)
             if (c != 0xFF) c = cache_readpage(addr); //and populate it with the existing data
         }
         if (c != 0xFF) { //could we find a suitable cache page to write to?
-            pages[c].data[(uint16_t)((address+count) & 0x00FF)] = *(uint8_t *)(data + count);
+            pages[c].data[(uint16_t)((address+count) & 0x00FF)] = *(uint8_t *)( ((uint8_t *)data) + count);
             pages[c].dirty = true;
             pages[c].address = addr; //set this in case we actually are setting up a new cache page
         }
@@ -271,7 +273,7 @@ boolean MemCache::Read(uint32_t address, void* data, uint16_t len)
             c = cache_readpage(addr);
         }
         if (c != 0xFF) {
-            *(uint8_t *)(data + count) = pages[c].data[(uint16_t)((address+count) & 0x00FF)];
+            *(uint8_t *)( ((uint8_t *)data) + count) = pages[c].data[(uint16_t)((address + count) & 0x00FF)];
             if (!pages[c].dirty) pages[c].age = 0; //reset age since we just used it
         }
         else break; //bust the for loop if we run into trouble
@@ -401,6 +403,33 @@ boolean MemCache::cache_writepage(uint8_t page)
     Wire.write(buffer, 258);
     Wire.endTransmission(true);
     return true;
+}
+
+//Nuke it from orbit. It's the only way to be sure.
+//erases the entire EEPROM back to 0xFF across all addresses. You will lose everything.
+//There is no erase command on our EEPROM chip so you must manually write FF's to every addss
+
+void MemCache::nukeFromOrbit()
+{
+    uint16_t d;
+    uint32_t addr;
+    uint8_t buffer[258];
+    uint8_t i2c_id;
+
+    for (d = 0; d < 256; d++) buffer[d+2] = 0xFF;
+
+    for (int page = 0; page < 1024; page++)
+    {
+        addr = page * 256;
+        buffer[0] = ((addr & 0xFF00) >> 8);
+        buffer[1] = 0; //pages are 256 bytes so LSB is always 0 for the start of a page
+        i2c_id = 0b01010000 + ((addr >> 16) & 0x03); //10100 is the chip ID then the two upper bits of the address
+        Wire.beginTransmission(i2c_id);
+        Wire.write(buffer, 258);
+        Wire.endTransmission(true);
+        delay(11);
+        watchdogReset();
+    }
 }
 
 

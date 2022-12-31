@@ -87,10 +87,12 @@ public:
 
     CanHandler(CanBusNode busNumber);
     void setup();
+    uint32_t getBusSpeed();
     void attach(CanObserver *observer, uint32_t id, uint32_t mask, bool extended);
     void detach(CanObserver *observer, uint32_t id, uint32_t mask);
     void process();
     void prepareOutputFrame(CAN_FRAME *frame, uint32_t id);
+    void CANIO(CAN_FRAME& frame);
     void sendFrame(CAN_FRAME& frame);
     void sendISOTP(int id, int length, uint8_t *data);
 
@@ -119,6 +121,7 @@ private:
     CanBusNode canBusNode;  // indicator to which can bus this instance is assigned to
     CANRaw *bus;    // the can bus instance which this CanHandler instance is assigned to
     CanObserverData observerData[CFG_CAN_NUM_OBSERVERS];    // Can observers
+    uint32_t busSpeed;
 
     void logFrame(CAN_FRAME& frame);
     int8_t findFreeObserverData();

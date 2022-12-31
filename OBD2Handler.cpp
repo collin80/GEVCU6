@@ -1,7 +1,7 @@
 /*
  * OBD2Handler.cpp - A simple utility class that can be used to handle OBDII traffic
  * of any form. It takes pointers to buffers where upwards of 8 characters reside.
- * Doesn't care about how the traffic came out or how it'll go out. That is handled
+ * Doesn't care about how the traffic came in or how it'll go out. That is handled
  * in places like CanPIDListener or ELM327Emu
  *
  *

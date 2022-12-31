@@ -53,6 +53,7 @@ protected:
 
 private:
     bool didInitialSetup;
+    int waitTicksStartup;
 };
 
 #endif

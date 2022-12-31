@@ -25,6 +25,7 @@
  */
 
 #include "Heartbeat.h"
+#include "BatteryManager.h"
 
 Heartbeat::Heartbeat() {
     led = false;
@@ -79,6 +80,16 @@ void Heartbeat::handleTick() {
         Logger::console("DOUT0: %d, DOUT1: %d, DOUT2: %d, DOUT3: %d,DOUT4: %d, DOUT5: %d, DOUT6: %d, DOUT7: %d", 
                         systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
                         systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
+        BatteryManager *bms = reinterpret_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
+        if (!bms) {
+            Logger::console("BATTHI: %d, BATTLO: %d, BATTERY: %d, CURRENT: %d", 
+                        systemIO.getPackHighReading(), systemIO.getPackLowReading(), systemIO.getPackHighReading()+systemIO.getPackLowReading(),
+                        systemIO.getCurrentReading());
+        }
+        else {
+            Logger::console( "HV Batt Voltage: %d, HV Current: %d, SOC: %i",
+                        bms->getPackVoltage(), bms->getPackCurrent(), bms->getSOC() );            
+        }
 
         if (accelerator) {
             Logger::console("Throttle is Faulted:%T", accelerator->isFaulted());

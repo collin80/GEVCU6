@@ -336,16 +336,11 @@ void BrusaMotorController::loadConfiguration() {
 #ifdef USE_HARD_CODED
     if (false) {
 #else
-  	if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
+//	if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
+    if (false) { //TODO: use eeprom, not fixed values
 #endif
         Logger::debug(BRUSA_DMC5, (char *)Constants::validChecksum);
-        prefsHandler->read(EEMC_MAX_MECHPOWER, &config->maxMechanicalPowerMotor);
-        prefsHandler->read(EEMC_MAX_MECHREGEN, &config->maxMechanicalPowerRegen);
-        prefsHandler->read(EEMC_MAX_VOLTPOWER, &config->dcVoltLimitMotor);
-        prefsHandler->read(EEMC_MAX_VOLTREGEN, &config->dcVoltLimitRegen);
-        prefsHandler->read(EEMC_CURR_LIM_POWER, &config->dcCurrentLimitMotor);
-        prefsHandler->read(EEMC_CURR_LIM_REGEN, &config->dcCurrentLimitRegen);
-        prefsHandler->read(EEMC_EN_OSC_LIMITER, (uint16_t *) &config->enableOscillationLimiter);
+//		prefsHandler->read(EEMC_, &config->minimumLevel1);
     } else { //checksum invalid. Reinitialize values and store to EEPROM
         Logger::warn(BRUSA_DMC5, (char *)Constants::invalidChecksum);
         config->maxMechanicalPowerMotor = 50000;
@@ -353,23 +348,11 @@ void BrusaMotorController::loadConfiguration() {
 
         config->dcVoltLimitMotor = 1000;
         config->dcVoltLimitRegen =  0;//TODO: 1000; don't want regen yet !;
-        config->dcCurrentLimitMotor = 100;
+        config->dcCurrentLimitMotor = 0;
         config->dcCurrentLimitRegen = 0;
         config->enableOscillationLimiter = false;
-        saveConfiguration();
+        //saveConfiguration();
     }
-
-    //currently the above is broken and you won't get the parameters set properly. So, they're hard coded below.
-    //Edit these lines to change the parameters.
-    config->maxMechanicalPowerMotor = 50000;
-    config->maxMechanicalPowerRegen = 0; //TODO: 50000; don't want regen yet !
-
-    config->dcVoltLimitMotor = 1000;
-    config->dcVoltLimitRegen =  0;//TODO: 1000; don't want regen yet !;
-    config->dcCurrentLimitMotor = 100;
-    config->dcCurrentLimitRegen = 0;
-    config->enableOscillationLimiter = false;
-
     Logger::debug(BRUSA_DMC5, "Max mech power motor: %d kW, max mech power regen: %d ", config->maxMechanicalPowerMotor, config->maxMechanicalPowerRegen);
     Logger::debug(BRUSA_DMC5, "DC limit motor: %d Volt, DC limit regen: %d Volt", config->dcVoltLimitMotor, config->dcVoltLimitRegen);
     Logger::debug(BRUSA_DMC5, "DC limit motor: %d Amps, DC limit regen: %d Amps", config->dcCurrentLimitMotor, config->dcCurrentLimitRegen);
@@ -383,12 +366,15 @@ void BrusaMotorController::saveConfiguration() {
 
     MotorController::saveConfiguration(); // call parent
 
-	  prefsHandler->write(EEMC_MAX_MECHPOWER, config->maxMechanicalPowerMotor);
-	  prefsHandler->write(EEMC_MAX_MECHREGEN, config->maxMechanicalPowerRegen);
-	  prefsHandler->write(EEMC_MAX_VOLTPOWER, config->dcVoltLimitMotor);
-	  prefsHandler->write(EEMC_MAX_VOLTREGEN, config->dcVoltLimitRegen);
-	  prefsHandler->write(EEMC_CURR_LIM_POWER, config->dcCurrentLimitMotor);
-	  prefsHandler->write(EEMC_CURR_LIM_REGEN, config->dcCurrentLimitRegen);
-	  prefsHandler->write(EEMC_EN_OSC_LIMITER, (uint16_t)config->enableOscillationLimiter);
-    prefsHandler->saveChecksum();
+    //TODO: store to eeprom
+//	prefsHandler->write(EEMC_, config->maxMechanicalPowerMotor);
+//	prefsHandler->write(EEMC_, config->maxMechanicalPowerRegen);
+//	prefsHandler->write(EEMC_, config->dcVoltLimitMotor);
+//	prefsHandler->write(EEMC_, config->dcVoltLimitRegen);
+//	prefsHandler->write(EEMC_, config->dcCurrentLimitMotor);
+//	prefsHandler->write(EEMC_, config->dcCurrentLimitRegen);
+//	prefsHandler->write(EEMC_, config->enableOscillationLimiter);
+    //prefsHandler->saveChecksum();
 }
+
+

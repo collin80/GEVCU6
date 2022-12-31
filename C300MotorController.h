@@ -1,7 +1,8 @@
 /*
- * Logger.h
+ * C300MotorController.h
  *
- Copyright (c) 2013 Collin Kidder, Michael Neuweiler, Charles Galpin
+ *
+ Copyright (c) 2021 EVTV
 
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -24,41 +25,55 @@
 
  */
 
-#ifndef LOGGER_H_
-#define LOGGER_H_
+#ifndef C300_H_
+#define C300_H_
 
 #include <Arduino.h>
 #include "config.h"
-#include "DeviceTypes.h"
-#include "constants.h"
+#include "MotorController.h"
+#include "sys_io.h"
+#include "TickHandler.h"
+#include "CanHandler.h"
 
-class Logger {
+/*
+ * Class for C300 specific configuration parameters
+ */
+class C300MotorControllerConfiguration : public MotorControllerConfiguration {
 public:
-    enum LogLevel {
-        Debug = 0, Info = 1, Warn = 2, Error = 3, Off = 4
-    };
-    static void debug(const char *, ...);
-    static void debug(DeviceId, const char *, ...);
-    static void info(const char *, ...);
-    static void info(DeviceId, const char *, ...);
-    static void warn(const char *, ...);
-    static void warn(DeviceId, const char *, ...);
-    static void error(const char *, ...);
-    static void error(DeviceId, const char *, ...);
-    static void console(const char *, ...);
-    static void setLoglevel(LogLevel);
-    static LogLevel getLogLevel();
-    static uint32_t getLastLogTime();
-    static boolean isDebug();
-private:
-    static LogLevel logLevel;
-    static uint32_t lastLogTime;
-
-    static void log(DeviceId, LogLevel, const char *format, va_list);
-    static void logMessage(const char *format, va_list args);
-    static void printDeviceName(DeviceId);
 };
 
-#endif /* LOGGER_H_ */
+class C300MotorController: public MotorController, CanObserver {
+public:
+    virtual void handleTick();
+    virtual void handleCanFrame(CAN_FRAME *frame);
+    virtual void setup();
+
+    C300MotorController();
+    DeviceId getId();
+    uint32_t getTickInterval();
+    void taperRegen();
+
+    virtual void loadConfiguration();
+    virtual void saveConfiguration();
+
+private:
+
+    OperationState actualState; //what the controller is reporting it is
+    byte online; //counter for whether C300 appears to be operating
+    byte alive;
+    int activityCount;
+    uint16_t torqueCommand;
+    uint16_t maxAllowedTorque;
+    uint32_t ms;
+    bool prechargeComplete;
+    bool allowedToOperate;
+    void timestamp();
+
+    void sendCmdUS();
+    void sendCmdCanada();
+};
+
+#endif /* C300_H_ */
+
 
 

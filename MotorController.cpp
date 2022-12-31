@@ -53,7 +53,7 @@ MotorController::MotorController() : Device() {
     mechanicalPower = 0;
 
     selectedGear = NEUTRAL;
-    operationState=ENABLE;
+    operationState = ENABLE;
 
     dcVoltage = 0;
     dcCurrent = 0;
@@ -99,6 +99,7 @@ void MotorController::setup() {
                     systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
                     systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
     coolflag = false;
+      
 
     Device::setup();
 
@@ -244,6 +245,9 @@ void MotorController::checkPrecharge()
             throttleRequested = 0; //Keep throttle at zero during precharge
             prelay=true;
             Logger::info("Starting precharge sequence - wait %i milliseconds", prechargetime);
+            Logger::info("PRECHARGE ENABLED...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
+                systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
+                systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
 
         }
     }
@@ -564,6 +568,7 @@ void MotorController::loadConfiguration() {
 #else
     if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
 #endif
+        Logger::info((char *)Constants::validChecksum);
         prefsHandler->read(EEMC_MAX_RPM, &config->speedMax);
         prefsHandler->read(EEMC_MAX_TORQUE, &config->torqueMax);
         prefsHandler->read(EEMC_RPM_SLEW_RATE, &config->speedSlewRate);
@@ -583,7 +588,8 @@ void MotorController::loadConfiguration() {
         prefsHandler->read(EEMC_REVERSE_IN, &config->reverseIn);
         prefsHandler->read(EEMC_TAPER_UPPER, &config->regenTaperUpper);
         prefsHandler->read(EEMC_TAPER_LOWER, &config->regenTaperLower);
-        prefsHandler->read(EESYS_CAPACITY, &config->capacity);
+        //prefsHandler->read(EESYS_CAPACITY, &config->capacity);
+        config->capacity = 0;
         if (config->regenTaperLower < 0 || config->regenTaperLower > 10000 ||
             config->regenTaperUpper < config->regenTaperLower || config->regenTaperUpper > 10000) {
             config->regenTaperLower = RegenTaperLower;
@@ -591,6 +597,7 @@ void MotorController::loadConfiguration() {
         }
     }
     else { //checksum invalid. Reinitialize values and store to EEPROM
+        Logger::info((char *)Constants::invalidChecksum);
         config->speedMax = MaxRPMValue;
         config->torqueMax = MaxTorqueValue;
         config->speedSlewRate = RPMSlewRateValue;
@@ -610,6 +617,7 @@ void MotorController::loadConfiguration() {
         config->reverseIn = ReverseIn;
         config->regenTaperLower = RegenTaperLower;
         config->regenTaperUpper = RegenTaperUpper;
+        saveConfiguration();
     }
     //DeviceManager::getInstance()->sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
 
@@ -640,9 +648,10 @@ void MotorController::saveConfiguration() {
     prefsHandler->write(EEMC_REVERSE_IN, config->reverseIn);
     prefsHandler->write(EEMC_TAPER_LOWER, config->regenTaperLower);
     prefsHandler->write(EEMC_TAPER_UPPER, config->regenTaperUpper);
-    prefsHandler->write(EESYS_CAPACITY, config->capacity);
+    //prefsHandler->write(EESYS_CAPACITY, config->capacity);
 
     prefsHandler->saveChecksum();
+    prefsHandler->forceCacheWrite();
     loadConfiguration();
 }
 

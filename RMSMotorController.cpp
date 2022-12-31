@@ -42,7 +42,8 @@ RMSMotorController::RMSMotorController() : MotorController()
     operationState = ENABLE;
     online = 0;
     activityCount = 0;
-    sequence=0;
+    sequence = 0;
+    isLockedOut = true;
     commonName = "Rinehart Motion Systems Inverter";
 }
 
@@ -59,8 +60,8 @@ void RMSMotorController::setup()
     //allow through 0xA0 through 0xAF	
     canHandlerEv.attach(this, 0x0A0, 0x7f0, false);
 
-    operationState=ENABLE;
-    selectedGear=NEUTRAL;
+    operationState = ENABLE;
+    selectedGear = NEUTRAL;
     tickHandler.attach(this, CFG_TICK_INTERVAL_MOTOR_CONTROLLER);
 }
 
@@ -68,15 +69,15 @@ void RMSMotorController::setup()
 void RMSMotorController::handleCanFrame(CAN_FRAME *frame)
 {
     int temp;
-    uint8_t *data = (uint8_t *)frame->data.value;
+    uint8_t *data = &frame->data.bytes[0];
     online = 1; //if a frame got to here then it passed the filter and must come from RMS
 	
     if (!running) //if we're newly running then cancel faults if necessary.
     {
-        faultHandler.cancelOngoingFault(CODAUQM, FAULT_MOTORCTRL_COMM);
+        faultHandler.cancelOngoingFault(RINEHARTINV, FAULT_MOTORCTRL_COMM);
     }
     
-    running=true;
+    running = true;
     
     Logger::debug("inverter msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", frame->id, frame->data.bytes[0],
                   frame->data.bytes[1],frame->data.bytes[2],frame->data.bytes[3],frame->data.bytes[4],
@@ -377,61 +378,61 @@ void RMSMotorController::handleCANMsgFaults(uint8_t *data)
 	if (postFaults != 0 || runFaults != 0) faulted = true;
 	else faulted = false;
 	
-	if (postFaults & 1) Logger::debug("Desat Fault!");
-	if (postFaults & 2) Logger::debug("HW Over Current Limit!");
-	if (postFaults & 4) Logger::debug("Accelerator Shorted!");
-	if (postFaults & 8) Logger::debug("Accelerator Open!");
-	if (postFaults & 0x10) Logger::debug("Current Sensor Low!");
-	if (postFaults & 0x20) Logger::debug("Current Sensor High!");
-	if (postFaults & 0x40) Logger::debug("Module Temperature Low!");
-	if (postFaults & 0x80) Logger::debug("Module Temperature High!");
-	if (postFaults & 0x100) Logger::debug("Control PCB Low Temp!");
-	if (postFaults & 0x200) Logger::debug("Control PCB High Temp!");
-	if (postFaults & 0x400) Logger::debug("Gate Drv PCB Low Temp!");
-	if (postFaults & 0x800) Logger::debug("Gate Drv PCB High Temp!");
-	if (postFaults & 0x1000) Logger::debug("5V Voltage Low!");
-	if (postFaults & 0x2000) Logger::debug("5V Voltage High!");
-	if (postFaults & 0x4000) Logger::debug("12V Voltage Low!");
-	if (postFaults & 0x8000) Logger::debug("12V Voltage High!");
-	if (postFaults & 0x10000) Logger::debug("2.5V Voltage Low!");
-	if (postFaults & 0x20000) Logger::debug("2.5V Voltage High!");
-	if (postFaults & 0x40000) Logger::debug("1.5V Voltage Low!");
-	if (postFaults & 0x80000) Logger::debug("1.5V Voltage High!");
-	if (postFaults & 0x100000) Logger::debug("DC Bus Voltage High!");
-	if (postFaults & 0x200000) Logger::debug("DC Bus Voltage Low!");
-	if (postFaults & 0x400000) Logger::debug("Precharge Timeout!");
-	if (postFaults & 0x800000) Logger::debug("Precharge Voltage Failure!");
-	if (postFaults & 0x1000000) Logger::debug("EEPROM Checksum Invalid!");
-	if (postFaults & 0x2000000) Logger::debug("EEPROM Data Out of Range!");
-	if (postFaults & 0x4000000) Logger::debug("EEPROM Update Required!");
-	if (postFaults & 0x40000000) Logger::debug("Brake Shorted!");
-	if (postFaults & 0x80000000) Logger::debug("Brake Open!");	
+	if (postFaults & 1) Logger::error("Desat Fault!");
+	if (postFaults & 2) Logger::error("HW Over Current Limit!");
+	if (postFaults & 4) Logger::error("Accelerator Shorted!");
+	if (postFaults & 8) Logger::error("Accelerator Open!");
+	if (postFaults & 0x10) Logger::error("Current Sensor Low!");
+	if (postFaults & 0x20) Logger::error("Current Sensor High!");
+	if (postFaults & 0x40) Logger::error("Module Temperature Low!");
+	if (postFaults & 0x80) Logger::error("Module Temperature High!");
+	if (postFaults & 0x100) Logger::error("Control PCB Low Temp!");
+	if (postFaults & 0x200) Logger::error("Control PCB High Temp!");
+	if (postFaults & 0x400) Logger::error("Gate Drv PCB Low Temp!");
+	if (postFaults & 0x800) Logger::error("Gate Drv PCB High Temp!");
+	if (postFaults & 0x1000) Logger::error("5V Voltage Low!");
+	if (postFaults & 0x2000) Logger::error("5V Voltage High!");
+	if (postFaults & 0x4000) Logger::error("12V Voltage Low!");
+	if (postFaults & 0x8000) Logger::error("12V Voltage High!");
+	if (postFaults & 0x10000ul) Logger::error("2.5V Voltage Low!");
+	if (postFaults & 0x20000ul) Logger::error("2.5V Voltage High!");
+	if (postFaults & 0x40000ul) Logger::error("1.5V Voltage Low!");
+	if (postFaults & 0x80000ul) Logger::error("1.5V Voltage High!");
+	if (postFaults & 0x100000ul) Logger::error("DC Bus Voltage High!");
+	if (postFaults & 0x200000ul) Logger::error("DC Bus Voltage Low!");
+	if (postFaults & 0x400000ul) Logger::error("Precharge Timeout!");
+	if (postFaults & 0x800000ul) Logger::error("Precharge Voltage Failure!");
+	if (postFaults & 0x1000000ul) Logger::error("EEPROM Checksum Invalid!");
+	if (postFaults & 0x2000000ul) Logger::error("EEPROM Data Out of Range!");
+	if (postFaults & 0x4000000ul) Logger::error("EEPROM Update Required!");
+	if (postFaults & 0x40000000ul) Logger::error("Brake Shorted!");
+	if (postFaults & 0x80000000ul) Logger::error("Brake Open!");	
 	
-	if (runFaults & 1) Logger::debug("Motor Over Speed!");
-	if (runFaults & 2) Logger::debug("Over Current!");
-	if (runFaults & 4) Logger::debug("Over Voltage!");
-	if (runFaults & 8) Logger::debug("Inverter Over Temp!");
-	if (runFaults & 0x10) Logger::debug("Accelerator Shorted!");
-	if (runFaults & 0x20) Logger::debug("Accelerator Open!");
-	if (runFaults & 0x40) Logger::debug("Direction Cmd Fault!");
-	if (runFaults & 0x80) Logger::debug("Inverter Response Timeout!");
-	if (runFaults & 0x100) Logger::debug("Hardware Desat Error!");
-	if (runFaults & 0x200) Logger::debug("Hardware Overcurrent Fault!");
-	if (runFaults & 0x400) Logger::debug("Under Voltage!");
-	if (runFaults & 0x800) Logger::debug("CAN Cmd Message Lost!");
-	if (runFaults & 0x1000) Logger::debug("Motor Over Temperature!");
-	if (runFaults & 0x10000) Logger::debug("Brake Input Shorted!");
-	if (runFaults & 0x20000) Logger::debug("Brake Input Open!");
-	if (runFaults & 0x40000) Logger::debug("IGBT A Over Temperature!");
-	if (runFaults & 0x80000) Logger::debug("IGBT B Over Temperature!");
-	if (runFaults & 0x100000) Logger::debug("IGBT C Over Temperature!");
-	if (runFaults & 0x200000) Logger::debug("PCB Over Temperature!");
-	if (runFaults & 0x400000) Logger::debug("Gate Drive 1 Over Temperature!");
-	if (runFaults & 0x800000) Logger::debug("Gate Drive 2 Over Temperature!");
-	if (runFaults & 0x1000000) Logger::debug("Gate Drive 3 Over Temperature!");
-	if (runFaults & 0x2000000) Logger::debug("Current Sensor Fault!");
-	if (runFaults & 0x40000000) Logger::debug("Resolver Not Connected!");
-	if (runFaults & 0x80000000) Logger::debug("Inverter Discharge Active!");
+	if (runFaults & 1) Logger::error("Motor Over Speed!");
+	if (runFaults & 2) Logger::error("Over Current!");
+	if (runFaults & 4) Logger::error("Over Voltage!");
+	if (runFaults & 8) Logger::error("Inverter Over Temp!");
+	if (runFaults & 0x10) Logger::error("Accelerator Shorted!");
+	if (runFaults & 0x20) Logger::error("Accelerator Open!");
+	if (runFaults & 0x40) Logger::error("Direction Cmd Fault!");
+	if (runFaults & 0x80) Logger::error("Inverter Response Timeout!");
+	if (runFaults & 0x100) Logger::error("Hardware Desat Error!");
+	if (runFaults & 0x200) Logger::error("Hardware Overcurrent Fault!");
+	if (runFaults & 0x400) Logger::error("Under Voltage!");
+	if (runFaults & 0x800) Logger::error("CAN Cmd Message Lost!");
+	if (runFaults & 0x1000) Logger::error("Motor Over Temperature!");
+	if (runFaults & 0x10000ul) Logger::error("Brake Input Shorted!");
+	if (runFaults & 0x20000ul) Logger::error("Brake Input Open!");
+	if (runFaults & 0x40000ul) Logger::error("IGBT A Over Temperature!");
+	if (runFaults & 0x80000ul) Logger::error("IGBT B Over Temperature!");
+	if (runFaults & 0x100000ul) Logger::error("IGBT C Over Temperature!");
+	if (runFaults & 0x200000ul) Logger::error("PCB Over Temperature!");
+	if (runFaults & 0x400000ul) Logger::error("Gate Drive 1 Over Temperature!");
+	if (runFaults & 0x800000ul) Logger::error("Gate Drive 2 Over Temperature!");
+	if (runFaults & 0x1000000ul) Logger::error("Gate Drive 3 Over Temperature!");
+	if (runFaults & 0x2000000ul) Logger::error("Current Sensor Fault!");
+	if (runFaults & 0x40000000ul) Logger::error("Resolver Not Connected!");
+	if (runFaults & 0x80000000ul) Logger::error("Inverter Discharge Active!");
 	
 }
 
@@ -445,7 +446,7 @@ void RMSMotorController::handleCANMsgTorqueTimer(uint8_t *data)
 	uptime = data[4] + (data[5] * 256) + (data[6] * 65536ul) + (data[7] * 16777216ul);
 	Logger::debug("Torque Cmd: %d   Actual: %d     Uptime: %d", cmdTorque, actTorque, uptime);
 	torqueActual = actTorque;
-	torqueCommand = cmdTorque;
+	//torqueCommand = cmdTorque; //should this be here? We set commanded torque and probably shouldn't overwrite here.
 }
 
 void RMSMotorController::handleCANMsgModFluxWeaken(uint8_t *data)
@@ -482,12 +483,12 @@ void RMSMotorController::handleTick() {
     {   //we set the RUNNING light on.  If no frames are received for 2 seconds, we set running OFF.
         if (millis()-mss>2000)
         {
-            running=false; // We haven't received any frames for over 2 seconds.  Otherwise online would be true.
+            running = false; // We haven't received any frames for over 2 seconds.  Otherwise online would be true.
             mss=millis();   //Reset our 2 second timer
         }
     }
-    else running=true;
-    online=false;//This flag will be set to true by received frames
+    else running = true;
+    online = false;//This flag will be set to true by received frames
 }
 
 
@@ -515,7 +516,7 @@ void RMSMotorController::sendCmdFrame()
 	output.data.bytes[7] = 0;
 	
 	
-    if(operationState==ENABLE && !isLockedOut)
+    if(operationState == ENABLE && !isLockedOut && selectedGear != NEUTRAL && donePrecharge)
     {
         output.data.bytes[5] = 1;
     }
@@ -524,13 +525,13 @@ void RMSMotorController::sendCmdFrame()
         output.data.bytes[5] = 0;
     }
 
-    if(selectedGear==DRIVE)
+    if(selectedGear == DRIVE)
     {
-        output.data.bytes[4] = 1;
+        output.data.bytes[4] = 0;
     }
     else
     {
-        output.data.bytes[4] = 0;
+        output.data.bytes[4] = 1;
     }
     
     torqueRequested = ((throttleRequested * config->torqueMax) / 1000); //Calculate torque request from throttle position x maximum torque
@@ -538,15 +539,19 @@ void RMSMotorController::sendCmdFrame()
         torqueCommand = torqueRequested;   //If actual rpm less than max rpm, add torque command to offset
     }
     else {
-        torqueCommand = torqueRequested/2;   //If at RPM limit, cut torque command in half.
+        torqueCommand = torqueRequested / 2;   //If at RPM limit, cut torque command in half.
     }
+    
+    if (torqueRequested < 0) torqueRequested = 0;
+    
+    Logger::debug("ThrottleRequested: %d     TorqueRequested: %d", throttleRequested, torqueRequested);
 	
-    output.data.bytes[1] = (torqueCommand & 0xFF00) >> 8;  //Stow torque command in bytes 2 and 3.
+    output.data.bytes[1] = (torqueCommand & 0xFF00) >> 8;  //Stow torque command in bytes 0 and 1.
     output.data.bytes[0] = (torqueCommand & 0x00FF);
     
     canHandlerEv.sendFrame(output);  //Mail it.
 
-    Logger::debug("CAN Command Frame: %X  %X  %X  %X  %X  %X  %X  %X",output.id, output.data.bytes[0],
+    Logger::debug("RMS Command Frame: %X  %X  %X  %X  %X  %X  %X  %X",output.id, output.data.bytes[0],
                   output.data.bytes[1],output.data.bytes[2],output.data.bytes[3],output.data.bytes[4],
 				  output.data.bytes[5],output.data.bytes[6],output.data.bytes[7]);
 }

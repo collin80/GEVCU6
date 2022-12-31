@@ -5,8 +5,6 @@ Generalized Electric Vehicle Control Unit
 
 Our website can be found at : http://www.evtv.me
 
-NOTE: This branch is quite old and not really supported at this point. Use the DEV branch of this project if at all possible. It is newer and better supported. Eventually the DEV branch will be merged back into this master branch.
-
 A project to create a fairly Arduino compatible ECU firmware
 to interface with various electric vehicle hardware over CANbus
 (and possibly other comm channels)
@@ -15,14 +13,18 @@ The project now builds in the Arduino IDE. So, use it to compile, send the firmw
 
 You will need the following to have any hope of compiling and running the firmware:
 - A GEVCU board. This version supports hardware 6.23c and later.
-- Arduino IDE 1.5.4 - or later
-- due_can library - There is a repo for this under github.com/Collin80
-- can_common library - Also under Collin80 repos
-- due_rtc library - Also under Collin80
-- due_wire library - once again
-- DueTimer library - and again
-- Microsmooth library (Also in repos: https://github.com/collin80/Microsmooth)
-- Adafruit_BLE_SPI library - You need the development branch from my repos: https://github.com/collin80/Adafruit_BLE_SPI/tree/development
+- Arduino IDE 1.5.4 - or later even 1.8.13 or such newer IDEs should work fine.
+- All below libraries can be gotten from the repos at github.com/collin80
+- due_can
+- can_common
+- due_rtc
+- due_wire
+- DueTimer
+- microsmooth library
+- Adafruit_BLE_SPI - You need the DEV branch of this library.
+- Wire_EEPROM
+- firmware_receiver
+- pwm_lib
 
 All libraries belong in %USERPROFILE%\Documents\Arduino\libraries (Windows) or ~/Arduino/libraries (Linux/Mac).
 You will need to remove -master or any other postfixes. Your library folders should be named as above.

@@ -53,24 +53,31 @@ Random comments on things that should be coded up soon:
 
 // The following includes are required in the .ino file by the Arduino IDE in order to properly
 // identify the required libraries for the build.
-#include <due_rtc.h>
 #include <due_can.h>
+#include <BLE.h>
 #include <FirmwareReceiver.h>
 #include <due_wire.h>
 #include <DueTimer.h>
 #include <SPI.h>
+#include <microsmooth.h>
 
-//RTC_clock rtc_clock(XTAL); //init RTC with the external 32k crystal as a reference
+#define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
 
 //Evil, global variables
 PrefHandler *sysPrefs;
 MemCache *memCache;
 Heartbeat *heartbeat;
 SerialConsole *serialConsole;
-Device *btDevice;
+ADAFRUITBLE *btDevice;
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
 
 byte i = 0;
+
+
+void watchdogSetup(void)
+{
+  watchdogEnable(250);
+}
 
 //initializes all the system EEPROM values. Chances are this should be broken out a bit but
 //there is only one checksum check for all of them so it's simple to do it all here.
@@ -89,23 +96,38 @@ void initSysEEPROM() {
 	sysPrefs->write(EESYS_ADC1_GAIN, sixteen);
 	sysPrefs->write(EESYS_ADC2_GAIN, sixteen);
 	sysPrefs->write(EESYS_ADC3_GAIN, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKH_GAIN, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKL_GAIN, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKC_GAIN, sixteen);
+
 
 	sixteen = 0; //no offset
 	sysPrefs->write(EESYS_ADC0_OFFSET, sixteen);
 	sysPrefs->write(EESYS_ADC1_OFFSET, sixteen);
 	sysPrefs->write(EESYS_ADC2_OFFSET, sixteen);
 	sysPrefs->write(EESYS_ADC3_OFFSET, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKH_OFFSET, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKL_OFFSET, sixteen);
+    sysPrefs->write(EESYS_ADC_PACKC_OFFSET, sixteen);
 
-	sixteen = 500; //multiplied by 1000 so 500k baud
+
+	sixteen = CFG_CAN0_SPEED;
 	sysPrefs->write(EESYS_CAN0_BAUD, sixteen);
+    sixteen = CFG_CAN1_SPEED;
 	sysPrefs->write(EESYS_CAN1_BAUD, sixteen);
 
-	eight = 3;  //0=debug, 1=info,2=warn,3=error,4=off
+	eight = 2;  //0=debug, 1=info,2=warn,3=error,4=off
 	sysPrefs->write(EESYS_LOG_LEVEL, eight);
 
 	sysPrefs->saveChecksum();
+    sysPrefs->forceCacheWrite();
 }
 
+/*
+Creating objects here is all you need to do to register them. The pointer
+reference will obviously expire at the end of the function but the object
+lives on and is hereafter controlled by the system. 
+*/
 void createObjects() {
 	PotThrottle *paccelerator = new PotThrottle();
 	CanThrottle *caccelerator = new CanThrottle();
@@ -119,12 +141,16 @@ void createObjects() {
     TestMotorController *testMotorController = new TestMotorController();
     DCDCController *dcdcController = new DCDCController();
 	BrusaMotorController *bmotorController = new BrusaMotorController();
-	ThinkBatteryManager *BMS = new ThinkBatteryManager();
+    C300MotorController *c300MotorController = new C300MotorController();
+	ThinkBatteryManager *thinkBMS = new ThinkBatteryManager();
+    BuiltinBatteryManager *builtinBMS = new BuiltinBatteryManager();
 	ELM327Emu *emu = new ELM327Emu();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
     EVIC *eVIC = new EVIC();
     PowerkeyPad *powerKey = new PowerkeyPad();
     VehicleSpecific *vehicleSpecific = new VehicleSpecific();
+    OvarCharger *ovarcharge = new OvarCharger();
+    PotGearSelector *potgear = new PotGearSelector();
 }
 
 void initializeDevices() {
@@ -150,6 +176,7 @@ void initializeDevices() {
 	 *	out there as they initialize. For instance, a motor controller could see if a BMS
 	 *	exists and supports a function that the motor controller wants to access.
 	 */
+    sysPrefs->forceCacheWrite();
 	deviceManager.sendMessage(DEVICE_ANY, INVALID, MSG_STARTUP, NULL);
 
 }
@@ -157,6 +184,7 @@ void initializeDevices() {
 void setup() {
     //Most boards pre 6.2 have outputs on 2-9 and a problem where their outputs can trigger on for just a quick moment
     //upon start up. So, try to pull the outputs low as soon as we can just to be sure.
+    //This project is now GEVCU6.2 specific but still, doesn't hurt to set your outputs properly.
     for (int i = 2; i < 10; i++) {
         pinMode(i, OUTPUT);
         digitalWrite(i, LOW);
@@ -166,10 +194,19 @@ void setup() {
     digitalWrite(64, HIGH);
     pinMode(65, OUTPUT); //reset for BLE module
     digitalWrite(65, HIGH);
-	
-    //delay(5000);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm way before 5 seconds.
     
-    //SerialUSB.println(millis());
+    //Activate the supply monitor at 2.8v and make it hold the CPU in reset under that point
+    //That first value is 1.9V + the value for the supply threshold. So, 9 would be 2.8v, A would be 2.9v, etc
+    
+    //               Thresh  Enable   Force Reset
+    SUPC->SUPC_SMMR = 0xA | (1<<8) | (1<<12);
+	
+#ifdef DEBUG_STARTUP_DELAY
+    for (int c = 0; c < 200; c++) {
+        delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm quickly upon start up
+        watchdogReset();
+    }
+#endif
        
 	pinMode(BLINK_LED, OUTPUT);
 	digitalWrite(BLINK_LED, LOW);
@@ -192,9 +229,10 @@ void setup() {
 
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
-	//loglevel = 0; //force debugging log level
+	loglevel = 0; //force debugging log level
     Logger::console("LogLevel: %i", loglevel);
-	Logger::setLoglevel((Logger::LogLevel)loglevel);    
+	Logger::setLoglevel((Logger::LogLevel)loglevel);
+    //Logger::setLoglevel((Logger::LogLevel)0);
 	systemIO.setup();  
 	canHandlerEv.setup();
 	canHandlerCar.setup();
@@ -203,8 +241,10 @@ void setup() {
 	initializeDevices();
     serialConsole = new SerialConsole(memCache, heartbeat);
 	serialConsole->printMenu();
-	btDevice = deviceManager.getDeviceByID(ELM327EMU);
+	btDevice = static_cast<ADAFRUITBLE *>(deviceManager.getDeviceByID(ADABLUE));
     deviceManager.sendMessage(DEVICE_WIFI, ADABLUE, MSG_CONFIG_CHANGE, NULL); //Load config into BLE interface
+
+   
 	Logger::info("System Ready");	
 }
 
@@ -220,8 +260,8 @@ void loop() {
 	serialConsole->loop();
 
     systemIO.pollInitialization();
+    
+    if (btDevice) btDevice->loop();
+    
+    watchdogReset();
 }
-
-
-
-

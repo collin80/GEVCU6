@@ -40,7 +40,7 @@ Device::Device() {
 void Device::setup() {
 }
 
-char* Device::getCommonName() {
+const char* Device::getCommonName() {
     return commonName;
 }
 
