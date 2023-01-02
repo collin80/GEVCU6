@@ -103,13 +103,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ThrottleFwdValue		280		//where does forward motion start
 #define ThrottleMapValue		750		//Where is the 1/2 way point for throttle
 #define ThrottleMinRegenValue	0		//how many percent of full power to use at minimal regen
-<<<<<<< HEAD
 #define ThrottleMaxRegenValue	70		//how many percent of full power to use at maximum regen
-#define ThrottleCreepValue		0		//how many percent of full power to use at creep
-=======
-#define ThrottleMaxRegenValue	50		//how many percent of full power to use at maximum regen
 #define ThrottleCreepValue		0		//percentage of torque used for creep function (imitate creep of automatic transmission, set 0 to disable)
->>>>>>> master
 #define ThrottleMaxErrValue		150		//tenths of percentage allowable deviation between pedals
 #define Throttle1MinValue		20		//Value ADC reads when pedal is up
 #define Throttle1MaxValue		3150		//Value ADC reads when pedal fully depressed
@@ -129,26 +124,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define KilowattHrs         11000 //not currently used
 #define PrechargeR          6000 //millliseconds precharge
 #define NominalVolt         3300 //a reasonable figure for a lithium cell pack driving the DMOC (in tenths of a volt)
-<<<<<<< HEAD
-#define PrechargeRelay      0
-#define MainContactorRelay  1
-=======
 #define PrechargeRelay      4 // precharge relay pin digital out
 #define MainContactorRelay  5 // main contactor realy pin - digital out
->>>>>>> master
 #define ReversePercent      50
 #define CoolFan             6  //output to use for cooling fan
 #define CoolOn              40 //temperature (in C) to turn on cooling fan
 #define BrakeLight          255 //temperature to turn it off
 #define CoolOff             35 //temperature to turn it off
 #define RevLight            255 //temperature to turn it off
-<<<<<<< HEAD
-#define EnableIn            0//temperature to turn it off
-#define ReverseIn           1 //temperature to turn it off
-=======
 #define EnableIn            0 //enable  digital input pin
 #define ReverseIn           1 //reverse digital input pin
->>>>>>> master
 #define MaxRegenWatts       40000 //in actual watts, there is no scale here
 #define MaxAccelWatts       150000
 #define BatteryCapacity     100

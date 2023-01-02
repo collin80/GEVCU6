@@ -1,0 +1,81 @@
+Building the bootloader yourself:
+
+The general method here is that the bootloader runs in FLASH1 which is the upper 256k of FLASH memory.
+FLASH0 is saved for your sketches. This limits sketches to 256k but usually this is not a problem. The sketch in
+FLASH0 runs without much modification but if firmware upgrading is needed in the future the sketch will have to
+call fwGotFrame to pass CAN frames to the firmware receiver. It will determine if a signal has been sent to go to the bootloader.
+
+Because the bootloader must run in FLASH1 it must be built specially and flashed specially. You will need
+to create a new board type. Edit this file:
+
+c:\users\<You>\appdata\local\arduino15\packages\arduino\hardware\same\<SAMVERSION>\boards.txt
+
+Add these lines:
+
+arduino_due_xhb.name=Arduino Due (High bootloader)
+arduino_due_xhb.vid.0=0x2341
+arduino_due_xhb.pid.0=0x003e
+arduino_due_xhb.vid.1=0x2A03
+arduino_due_xhb.pid.1=0x003e
+arduino_due_xhb.upload.tool=bossac
+arduino_due_xhb.upload.protocol=sam-ba
+arduino_due_xhb.upload.maximum_size=262144
+arduino_due_xhb.upload.use_1200bps_touch=true
+arduino_due_xhb.upload.wait_for_upload_port=true
+arduino_due_xhb.upload.native_usb=true
+arduino_due_xhb.build.mcu=cortex-m3
+arduino_due_xhb.build.f_cpu=84000000L
+arduino_due_xhb.build.usb_manufacturer="Arduino LLC"
+arduino_due_xhb.build.usb_product="Arduino Due"
+arduino_due_xhb.build.board=SAM_DUE
+arduino_due_xhb.build.core=arduino
+arduino_due_xhb.build.extra_flags=-D__SAM3X8E__ -mthumb {build.usb_flags}
+arduino_due_xhb.build.ldscript=linker_scripts/gcc/flash2.ld
+arduino_due_xhb.build.variant=arduino_due_x
+arduino_due_xhb.build.variant_system_lib=libsam_sam3x8e_gcc_rel.a
+arduino_due_xhb.build.vid=0x2341
+arduino_due_xhb.build.pid=0x003e
+
+Now, still within that directory, further go to:
+
+variants\arduino_due_x\linker_scripts\gcc
+
+Copy flash.ld to a new file flash2.ld
+
+In the MEMORY section change this line:
+
+rom (rx)    : ORIGIN = 0x00080000, LENGTH = 0x00080000 /* Flash, 512K */
+
+to
+
+rom (rx)    : ORIGIN = 0x000C0000, LENGTH = 0x00040000 /* Flash, 256K */
+
+Now, save that file. If you want you can also lower the rom size in flash.ld:
+
+In flash.ld change:
+
+rom (rx)    : ORIGIN = 0x00080000, LENGTH = 0x00080000 /* Flash, 512K */
+
+to 
+
+rom (rx)    : ORIGIN = 0x00080000, LENGTH = 0x00040000 /* Flash, 256K */
+
+Now you're ready to compile the bootloader. Load the example sketch duecan_bootloader. 
+You can change the CANBASE and DEVICETOK values to be custom for your project.
+
+Change your board to Arduino Due (High Bootloader) and compile (but do not upload!)
+
+When it is done compiling you will need to find the output files. If you have verbose compiling
+enabled (and you should) then you can find the output directory by looking near the end of the compile results.
+
+Grab the .ELF file produced by the compile. Save it somewhere you can easily find again.
+
+Now, you also need something in FLASH0 to bootstrap the process. The other example that comes with the project
+is FirmwareReceivingSketch. All it does is set the CAN0 to 500k baud then blink the LED rapidly while waiting for firmware.
+
+This sketch is compiled with either of the other Due options such as Arduino Due Native Port. Compile it and find the resulting
+.ELF from from it as well.
+
+Now you've got two ELF files. The easiest approach is to use Atmel Studio or some other JTAG interface to program each of the ELF files.
+It doesn't matter which you flash first. Flash them both to the Due - they don't overlap. Once both are flashed (however you do it) then
+grab a binary image (512k) of the entirety of FLASH on the Due. You can then use this bin file with bossac.
