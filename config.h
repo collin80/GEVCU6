@@ -94,7 +94,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * the parameter values defined here are used instead of those stored in the EEPROM.
  */
 //#define USE_HARD_CODED
-#define ThrottleNumPots			1		//# of pots to use by default
+#define ThrottleNumPots			2		//# of pots to use by default
 #define ThrottleADC1			0		//Which pin to use
 #define ThrottleADC2			1		//Which pin to use
 #define ThrottleSubtype			1		//subtype 1 is a standard linear pot throttle
@@ -104,7 +104,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ThrottleMapValue		750		//Where is the 1/2 way point for throttle
 #define ThrottleMinRegenValue	0		//how many percent of full power to use at minimal regen
 #define ThrottleMaxRegenValue	70		//how many percent of full power to use at maximum regen
-#define ThrottleCreepValue		0		//percentage of torque used for creep function (imitate creep of automatic transmission, set 0 to disable)
+#define ThrottleCreepValue   	5		//percentage of torque used for creep function (imitate creep of automatic transmission, set 0 to disable)
 #define ThrottleMaxErrValue		150		//tenths of percentage allowable deviation between pedals
 #define Throttle1MinValue		20		//Value ADC reads when pedal is up
 #define Throttle1MaxValue		3150		//Value ADC reads when pedal fully depressed
@@ -117,13 +117,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define BrakeADC				0       //which ADC pin to use
 
 
-#define MaxTorqueValue      3000 //in tenths of a Nm
+#define MaxTorqueValue      2000 //in tenths of a Nm
 #define	MaxRPMValue         6000 //DMOC will ignore this but we can use it ourselves for limiting
 #define RPMSlewRateValue    10000 // rpm/sec the requested speed should change (speed mode)
 #define TorqueSlewRateValue 6000 // 0.1Nm/sec the requested torque output should change (torque mode)
 #define KilowattHrs         11000 //not currently used
 #define PrechargeR          6000 //millliseconds precharge
-#define NominalVolt         3300 //a reasonable figure for a lithium cell pack driving the DMOC (in tenths of a volt)
+#define NominalVolt         3200 //a reasonable figure for a lithium cell pack driving the DMOC (in tenths of a volt)
 #define PrechargeRelay      4 // precharge relay pin digital out
 #define MainContactorRelay  5 // main contactor realy pin - digital out
 #define ReversePercent      50
@@ -133,14 +133,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CoolOff             35 //temperature to turn it off
 #define RevLight            255 //temperature to turn it off
 #define EnableIn            0 //enable  digital input pin
-#define ReverseIn           1 //reverse digital input pin
+#define ReverseIn           255 //reverse digital input pin
 #define MaxRegenWatts       40000 //in actual watts, there is no scale here
 #define MaxAccelWatts       150000
 #define BatteryCapacity     100
 #define RegenTaperUpper     500
 #define RegenTaperLower     75
 
-#define DefaultPackCapacity   1000       //in tenths of AH
+#define DefaultPackCapacity   1200       //in tenths of AH
 #define DefaultPackRemaining  50000000l //in millionths of AH
 #define DefaultHighVLim       3850 //tenths of a V
 #define DefaultLowVLim        2400 //tenths of a V
