@@ -860,8 +860,6 @@ void SerialConsole::handleShortCmd() {
         Logger::console("TCCH Charger = %X", TCCHCHARGE);
         Logger::console("Pot based accelerator = %X", POTACCELPEDAL);
         Logger::console("Pot based brake = %X", POTBRAKEPEDAL);
-        Logger::console("CANBus accelerator = %X", CANACCELPEDAL);
-        Logger::console("CANBus brake = %X", CANBRAKEPEDAL);
         Logger::console("WIFI (iChip2128) = %X", ICHIP2128);
         Logger::console("Th!nk City BMS = %X", THINKBMS);
         break;

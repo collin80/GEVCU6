@@ -111,8 +111,6 @@ uint16_t deviceTable[] =
     LEAR,           //7
     POTACCELPEDAL,  //8
     POTBRAKEPEDAL,  //9
-    CANACCELPEDAL,  //10
-    CANBRAKEPEDAL,  //11
     TESTACCEL,      //12
     EVICTUS,        //13
     ADABLUE,        //14

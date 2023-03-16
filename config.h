@@ -78,7 +78,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #define CFG_CAN0_SPEED                              500 // specify the speed of the CAN0 bus (EV) in thousands. 
 #define CFG_CAN1_SPEED                              500 // specify the speed of the CAN1 bus (Car) in thousands
-#define CFG_CANTHROTTLE_MAX_NUM_LOST_MSG            3 // maximum number of lost messages allowed
 
 /*
  * MISCELLANEOUS

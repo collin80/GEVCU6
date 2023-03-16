@@ -58,8 +58,6 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     THROTTLE = 0x1030,
     POTACCELPEDAL = 0x1031,
     POTBRAKEPEDAL = 0x1032,
-    CANACCELPEDAL = 0x1033,
-    CANBRAKEPEDAL = 0x1034,
     ICHIP2128 = 0x1040,
     ADABLUE = 0x1041,
     TESTACCEL = 0x104F,

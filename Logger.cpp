@@ -345,12 +345,6 @@ void Logger::printDeviceName(DeviceId deviceId) {
     case POTBRAKEPEDAL:
         SerialUSB.print("POTBRAKE");
         break;
-    case CANACCELPEDAL:
-        SerialUSB.print("CANACCEL");
-        break;
-    case CANBRAKEPEDAL:
-        SerialUSB.print("CANBRAKE");
-        break;
     case ICHIP2128:
         SerialUSB.print("ICHIP");
         break;

@@ -130,10 +130,8 @@ lives on and is hereafter controlled by the system.
 */
 void createObjects() {
 	PotThrottle *paccelerator = new PotThrottle();
-	CanThrottle *caccelerator = new CanThrottle();
 	PotBrake *pbrake = new PotBrake();
     TestThrottle *testAccel = new TestThrottle();
-	CanBrake *cbrake = new CanBrake();
 	DmocMotorController *dmotorController = new DmocMotorController();
     CodaMotorController *cmotorController = new CodaMotorController();
 	CKMotorController *ckMotorController = new CKMotorController();

@@ -31,8 +31,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config.h"
 #include "Device.h"
 #include "Throttle.h"
-#include "CanThrottle.h"
-#include "CanBrake.h"
 #include "PotThrottle.h"
 #include "TestThrottle.h"
 #include "PotBrake.h"
