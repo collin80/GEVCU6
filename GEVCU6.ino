@@ -144,7 +144,6 @@ void createObjects() {
     BuiltinBatteryManager *builtinBMS = new BuiltinBatteryManager();
 	ELM327Emu *emu = new ELM327Emu();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
-    EVIC *eVIC = new EVIC();
 }
 
 void initializeDevices() {

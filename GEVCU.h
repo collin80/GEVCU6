@@ -56,7 +56,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "CodaMotorController.h"
 #include "FaultHandler.h"
 #include "DCDCController.h"
-#include "EVIC.h"
 #include "VehicleSpecific.h"
 
 #ifdef __cplusplus
