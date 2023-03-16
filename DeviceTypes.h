@@ -49,7 +49,6 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     ICHIP2128 = 0x1040,
     ADABLUE = 0x1041,
     TESTACCEL = 0x104F,
-    DCDC = 0x1050,
     VEHICLESPECIFIC = 0x3000,
     FAULTSYS = 0x4000,
     EVICTUS = 0x4400,

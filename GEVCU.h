@@ -46,7 +46,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "adafruitBLE.h"
 #include "Sys_Messages.h"
 #include "FaultHandler.h"
-#include "DCDCController.h"
 #include "VehicleSpecific.h"
 
 #ifdef __cplusplus
