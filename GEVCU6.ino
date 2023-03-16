@@ -131,6 +131,7 @@ lives on and is hereafter controlled by the system.
 void createObjects() {
 	PotThrottle *paccelerator = new PotThrottle();
 	PotBrake *pbrake = new PotBrake();
+    VehicleSpecific *vehicleSpecific = new VehicleSpecific();
     TestThrottle *testAccel = new TestThrottle();
 	DmocMotorController *dmotorController = new DmocMotorController();
     CodaMotorController *cmotorController = new CodaMotorController();
@@ -144,8 +145,6 @@ void createObjects() {
 	ELM327Emu *emu = new ELM327Emu();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
     EVIC *eVIC = new EVIC();
-    PowerkeyPad *powerKey = new PowerkeyPad();
-    VehicleSpecific *vehicleSpecific = new VehicleSpecific();
 }
 
 void initializeDevices() {

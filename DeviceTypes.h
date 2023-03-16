@@ -43,7 +43,6 @@ enum DeviceType {
 
 enum DeviceId { //unique device ID for every piece of hardware possible
     ELM327EMU = 0x650,
-    POWERKEYPRO = 0x700,
     DMOC645 = 0x1000,
     BRUSA_DMC5 = 0x1001,
     CODAUQM = 0x1002,
