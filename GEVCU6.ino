@@ -140,8 +140,6 @@ void createObjects() {
     TestMotorController *testMotorController = new TestMotorController();
     DCDCController *dcdcController = new DCDCController();
 	BrusaMotorController *bmotorController = new BrusaMotorController();
-	ThinkBatteryManager *thinkBMS = new ThinkBatteryManager();
-    BuiltinBatteryManager *builtinBMS = new BuiltinBatteryManager();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
 }
 

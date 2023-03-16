@@ -99,6 +99,8 @@ Characteristic characteristics[] =
  * DO NOT REORDER THIS LIST OR REMOVE ANY! If you have new devices add them to the end. But, never remove or reorder!
  * Obviously though, leave the 0 at the end. That's the extent of reordering - add before the 0 at the end
  */
+
+//TODO update indexes
 uint16_t deviceTable[] = 
 {
     DMOC645,        //0
@@ -114,7 +116,6 @@ uint16_t deviceTable[] =
     TESTACCEL,      //12
     EVICTUS,        //13
     ADABLUE,        //14
-    THINKBMS,       //15
     PIDLISTENER,    //16
     0               //NULL terminator
 };
@@ -475,7 +476,6 @@ void ADAFRUITBLE::handleTick() {
     MotorController* motorController = deviceManager.getMotorController();
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
-    BatteryManager *bms = reinterpret_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
     
     PotThrottleConfiguration *acceleratorConfig = NULL;
     PotThrottleConfiguration *brakeConfig = NULL;
@@ -566,15 +566,7 @@ void ADAFRUITBLE::handleTick() {
         }
     }
     
-    if (tickCounter == 2) {        
-        if (bms)
-        {
-            if (blePowerStatus.SOC != bms->getSOC())
-            {
-                blePowerStatus.SOC = bms->getSOC();
-                blePowerStatus.doUpdate = 1;
-            }
-        }
+    if (tickCounter == 2) {
         if (motorController) {
             //Logger::console("Wifi tick counter 2...");            
             if ( blePowerStatus.busVoltage != motorController->getDcVoltage() ) {

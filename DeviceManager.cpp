@@ -154,14 +154,6 @@ uint8_t DeviceManager::getNumControllers() {
     return countDeviceType(DEVICE_MOTORCTRL);
 }
 
-uint8_t DeviceManager::getNumBMS() {
-    return countDeviceType(DEVICE_BMS);
-}
-
-uint8_t DeviceManager::getNumChargers() {
-    return countDeviceType(DEVICE_CHARGER);
-}
-
 uint8_t DeviceManager::getNumDisplays() {
     return countDeviceType(DEVICE_DISPLAY);
 }

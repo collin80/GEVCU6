@@ -348,9 +348,6 @@ void Logger::printDeviceName(DeviceId deviceId) {
     case ICHIP2128:
         SerialUSB.print("ICHIP");
         break;
-    case THINKBMS:
-        SerialUSB.print("THINKBMS");
-        break;
     case SYSTEM:
         SerialUSB.print("SYSTEM");
         break;

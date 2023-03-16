@@ -30,8 +30,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 enum DeviceType {
     DEVICE_ANY,
     DEVICE_MOTORCTRL,
-    DEVICE_BMS,
-    DEVICE_CHARGER,
     DEVICE_DISPLAY,
     DEVICE_THROTTLE,
     DEVICE_BRAKE,
@@ -58,8 +56,6 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     ADABLUE = 0x1041,
     TESTACCEL = 0x104F,
     DCDC = 0x1050,
-    THINKBMS = 0x2000,
-    BUILTINBMS = 0x2100,
     VEHICLESPECIFIC = 0x3000,
     FAULTSYS = 0x4000,
     EVICTUS = 0x4400,
