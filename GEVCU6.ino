@@ -139,7 +139,6 @@ void createObjects() {
     TestMotorController *testMotorController = new TestMotorController();
     DCDCController *dcdcController = new DCDCController();
 	BrusaMotorController *bmotorController = new BrusaMotorController();
-    C300MotorController *c300MotorController = new C300MotorController();
 	ThinkBatteryManager *thinkBMS = new ThinkBatteryManager();
     BuiltinBatteryManager *builtinBMS = new BuiltinBatteryManager();
 	ELM327Emu *emu = new ELM327Emu();

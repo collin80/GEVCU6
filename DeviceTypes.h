@@ -49,7 +49,6 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     CODAUQM = 0x1002,
     CKINVERTER = 0x1003,
     RINEHARTINV = 0x1004,
-    C300INV     = 0x1005,
     TESTINVERTER =0x100F,
     BRUSACHARGE = 0x1010,
     TCCHCHARGE = 0x1011,
