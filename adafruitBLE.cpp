@@ -104,12 +104,6 @@ Characteristic characteristics[] =
 uint16_t deviceTable[] = 
 {
     DMOC645,        //0
-    BRUSA_DMC5,     //1
-    CODAUQM,        //2
-    CKINVERTER,     //3
-    TESTINVERTER,   //4
-    BRUSACHARGE,    //5
-    TCCHCHARGE,     //6
     LEAR,           //7
     POTACCELPEDAL,  //8
     POTBRAKEPEDAL,  //9

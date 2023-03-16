@@ -134,12 +134,7 @@ void createObjects() {
     VehicleSpecific *vehicleSpecific = new VehicleSpecific();
     TestThrottle *testAccel = new TestThrottle();
 	DmocMotorController *dmotorController = new DmocMotorController();
-    CodaMotorController *cmotorController = new CodaMotorController();
-	CKMotorController *ckMotorController = new CKMotorController();
-	RMSMotorController *rmsMotorController = new RMSMotorController();
-    TestMotorController *testMotorController = new TestMotorController();
     DCDCController *dcdcController = new DCDCController();
-	BrusaMotorController *bmotorController = new BrusaMotorController();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
 }
 

@@ -751,7 +751,6 @@ void SerialConsole::handleShortCmd() {
         //nobody will know your device exists. Additionally, these values are
         //decoded into decimal from their hex specification in DeviceTypes.h
         Logger::console("DMOC645 = %X", DMOC645);
-        Logger::console("Brusa DMC5 = %X", BRUSA_DMC5);
         Logger::console("Pot based accelerator = %X", POTACCELPEDAL);
         Logger::console("Pot based brake = %X", POTBRAKEPEDAL);
         Logger::console("WIFI (iChip2128) = %X", ICHIP2128);
