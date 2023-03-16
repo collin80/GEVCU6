@@ -63,7 +63,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Powerkeypad.h"
 #include "VehicleSpecific.h"
 #include "OvarChargerDCDC.h"
-#include "PotGearSelector.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,5 +75,3 @@ void setup();
 #endif
 
 #endif /* GEVCU_H_ */
-
-

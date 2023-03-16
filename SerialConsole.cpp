@@ -68,7 +68,6 @@ void SerialConsole::printMenu() {
     Throttle *brake = deviceManager.getBrake();
     BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
     OvarCharger *charger = static_cast<OvarCharger *>(deviceManager.getDeviceByID(OVARCHARGE));
-    PotGearSelector *potgear = static_cast<PotGearSelector *>(deviceManager.getDeviceByID(POTGEAR));
    
     //Show build # here as well in case people are using the native port and don't get to see the start up messages
     SerialUSB.print("Build number: ");
@@ -120,18 +119,6 @@ void SerialConsole::printMenu() {
         SerialUSB<<"\nCHARGER CONTROLS\n\n";
         Logger::console("   CHARGEV=%i - Max charge voltage in 0.1v increments (aka, 1005 = 100.5v) ", chargercfg->maxAllowedVolts);
         Logger::console("   CHARGEA=%i - Max charge current in 0.1a increments (200 = 20.0A)", chargercfg->maxAllowedCurrent);
-    }
-
-    if (potgear && potgear->getConfiguration())
-    {
-        PotGearSelConfiguration *potgearcfg = (PotGearSelConfiguration *) potgear->getConfiguration();
-        SerialUSB<<"\nPOTENTIOMETER GEAR SELECTOR CONTROLS\n\n";
-        Logger::console("   GEARADC=%i - Which ADC to use for gear selector (0-3) ", potgearcfg->adcPin);
-        Logger::console("   GEARHYST=%i - Hysteresis for gear changing", potgearcfg->hysteresis);
-        Logger::console("   GEARPARK=%i - Nominal ADC value for Park", potgearcfg->parkPosition);
-        Logger::console("   GEARREVERSE=%i - Nominal ADC value for Reverse", potgearcfg->reversePosition);
-        Logger::console("   GEARNEUTRAL=%i - Nominal ADC value for Neutral", potgearcfg->neutralPosition);
-        Logger::console("   GEARDRIVE=%i - Nominal ADC value for Drive", potgearcfg->drivePosition);
     }
 
     if (accelerator && accelerator->getConfiguration()) {
@@ -284,14 +271,12 @@ void SerialConsole::handleConfigCmd() {
     MotorControllerConfiguration *motorConfig = NULL;
     BatteryManagerConfiguration *bmsConfig = NULL;
     OvarChargerConfiguration *chargerConfig = NULL;
-    PotGearSelConfiguration *potgearConfig = NULL;
 
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
     MotorController *motorController = deviceManager.getMotorController();
     BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
     OvarCharger *charger = static_cast<OvarCharger *>(deviceManager.getDeviceByID(OVARCHARGE));
-    PotGearSelector *potgear = static_cast<PotGearSelector *>(deviceManager.getDeviceByID(POTGEAR));
 
     int i;
     int newValue;
@@ -326,8 +311,6 @@ void SerialConsole::handleConfigCmd() {
         bmsConfig = static_cast<BatteryManagerConfiguration *>(bms->getConfiguration());
     if (charger)
         chargerConfig = static_cast<OvarChargerConfiguration *>(charger->getConfiguration());
-    if (potgear)
-        potgearConfig = static_cast<PotGearSelConfiguration *>(potgear->getConfiguration());
 
     // strtol() is able to parse also hex values (e.g. a string "0xCAFE"), useful for enable/disable by device id
     newValue = strtol((char *) (cmdBuffer + i), NULL, 0);
@@ -494,48 +477,6 @@ void SerialConsole::handleConfigCmd() {
 
 
 
-    } else if (cmdString == String("GEARADC") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 3) || (newValue == 255)) {
-            Logger::console("Setting gear sel ADC to %i", newValue);
-            potgearConfig->adcPin = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC pin. Please use 0-3 or 255 to disable");
-    } else if (cmdString == String("GEARHYST") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 10000)) {
-            Logger::console("Setting gear hysteresis to %i", newValue);
-            potgearConfig->hysteresis = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid hysteresis value. Please enter a value 0 - 10000");
-    } else if (cmdString == String("GEARPARK") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 60000)) {
-            Logger::console("Setting gear park position to %i", newValue);
-            potgearConfig->parkPosition = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC value. Please enter a value 0 - 60000");
-    } else if (cmdString == String("GEARREVERSE") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 60000)) {
-            Logger::console("Setting gear reverse position to %i", newValue);
-            potgearConfig->reversePosition = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC value. Please enter a value 0 - 60000");
-    } else if (cmdString == String("GEARNEUTRAL") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 60000)) {
-            Logger::console("Setting gear neutral position to %i", newValue);
-            potgearConfig->neutralPosition = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC value. Please enter a value 0 - 60000");
-    } else if (cmdString == String("GEARDRIVE") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 60000)) {
-            Logger::console("Setting gear drive position to %i", newValue);
-            potgearConfig->drivePosition = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC value. Please enter a value 0 - 60000");
     } else if (cmdString == String("ENABLE")) {
         if (PrefHandler::setDeviceStatus(newValue, true)) {
             sysPrefs->saveChecksum();
