@@ -116,7 +116,6 @@ uint16_t deviceTable[] =
     ADABLUE,        //14
     THINKBMS,       //15
     PIDLISTENER,    //16
-    ELM327EMU,      //17
     0               //NULL terminator
 };
 

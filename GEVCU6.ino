@@ -142,7 +142,6 @@ void createObjects() {
 	BrusaMotorController *bmotorController = new BrusaMotorController();
 	ThinkBatteryManager *thinkBMS = new ThinkBatteryManager();
     BuiltinBatteryManager *builtinBMS = new BuiltinBatteryManager();
-	ELM327Emu *emu = new ELM327Emu();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
 }
 
