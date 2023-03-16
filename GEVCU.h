@@ -60,7 +60,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "EVIC.h"
 #include "Powerkeypad.h"
 #include "VehicleSpecific.h"
-#include "OvarChargerDCDC.h"
 
 #ifdef __cplusplus
 extern "C" {

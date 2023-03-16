@@ -147,7 +147,6 @@ void createObjects() {
     EVIC *eVIC = new EVIC();
     PowerkeyPad *powerKey = new PowerkeyPad();
     VehicleSpecific *vehicleSpecific = new VehicleSpecific();
-    OvarCharger *ovarcharge = new OvarCharger();
 }
 
 void initializeDevices() {

@@ -67,7 +67,6 @@ void SerialConsole::printMenu() {
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
     BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
-    OvarCharger *charger = static_cast<OvarCharger *>(deviceManager.getDeviceByID(OVARCHARGE));
    
     //Show build # here as well in case people are using the native port and don't get to see the start up messages
     SerialUSB.print("Build number: ");
@@ -111,14 +110,6 @@ void SerialConsole::printMenu() {
         Logger::console("   REVIN=%i - Digital input to reverse motor rotation (0-3, 255 for none)", config->reverseIn);
         Logger::console("   TAPERHI=%i - Regen taper upper RPM (0 - 10000)", config->regenTaperUpper);
         Logger::console("   TAPERLO=%i - Regen taper lower RPM (0 - 10000)", config->regenTaperLower);
-    }
-
-    if (charger && charger->getConfiguration())
-    {
-        OvarChargerConfiguration *chargercfg = (OvarChargerConfiguration *) charger->getConfiguration();
-        SerialUSB<<"\nCHARGER CONTROLS\n\n";
-        Logger::console("   CHARGEV=%i - Max charge voltage in 0.1v increments (aka, 1005 = 100.5v) ", chargercfg->maxAllowedVolts);
-        Logger::console("   CHARGEA=%i - Max charge current in 0.1a increments (200 = 20.0A)", chargercfg->maxAllowedCurrent);
     }
 
     if (accelerator && accelerator->getConfiguration()) {
@@ -270,13 +261,11 @@ void SerialConsole::handleConfigCmd() {
     PotThrottleConfiguration *brakeConfig = NULL;
     MotorControllerConfiguration *motorConfig = NULL;
     BatteryManagerConfiguration *bmsConfig = NULL;
-    OvarChargerConfiguration *chargerConfig = NULL;
 
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
     MotorController *motorController = deviceManager.getMotorController();
     BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
-    OvarCharger *charger = static_cast<OvarCharger *>(deviceManager.getDeviceByID(OVARCHARGE));
 
     int i;
     int newValue;
@@ -309,8 +298,6 @@ void SerialConsole::handleConfigCmd() {
         motorConfig = (MotorControllerConfiguration *) motorController->getConfiguration();
     if (bms)
         bmsConfig = static_cast<BatteryManagerConfiguration *>(bms->getConfiguration());
-    if (charger)
-        chargerConfig = static_cast<OvarChargerConfiguration *>(charger->getConfiguration());
 
     // strtol() is able to parse also hex values (e.g. a string "0xCAFE"), useful for enable/disable by device id
     newValue = strtol((char *) (cmdBuffer + i), NULL, 0);
@@ -460,23 +447,6 @@ void SerialConsole::handleConfigCmd() {
             motorController->saveConfiguration();
         }
         else Logger::console("Invalid RPM value. Please enter a value higher than low limit and under 10000");
-    } else if (cmdString == String("CHARGEV") && chargerConfig) {
-        if (newValue >= 1000 && newValue <= 6000) {
-            Logger::console("Setting charger voltage limit to %i", newValue);
-            chargerConfig->maxAllowedVolts = newValue;
-            charger->saveConfiguration();
-        }
-        else Logger::console("Invalid charger voltage limit. Please enter a value between 1000 and 6000");
-    } else if (cmdString == String("CHARGEA") && chargerConfig) {
-        if (newValue >= 10 && newValue <= 1000) {
-            Logger::console("Setting charger amperage limit to %i", newValue);
-            chargerConfig->maxAllowedCurrent = newValue;
-            charger->saveConfiguration();
-        }
-        else Logger::console("Invalid charger amperage limit. Please enter a value between 10 and 1000");
-
-
-
     } else if (cmdString == String("ENABLE")) {
         if (PrefHandler::setDeviceStatus(newValue, true)) {
             sysPrefs->saveChecksum();
