@@ -41,7 +41,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "DeviceManager.h"
 #include "sys_io.h"
 #include "PotThrottle.h"
-#include "BatteryManager.h"
 #include "Sys_Messages.h"
 #include "Logger.h"
 #include "DeviceTypes.h"

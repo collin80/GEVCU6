@@ -1,7 +1,7 @@
 /*
  * eeprom_layout.h
  *
-*EEPROM Map. There is support for up to 6 devices: A motor controller, display, charger, BMS, Throttle,  and a misc device (EPAS, WOC, etc)
+*EEPROM Map. There is support for up to 6 devices: A motor controller, display,, Throttle,  and a misc device (EPAS, WOC, etc)
 *
 *There is a 256KB eeprom chip which stores these settings. The 4K is allocated to primary storage and 4K is allocated to a "known good"
 * storage location. This leaves most of EEPROM free for something else, probably logging.
@@ -136,18 +136,6 @@ the end of the stardard data. The below numbers are offsets from the device's ee
 #define EESYS_ADC_PACKC_OFFSET   56  //2 bytes - Offset for Pack current reading
 #define EESYS_CAN0_BAUD          80 //2 bytes - Baud rate of CAN0 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN0
 #define EESYS_CAN1_BAUD          82 //2 bytes - Baud rate of CAN1 in 1000's of baud. So a value of 500 = 500k baud. Set to 0 to disable CAN1
-
-#define EEBMS_CAPACITY           20 //2 bytes - pack capacity in 1/10 amp hours
-#define EEBMS_AH                 22 //4 bytes - Current number of AH remaining in pack (in millionths of an AH)
-#define EEBMS_HI_VOLT_LIM        26 //2 bytes - Voltage above which the BMS should disallow charging - Tenths of a V
-#define EEBMS_LO_VOLT_LIM        28 //2 bytes - Voltage below which the BMS show disallow any discharge - Tenths of a V
-#define EEBMS_HI_CELL_LIM        30 //2 bytes - Cell voltage above which a fault is raised - In hundredths of a volt
-#define EEBMS_LO_CELL_LIM        32 //2 bytes - Cell voltage under which a fault is raised - In hundredths of a volt
-#define EEBMS_HI_TEMP_LIM        34 //2 bytes - Cell temperature over which a fault is raised - In tenths of a degree C
-#define EEBMS_LO_TEMP_LIM        36 //2 bytes - Cell temperature under which a fault is raised - Tenths of a degree C
-
-#define EECHARGER_MAX_V          20 //2 bytes - maximum allowable voltage while charging. in 1/10 volt increments
-#define EECHARGER_MAX_A          22 //2 bytes - maximum allowable current while charging in 1/10 amp increments
 
 #define EEGEARSEL_ADC            20 //1 byte - # of the ADC we're reading
 #define EEGEARSEL_PARK           21 //2 bytes - ADC value of nominal position of park

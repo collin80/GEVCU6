@@ -31,21 +31,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config.h"
 #include "Device.h"
 #include "Throttle.h"
-#include "CanThrottle.h"
-#include "CanBrake.h"
 #include "PotThrottle.h"
 #include "TestThrottle.h"
 #include "PotBrake.h"
-#include "BatteryManager.h"
-#include "ThinkBatteryManager.h"
-#include "BuiltinBMS.h"
 #include "MotorController.h"
 #include "DmocMotorController.h"
-#include "BrusaMotorController.h"
-#include "CKMotorController.h"
-#include "RMSMotorController.h"
-#include "TestMotorController.h"
-#include "C300MotorController.h"
 #include "Heartbeat.h"
 #include "sys_io.h"
 #include "CanHandler.h"
@@ -53,17 +43,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ThrottleDetector.h"
 #include "DeviceManager.h"
 #include "SerialConsole.h"
-#include "ELM327_Emu.h"
 #include "adafruitBLE.h"
 #include "Sys_Messages.h"
-#include "CodaMotorController.h"
 #include "FaultHandler.h"
-#include "DCDCController.h"
-#include "EVIC.h"
-#include "Powerkeypad.h"
 #include "VehicleSpecific.h"
-#include "OvarChargerDCDC.h"
-#include "PotGearSelector.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,5 +59,3 @@ void setup();
 #endif
 
 #endif /* GEVCU_H_ */
-
-

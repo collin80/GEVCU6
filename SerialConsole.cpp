@@ -66,9 +66,6 @@ void SerialConsole::printMenu() {
     MotorController* motorController = (MotorController*) deviceManager.getMotorController();
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
-    BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
-    OvarCharger *charger = static_cast<OvarCharger *>(deviceManager.getDeviceByID(OVARCHARGE));
-    PotGearSelector *potgear = static_cast<PotGearSelector *>(deviceManager.getDeviceByID(POTGEAR));
    
     //Show build # here as well in case people are using the native port and don't get to see the start up messages
     SerialUSB.print("Build number: ");
@@ -114,26 +111,6 @@ void SerialConsole::printMenu() {
         Logger::console("   TAPERLO=%i - Regen taper lower RPM (0 - 10000)", config->regenTaperLower);
     }
 
-    if (charger && charger->getConfiguration())
-    {
-        OvarChargerConfiguration *chargercfg = (OvarChargerConfiguration *) charger->getConfiguration();
-        SerialUSB<<"\nCHARGER CONTROLS\n\n";
-        Logger::console("   CHARGEV=%i - Max charge voltage in 0.1v increments (aka, 1005 = 100.5v) ", chargercfg->maxAllowedVolts);
-        Logger::console("   CHARGEA=%i - Max charge current in 0.1a increments (200 = 20.0A)", chargercfg->maxAllowedCurrent);
-    }
-
-    if (potgear && potgear->getConfiguration())
-    {
-        PotGearSelConfiguration *potgearcfg = (PotGearSelConfiguration *) potgear->getConfiguration();
-        SerialUSB<<"\nPOTENTIOMETER GEAR SELECTOR CONTROLS\n\n";
-        Logger::console("   GEARADC=%i - Which ADC to use for gear selector (0-3) ", potgearcfg->adcPin);
-        Logger::console("   GEARHYST=%i - Hysteresis for gear changing", potgearcfg->hysteresis);
-        Logger::console("   GEARPARK=%i - Nominal ADC value for Park", potgearcfg->parkPosition);
-        Logger::console("   GEARREVERSE=%i - Nominal ADC value for Reverse", potgearcfg->reversePosition);
-        Logger::console("   GEARNEUTRAL=%i - Nominal ADC value for Neutral", potgearcfg->neutralPosition);
-        Logger::console("   GEARDRIVE=%i - Nominal ADC value for Drive", potgearcfg->drivePosition);
-    }
-
     if (accelerator && accelerator->getConfiguration()) {
         PotThrottleConfiguration *config = (PotThrottleConfiguration *) accelerator->getConfiguration();
         SerialUSB<<"\nTHROTTLE CONTROLS\n\n";
@@ -166,19 +143,6 @@ void SerialConsole::printMenu() {
         Logger::console("   B1MX=%i - Set brake max value", config->maximumLevel1);
         Logger::console("   BMINR=%i - Percent of full torque for start of brake regen", config->minimumRegen);
         Logger::console("   BMAXR=%i - Percent of full torque for maximum brake regen", config->maximumRegen);
-    }
-
-    if (bms && bms->getConfiguration()) {
-        BatteryManagerConfiguration *config = static_cast<BatteryManagerConfiguration *>(bms->getConfiguration());
-        SerialUSB << "\nBATTERY MANAGEMENT CONTROLS\n\n";
-        Logger::console("   CAPACITY=%i - Capacity of battery pack in tenths ampere-hours", config->packCapacity);
-        Logger::console("   AHLEFT=%i - Number of amp hours remaining in pack in tenths ampere-hours", config->packAHRemaining / 100000);
-        Logger::console("   VOLTLIMHI=%i - High limit for pack voltage in tenths of a volt", config->highVoltLimit);
-        Logger::console("   VOLTLIMLO=%i - Low limit for pack voltage in tenths of a volt", config->lowVoltLimit);
-        Logger::console("   CELLLIMHI=%i - High limit for cell voltage in hundredths of a volt", config->highCellLimit);
-        Logger::console("   CELLLIMLO=%i - Low limit for cell voltage in hundredths of a volt", config->lowCellLimit);
-        Logger::console("   TEMPLIMHI=%i - High limit for pack and cell temperature in tenths of a degree C", config->highTempLimit);
-        Logger::console("   TEMPLIMLO=%i - Low limit for pack and cell temperature in tenths of a degree C", config->lowTempLimit);        
     }
 
     if (motorController && motorController->getConfiguration()) {
@@ -282,16 +246,10 @@ void SerialConsole::handleConfigCmd() {
     PotThrottleConfiguration *acceleratorConfig = NULL;
     PotThrottleConfiguration *brakeConfig = NULL;
     MotorControllerConfiguration *motorConfig = NULL;
-    BatteryManagerConfiguration *bmsConfig = NULL;
-    OvarChargerConfiguration *chargerConfig = NULL;
-    PotGearSelConfiguration *potgearConfig = NULL;
 
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
     MotorController *motorController = deviceManager.getMotorController();
-    BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
-    OvarCharger *charger = static_cast<OvarCharger *>(deviceManager.getDeviceByID(OVARCHARGE));
-    PotGearSelector *potgear = static_cast<PotGearSelector *>(deviceManager.getDeviceByID(POTGEAR));
 
     int i;
     int newValue;
@@ -322,12 +280,6 @@ void SerialConsole::handleConfigCmd() {
         brakeConfig = (PotThrottleConfiguration *) brake->getConfiguration();
     if (motorController)
         motorConfig = (MotorControllerConfiguration *) motorController->getConfiguration();
-    if (bms)
-        bmsConfig = static_cast<BatteryManagerConfiguration *>(bms->getConfiguration());
-    if (charger)
-        chargerConfig = static_cast<OvarChargerConfiguration *>(charger->getConfiguration());
-    if (potgear)
-        potgearConfig = static_cast<PotGearSelConfiguration *>(potgear->getConfiguration());
 
     // strtol() is able to parse also hex values (e.g. a string "0xCAFE"), useful for enable/disable by device id
     newValue = strtol((char *) (cmdBuffer + i), NULL, 0);
@@ -477,65 +429,6 @@ void SerialConsole::handleConfigCmd() {
             motorController->saveConfiguration();
         }
         else Logger::console("Invalid RPM value. Please enter a value higher than low limit and under 10000");
-    } else if (cmdString == String("CHARGEV") && chargerConfig) {
-        if (newValue >= 1000 && newValue <= 6000) {
-            Logger::console("Setting charger voltage limit to %i", newValue);
-            chargerConfig->maxAllowedVolts = newValue;
-            charger->saveConfiguration();
-        }
-        else Logger::console("Invalid charger voltage limit. Please enter a value between 1000 and 6000");
-    } else if (cmdString == String("CHARGEA") && chargerConfig) {
-        if (newValue >= 10 && newValue <= 1000) {
-            Logger::console("Setting charger amperage limit to %i", newValue);
-            chargerConfig->maxAllowedCurrent = newValue;
-            charger->saveConfiguration();
-        }
-        else Logger::console("Invalid charger amperage limit. Please enter a value between 10 and 1000");
-
-
-
-    } else if (cmdString == String("GEARADC") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 3) || (newValue == 255)) {
-            Logger::console("Setting gear sel ADC to %i", newValue);
-            potgearConfig->adcPin = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC pin. Please use 0-3 or 255 to disable");
-    } else if (cmdString == String("GEARHYST") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 10000)) {
-            Logger::console("Setting gear hysteresis to %i", newValue);
-            potgearConfig->hysteresis = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid hysteresis value. Please enter a value 0 - 10000");
-    } else if (cmdString == String("GEARPARK") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 60000)) {
-            Logger::console("Setting gear park position to %i", newValue);
-            potgearConfig->parkPosition = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC value. Please enter a value 0 - 60000");
-    } else if (cmdString == String("GEARREVERSE") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 60000)) {
-            Logger::console("Setting gear reverse position to %i", newValue);
-            potgearConfig->reversePosition = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC value. Please enter a value 0 - 60000");
-    } else if (cmdString == String("GEARNEUTRAL") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 60000)) {
-            Logger::console("Setting gear neutral position to %i", newValue);
-            potgearConfig->neutralPosition = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC value. Please enter a value 0 - 60000");
-    } else if (cmdString == String("GEARDRIVE") && potgearConfig) {
-        if ((newValue >= 0) && (newValue <= 60000)) {
-            Logger::console("Setting gear drive position to %i", newValue);
-            potgearConfig->drivePosition = newValue;
-            potgear->saveConfiguration();
-        }
-        else Logger::console("Invalid ADC value. Please enter a value 0 - 60000");
     } else if (cmdString == String("ENABLE")) {
         if (PrefHandler::setDeviceStatus(newValue, true)) {
             sysPrefs->saveChecksum();
@@ -761,62 +654,6 @@ void SerialConsole::handleConfigCmd() {
                         systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3), 
                         systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
 
-    } else if (cmdString == String("CAPACITY") && bmsConfig ) {
-        if (newValue >= 0 && newValue <= 6000) {
-            bmsConfig->packCapacity = newValue;
-            bms->saveConfiguration();
-            Logger::console("Battery Pack Capacity set to: %d", bmsConfig->packCapacity);
-        }
-        else Logger::console("Invalid capacity please enter a value between 0 and 6000");
-    } else if (cmdString == String("AHLEFT") && bmsConfig ) {
-        if (newValue >= 0 && newValue <= 6000) {
-            bmsConfig->packAHRemaining = newValue * 100000ul;
-            bms->saveConfiguration();
-            Logger::console("Battery Pack remaining capacity set to: %d", newValue);
-        }
-        else Logger::console("Invalid remaining capacity please enter a value between 0 and 6000");
-    } else if (cmdString == String("VOLTLIMHI") && bmsConfig ) {
-        if (newValue >= 0 && newValue <= 6000) {
-            bmsConfig->highVoltLimit = newValue;
-            bms->saveConfiguration();
-            Logger::console("Battery High Voltage Limit set to: %d", bmsConfig->highVoltLimit);
-        }
-        else Logger::console("Invalid high voltage limit please enter a value between 0 and 6000");
-    } else if (cmdString == String("VOLTLIMLO") && bmsConfig ) {
-        if (newValue >= 0 && newValue <= 6000) {
-            bmsConfig->lowVoltLimit = newValue;
-            bms->saveConfiguration();
-            Logger::console("Battery Low Voltage Limit set to: %d", bmsConfig->lowVoltLimit);
-        }
-        else Logger::console("Invalid low voltage limit please enter a value between 0 and 6000");
-    } else if (cmdString == String("CELLLIMHI") && bmsConfig ) {
-        if (newValue >= 0 && newValue <= 20000) {
-            bmsConfig->highCellLimit = newValue;
-            bms->saveConfiguration();
-            Logger::console("Cell High Voltage Limit set to: %d", bmsConfig->highCellLimit);
-        }
-        else Logger::console("Invalid high voltage limit please enter a value between 0 and 20000");
-    } else if (cmdString == String("CELLLIMLO") && bmsConfig ) {
-        if (newValue >= 0 && newValue <= 20000) {
-            bmsConfig->lowCellLimit = newValue;
-            bms->saveConfiguration();
-            Logger::console("Cell Low Voltage Limit set to: %d", bmsConfig->lowCellLimit);
-        }
-        else Logger::console("Invalid low voltage limit please enter a value between 0 and 20000");
-    } else if (cmdString == String("TEMPLIMHI") && bmsConfig ) {
-        if (newValue >= 0 && newValue <= 2000) {
-            bmsConfig->highTempLimit = newValue;
-            bms->saveConfiguration();
-            Logger::console("Battery Temperature Upper Limit set to: %d", bmsConfig->highTempLimit);
-        }
-        else Logger::console("Invalid temperature upper limit please enter a value between 0 and 2000");
-    } else if (cmdString == String("TEMPLIMLO") && bmsConfig ) {
-        if (newValue >= -2000 && newValue <= 2000) {
-            bmsConfig->lowTempLimit = newValue;
-            bms->saveConfiguration();
-            Logger::console("Battery Temperature Lower Limit set to: %d", bmsConfig->lowTempLimit);
-        }
-        else Logger::console("Invalid temperature lower limit please enter a value between -2000 and 2000");
     } else if (cmdString == String("NUKE")) {
         if (newValue == 1) {
             Logger::console("Start of EEPROM Nuke");
@@ -914,15 +751,9 @@ void SerialConsole::handleShortCmd() {
         //nobody will know your device exists. Additionally, these values are
         //decoded into decimal from their hex specification in DeviceTypes.h
         Logger::console("DMOC645 = %X", DMOC645);
-        Logger::console("Brusa DMC5 = %X", BRUSA_DMC5);
-        Logger::console("Brusa Charger = %X", BRUSACHARGE);
-        Logger::console("TCCH Charger = %X", TCCHCHARGE);
         Logger::console("Pot based accelerator = %X", POTACCELPEDAL);
         Logger::console("Pot based brake = %X", POTBRAKEPEDAL);
-        Logger::console("CANBus accelerator = %X", CANACCELPEDAL);
-        Logger::console("CANBus brake = %X", CANBRAKEPEDAL);
         Logger::console("WIFI (iChip2128) = %X", ICHIP2128);
-        Logger::console("Th!nk City BMS = %X", THINKBMS);
         break;
     
     

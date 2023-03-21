@@ -48,8 +48,6 @@ public:
     void setParameter(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, char *key, uint32_t value);
     uint8_t getNumThrottles();
     uint8_t getNumControllers();
-    uint8_t getNumBMS();
-    uint8_t getNumChargers();
     uint8_t getNumDisplays();
     Throttle *getAccelerator();
     Throttle *getBrake();

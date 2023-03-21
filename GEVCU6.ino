@@ -130,27 +130,11 @@ lives on and is hereafter controlled by the system.
 */
 void createObjects() {
 	PotThrottle *paccelerator = new PotThrottle();
-	CanThrottle *caccelerator = new CanThrottle();
 	PotBrake *pbrake = new PotBrake();
-    TestThrottle *testAccel = new TestThrottle();
-	CanBrake *cbrake = new CanBrake();
-	DmocMotorController *dmotorController = new DmocMotorController();
-    CodaMotorController *cmotorController = new CodaMotorController();
-	CKMotorController *ckMotorController = new CKMotorController();
-	RMSMotorController *rmsMotorController = new RMSMotorController();
-    TestMotorController *testMotorController = new TestMotorController();
-    DCDCController *dcdcController = new DCDCController();
-	BrusaMotorController *bmotorController = new BrusaMotorController();
-    C300MotorController *c300MotorController = new C300MotorController();
-	ThinkBatteryManager *thinkBMS = new ThinkBatteryManager();
-    BuiltinBatteryManager *builtinBMS = new BuiltinBatteryManager();
-	ELM327Emu *emu = new ELM327Emu();
-    ADAFRUITBLE *ble = new ADAFRUITBLE();
-    EVIC *eVIC = new EVIC();
-    PowerkeyPad *powerKey = new PowerkeyPad();
     VehicleSpecific *vehicleSpecific = new VehicleSpecific();
-    OvarCharger *ovarcharge = new OvarCharger();
-    PotGearSelector *potgear = new PotGearSelector();
+    TestThrottle *testAccel = new TestThrottle();
+	DmocMotorController *dmotorController = new DmocMotorController();
+    ADAFRUITBLE *ble = new ADAFRUITBLE();
 }
 
 void initializeDevices() {

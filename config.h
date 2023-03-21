@@ -58,18 +58,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #define CFG_TICK_INTERVAL_HEARTBEAT                 2000000
 #define CFG_TICK_INTERVAL_POT_THROTTLE              40000
-#define CFG_TICK_INTERVAL_CAN_THROTTLE              40000
 #define CFG_TICK_INTERVAL_MOTOR_CONTROLLER          40000
 #define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_DMOC     40000
-#define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_CODAUQM  10000
-#define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_BRUSA    20000
-#define CFG_TICK_INTERVAL_MOTOR_CONTROLLER_C300     20000
 #define CFG_TICK_INTERVAL_MEM_CACHE                 40000
-#define CFG_TICK_INTERVAL_BMS_INTERNAL              40000
-#define CFG_TICK_INTERVAL_BMS_THINK                 500000
 #define CFG_TICK_INTERVAL_WIFI                      200000
 #define CFG_TICK_INTERVAL_BLE                       10000
-#define CFG_TICK_INTERVAL_DCDC                      200000
 #define CFG_TICK_INTERVAL_EVIC                      100000
 #define CFG_TICK_INTERVAL_VEHICLE                   100000
 
@@ -78,7 +71,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #define CFG_CAN0_SPEED                              500 // specify the speed of the CAN0 bus (EV) in thousands. 
 #define CFG_CAN1_SPEED                              500 // specify the speed of the CAN1 bus (Car) in thousands
-#define CFG_CANTHROTTLE_MAX_NUM_LOST_MSG            3 // maximum number of lost messages allowed
 
 /*
  * MISCELLANEOUS
