@@ -640,7 +640,7 @@ bool SystemIO::calibrateADCOffset(int adc, bool update)
 
         //normally one shouldn't call watchdog reset in multiple
         //places but this is a special case.
-        watchdogReset();
+        wdt_reset();
         delay(2);
     }
     accum /= 500;
@@ -675,7 +675,7 @@ bool SystemIO::calibrateADCGain(int adc, int32_t target, bool update)
 
         //normally one shouldn't call watchdog reset in multiple
         //places but this is a special case.
-        watchdogReset();
+        wdt_reset();
         delay(2);
     }
     accum /= 500;

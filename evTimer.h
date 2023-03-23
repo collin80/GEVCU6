@@ -22,9 +22,6 @@ public:
 
 	static evTimer getAvailable();
 
-	// Store timer configuration (static, as it's fix for every object)
-	static const evTimer Timers[9];
-
 	// Needs to be public, because the handlers are outside class:
 	static void (*callbacks[9])();
 

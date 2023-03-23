@@ -57,6 +57,7 @@ Random comments on things that should be coded up soon:
 #include <Wire.h>
 #include "evTimer.h"
 #include <SPI.h>
+#include <avr/wdt.h>
 
 #define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
 
@@ -69,6 +70,7 @@ ADAFRUITBLE *btDevice;
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
 
 byte i = 0;
+
 
 //initializes all the system EEPROM values. Chances are this should be broken out a bit but
 //there is only one checksum check for all of them so it's simple to do it all here.
@@ -170,16 +172,19 @@ void setup() {
     pinMode(65, OUTPUT); //reset for BLE module
     digitalWrite(65, HIGH);
     
+	#ifdef SUPC
     //Activate the supply monitor at 2.8v and make it hold the CPU in reset under that point
     //That first value is 1.9V + the value for the supply threshold. So, 9 would be 2.8v, A would be 2.9v, etc
     
     //               Thresh  Enable   Force Reset
     SUPC->SUPC_SMMR = 0xA | (1<<8) | (1<<12);
+	#endif
+	wdt_enable(WDTO_2S);
 	
 #ifdef DEBUG_STARTUP_DELAY
     for (int c = 0; c < 200; c++) {
         delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm quickly upon start up
-        watchdogReset();
+        wdt_reset();
     }
 #endif
        
@@ -247,5 +252,5 @@ void loop() {
 	Timer7.loop();
 	Timer8.loop();
     
-    watchdogReset();
+    wdt_reset();
 }

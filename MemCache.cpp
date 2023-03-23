@@ -84,7 +84,7 @@ void MemCache::FlushAllPages()
             cache_writepage(c);
             pages[c].dirty = false;
             delay(10); //10ms is longest it would take to write a page according to datasheet
-            watchdogReset();
+            wdt_reset();
         }
     }
 }
@@ -137,7 +137,7 @@ void MemCache::InvalidateAll()
     uint8_t c;
     for (c=0; c<NUM_CACHED_PAGES; c++) {
         InvalidatePage(c);
-        watchdogReset();
+        wdt_reset();
     }
 }
 
@@ -428,6 +428,6 @@ void MemCache::nukeFromOrbit()
         Wire.write(buffer, 258);
         Wire.endTransmission(true);
         delay(11);
-        watchdogReset();
+        wdt_reset();
     }
 }
