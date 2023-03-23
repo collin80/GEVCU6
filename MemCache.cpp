@@ -32,7 +32,7 @@ MemCache::MemCache()
 
 void MemCache::setup() {
     tickHandler.detach(this);
-    for (U8 c = 0; c < NUM_CACHED_PAGES; c++) {
+    for (int c = 0; c < NUM_CACHED_PAGES; c++) {
         pages[c].address = 0xFFFFFF; //maximum number. This is way over what our chip will actually support so it signals unused
         pages[c].age = 0;
         pages[c].dirty = false;
@@ -49,7 +49,7 @@ void MemCache::setup() {
 //Handle aging of dirty pages and flushing of aged out dirty pages
 void MemCache::handleTick()
 {
-    U8 c;
+    int c;
     cache_age();
     for (c=0; c<NUM_CACHED_PAGES; c++) {
         if ((pages[c].age == MAX_AGE) && (pages[c].dirty)) {
@@ -63,7 +63,7 @@ void MemCache::handleTick()
 //a previous page has been written. Remember that page writes take about 7ms.
 void MemCache::FlushSinglePage()
 {
-    U8 c;
+    int c;
     for (c=0; c<NUM_CACHED_PAGES; c++) {
         if (pages[c].dirty) {
             cache_writepage(c);
@@ -78,7 +78,7 @@ void MemCache::FlushSinglePage()
 //DO NOT USE THIS FUNCTION UNLESS YOU CAN ACCEPT THAT!
 void MemCache::FlushAllPages()
 {
-    U8 c;
+    int c;
     for (c = 0; c < NUM_CACHED_PAGES; c++) {
         if (pages[c].dirty) { //found a dirty page so flush it
             cache_writepage(c);
@@ -431,5 +431,3 @@ void MemCache::nukeFromOrbit()
         watchdogReset();
     }
 }
-
-

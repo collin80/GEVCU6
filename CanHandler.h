@@ -27,7 +27,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CAN_HANDLER_H_
 
 #include <Arduino.h>
-#include "variant.h"
 #include "evTimer.h"
 #include "Logger.h"
 #include <can_common.h>

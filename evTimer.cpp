@@ -1,14 +1,6 @@
-/*
-  evTimer.cpp - Implementation of Timers defined on evTimer.h
-  For instructions, go to https://github.com/ivanseidel/evTimer
-
-  Created by Ivan Seidel Gomes, March, 2013.
-  Modified by Philipp Klaus, June 2013.
-  Thanks to stimmer (from Arduino forum), for coding the "timer soul" (Register stuff)
-  Released into the public domain.
-*/
-
 #include "evTimer.h"
+
+SimpleTimer timer;
 
 const evTimer::Timer evTimer::Timers[9] = {
 	{TC0,0,TC0_IRQn},
@@ -40,12 +32,11 @@ evTimer Timer6(6);
 evTimer Timer7(7);
 evTimer Timer8(8);
 
-evTimer::evTimer(int _timer){
+evTimer::evTimer(int index){
 	/*
 		The constructor of the class evTimer 
 	*/
-
-	timer = _timer;
+	index = _index;
 }
 
 evTimer evTimer::getAvailable(){
@@ -60,148 +51,24 @@ evTimer evTimer::getAvailable(){
 	// Default, return Timer0;
 	return evTimer(0);
 }
-
-evTimer evTimer::attachInterrupt(void (*isr)()){
-	/*
-		Links the function passed as argument to the timer of the object
-	*/
-
-	callbacks[timer] = isr;
-
-	return *this;
+return *this;
 }
 
-evTimer evTimer::detachInterrupt(){
-	/*
-		Links the function passed as argument to the timer of the object
-	*/
-
-	stop(); // Stop the currently running timer
-
-	callbacks[timer] = NULL;
-
-	return *this;
-}
-
-evTimer evTimer::start(long microseconds){
-	/*
-		Start the timer
-		If a period is set, then sets the period and start the timer
-	*/
-
-	if(microseconds > 0)
-		setPeriod(microseconds);
-	
-	if(_frequency[timer] <= 0)
-		setFrequency(1);
-
-	NVIC_ClearPendingIRQ(Timers[timer].irq);
-	NVIC_EnableIRQ(Timers[timer].irq);
-
-	return *this;
-}
-
-evTimer evTimer::stop(){
-	/*
-		Stop the timer
-	*/
-
-	NVIC_DisableIRQ(Timers[timer].irq);
-
-	return *this;
-}
-
-uint8_t evTimer::bestClock(double frequency, uint32_t& retRC){
-	/*
-		Pick the best Clock, thanks to Ogle Basil Hall!
-
-		Timer		Definition
-		TIMER_CLOCK1	MCK /  2
-		TIMER_CLOCK2	MCK /  8
-		TIMER_CLOCK3	MCK / 32
-		TIMER_CLOCK4	MCK /128
-	*/
-	struct {
-		uint8_t flag;
-		uint8_t divisor;
-	} clockConfig[] = {
-		{ TC_CMR_TCCLKS_TIMER_CLOCK1,   2 },
-		{ TC_CMR_TCCLKS_TIMER_CLOCK2,   8 },
-		{ TC_CMR_TCCLKS_TIMER_CLOCK3,  32 },
-		{ TC_CMR_TCCLKS_TIMER_CLOCK4, 128 }
-	};
-	float ticks;
-	float error;
-	int clkId = 3;
-	int bestClock = 3;
-	float bestError = 1.0;
-	do
-	{
-		ticks = (float) VARIANT_MCK / frequency / (float) clockConfig[clkId].divisor;
-		error = abs(ticks - round(ticks));
-		if (abs(error) < bestError)
-		{
-			bestClock = clkId;
-			bestError = error;
-		}
-	} while (clkId-- > 0);
-	ticks = (float) VARIANT_MCK / frequency / (float) clockConfig[bestClock].divisor;
-	retRC = (uint32_t) round(ticks);
-	return clockConfig[bestClock].flag;
+void evTimer::loop(){
+    timer.loop();
 }
 
 
-evTimer evTimer::setFrequency(double frequency){
+evTimer evTimer::setInterval(long millis, void (*isr)()){
 	/*
-		Set the timer frequency (in Hz)
+		Set the timer frequency (in milliseconds)
 	*/
 
 	// Prevent negative frequencies
 	if(frequency <= 0) { frequency = 1; }
 
-	// Remember the frequency
-	_frequency[timer] = frequency;
+	timer.setInterval(millis,isr);
 
-	// Get current timer configuration
-	Timer t = Timers[timer];
-
-	uint32_t rc = 0;
-	uint8_t clock;
-
-	// Tell the Power Management Controller to disable 
-	// the write protection of the (Timer/Counter) registers:
-	pmc_set_writeprotect(false);
-
-	// Enable clock for the timer
-	pmc_enable_periph_clk((uint32_t)t.irq);
-
-	// Find the best clock for the wanted frequency
-	clock = bestClock(frequency, rc);
-
-	// Set up the Timer in waveform mode which creates a PWM
-	// in UP mode with automatic trigger on RC Compare
-	// and sets it up with the determined internal clock as clock input.
-	TC_Configure(t.tc, t.channel, TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | clock);
-	// Reset counter and fire interrupt when RC value is matched:
-	TC_SetRC(t.tc, t.channel, rc);
-	// Start the Counter channel
-	TC_Start(t.tc, t.channel);
-	// Enable the RC Compare Interrupt...
-	t.tc->TC_CHANNEL[t.channel].TC_IER=TC_IER_CPCS;
-	// ... and disable all others.
-	t.tc->TC_CHANNEL[t.channel].TC_IDR=~TC_IER_CPCS;
-
-	return *this;
-}
-
-evTimer evTimer::setPeriod(long microseconds){
-	/*
-		Set the period of the timer (in microseconds)
-	*/
-
-	// Convert period in microseconds to frequency in Hz
-	double frequency = 1000000.0 / microseconds;	
-	setFrequency(frequency);
 	return *this;
 }
 
@@ -210,7 +77,7 @@ double evTimer::getFrequency(){
 		Get current time frequency
 	*/
 
-	return _frequency[timer];
+	return _frequency[index];
 }
 
 long evTimer::getPeriod(){

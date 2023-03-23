@@ -33,10 +33,13 @@
 
 #include "TickHandler.h"
 
-TickHandler::TickHandler() {
-    for (int i = 0; i < NUM_TIMERS; i++) {
+TickHandler::TickHandler()
+{
+    for (int i = 0; i < NUM_TIMERS; i++)
+    {
         timerEntry[i].interval = 0;
-        for (int j = 0; j < CFG_TIMER_NUM_OBSERVERS; j++) {
+        for (int j = 0; j < CFG_TIMER_NUM_OBSERVERS; j++)
+        {
             timerEntry[i].observer[j] = NULL;
         }
     }
@@ -54,11 +57,14 @@ TickHandler::TickHandler() {
  * used. Then a free TickObserver slot (of max CFG_MAX_TICK_OBSERVERS) is looked up. If all went
  * well, the timer is configured and (re)started.
  */
-void TickHandler::attach(TickObserver* observer, uint32_t interval) {
+void TickHandler::attach(TickObserver *observer, uint32_t interval)
+{
     int timer = findTimer(interval);
-    if (timer == -1) {
-        timer = findTimer(0);	// no timer with given tick interval exist -> look for unused (interval == 0)
-        if (timer == -1) {
+    if (timer == -1)
+    {
+        timer = findTimer(0); // no timer with given tick interval exist -> look for unused (interval == 0)
+        if (timer == -1)
+        {
             Logger::error("No free timer available for interval=%d", interval);
             return;
         }
@@ -66,40 +72,42 @@ void TickHandler::attach(TickObserver* observer, uint32_t interval) {
     }
 
     int observerIndex = findObserver(timer, 0);
-    if (observerIndex == -1) {
+    if (observerIndex == -1)
+    {
         Logger::error("No free observer slot for timer %d with interval %d", timer, timerEntry[timer].interval);
         return;
     }
     timerEntry[timer].observer[observerIndex] = observer;
     Logger::debug("attached TickObserver (%X) as number %d to timer %d, %dus interval", observer, observerIndex, timer, interval);
 
-    switch (timer) { // restarting a timer which would already be running is no problem (see evTimer.cpp)
+    switch (timer)
+    { // restarting a timer which would already be running is no problem (see evTimer.cpp)
     case 0:
-        Timer0.setPeriod(interval).attachInterrupt(timer0Interrupt).start();
+        Timer0.setInterval(interval/1000, timer0Interrupt);
         break;
     case 1:
-        Timer1.setPeriod(interval).attachInterrupt(timer1Interrupt).start();
+        Timer1.setInterval(interval/1000, timer1Interrupt);
         break;
     case 2:
-        Timer2.setPeriod(interval).attachInterrupt(timer2Interrupt).start();
+        Timer2.setInterval(interval/1000, timer2Interrupt);
         break;
     case 3:
-        Timer3.setPeriod(interval).attachInterrupt(timer3Interrupt).start();
+        Timer3.setInterval(interval/1000, timer3Interrupt);
         break;
     case 4:
-        Timer4.setPeriod(interval).attachInterrupt(timer4Interrupt).start();
+        Timer4.setInterval(interval/1000, timer4Interrupt);
         break;
     case 5:
-        Timer5.setPeriod(interval).attachInterrupt(timer5Interrupt).start();
+        Timer5.setInterval(interval/1000, timer5Interrupt);
         break;
     case 6:
-        Timer6.setPeriod(interval).attachInterrupt(timer6Interrupt).start();
+        Timer6.setInterval(interval/1000, timer6Interrupt);
         break;
     case 7:
-        Timer7.setPeriod(interval).attachInterrupt(timer7Interrupt).start();
+        Timer7.setInterval(interval/1000, timer7Interrupt);
         break;
     case 8:
-        Timer8.setPeriod(interval).attachInterrupt(timer8Interrupt).start();
+        Timer8.setInterval(interval/1000, timer8Interrupt);
         break;
     }
 }
@@ -107,10 +115,14 @@ void TickHandler::attach(TickObserver* observer, uint32_t interval) {
 /**
  * Remove an observer from all timers where it was registered.
  */
-void TickHandler::detach(TickObserver* observer) {
-    for (int timer = 0; timer < NUM_TIMERS; timer++) {
-        for (int observerIndex = 0; observerIndex < CFG_TIMER_NUM_OBSERVERS; observerIndex++) {
-            if (timerEntry[timer].observer[observerIndex] == observer) {
+void TickHandler::detach(TickObserver *observer)
+{
+    for (int timer = 0; timer < NUM_TIMERS; timer++)
+    {
+        for (int observerIndex = 0; observerIndex < CFG_TIMER_NUM_OBSERVERS; observerIndex++)
+        {
+            if (timerEntry[timer].observer[observerIndex] == observer)
+            {
                 Logger::debug("removing TickObserver (%X) as number %d from timer %d", observer, observerIndex, timer);
                 timerEntry[timer].observer[observerIndex] = NULL;
             }
@@ -121,8 +133,10 @@ void TickHandler::detach(TickObserver* observer) {
 /**
  * Find a timer with a specified interval.
  */
-int TickHandler::findTimer(long interval) {
-    for (int i = 0; i < NUM_TIMERS; i++) {
+int TickHandler::findTimer(long interval)
+{
+    for (int i = 0; i < NUM_TIMERS; i++)
+    {
         if (timerEntry[i].interval == interval)
             return i;
     }
@@ -132,8 +146,10 @@ int TickHandler::findTimer(long interval) {
 /*
  * Find a TickObserver in the list of a specific timer.
  */
-int TickHandler::findObserver(int timer, TickObserver *observer) {
-    for (int i = 0; i < CFG_TIMER_NUM_OBSERVERS; i++) {
+int TickHandler::findObserver(int timer, TickObserver *observer)
+{
+    for (int i = 0; i < CFG_TIMER_NUM_OBSERVERS; i++)
+    {
         if (timerEntry[timer].observer[i] == observer)
             return i;
     }
@@ -144,34 +160,40 @@ int TickHandler::findObserver(int timer, TickObserver *observer) {
 /*
  * Check if a tick is available, forward it to registered observers.
  */
-void TickHandler::process() {
-    while (bufferHead != bufferTail) {
+void TickHandler::process()
+{
+    while (bufferHead != bufferTail)
+    {
         tickBuffer[bufferTail]->handleTick();
         bufferTail = (bufferTail + 1) % CFG_TIMER_BUFFER_SIZE;
-        //Logger::debug("process, bufferHead=%d bufferTail=%d", bufferHead, bufferTail);
+        // Logger::debug("process, bufferHead=%d bufferTail=%d", bufferHead, bufferTail);
     }
 }
 
-void TickHandler::cleanBuffer() {
+void TickHandler::cleanBuffer()
+{
     bufferHead = bufferTail = 0;
 }
 
-#endif //CFG_TIMER_USE_QUEUING
+#endif // CFG_TIMER_USE_QUEUING
 
 /*
  * Handle the interrupt of any timer.
  * All the registered TickObservers of the timer are called.
  */
-void TickHandler::handleInterrupt(int timerNumber) {
-    for (int i = 0; i < CFG_TIMER_NUM_OBSERVERS; i++) {
-        if (timerEntry[timerNumber].observer[i] != NULL) {
+void TickHandler::handleInterrupt(int timerNumber)
+{
+    for (int i = 0; i < CFG_TIMER_NUM_OBSERVERS; i++)
+    {
+        if (timerEntry[timerNumber].observer[i] != NULL)
+        {
 #ifdef CFG_TIMER_USE_QUEUING
             tickBuffer[bufferHead] = timerEntry[timerNumber].observer[i];
             bufferHead = (bufferHead + 1) % CFG_TIMER_BUFFER_SIZE;
-//Logger::debug("bufferHead=%d, bufferTail=%d, observer=%d", bufferHead, bufferTail, timerEntry[timerNumber].observer[i]);
+// Logger::debug("bufferHead=%d, bufferTail=%d, observer=%d", bufferHead, bufferTail, timerEntry[timerNumber].observer[i]);
 #else
             timerEntry[timerNumber].observer[i]->handleTick();
-#endif //CFG_TIMER_USE_QUEUING
+#endif // CFG_TIMER_USE_QUEUING
         }
     }
 }
@@ -179,55 +201,64 @@ void TickHandler::handleInterrupt(int timerNumber) {
 /*
  * Interrupt function for Timer0
  */
-void timer0Interrupt() {
+void timer0Interrupt()
+{
     tickHandler.handleInterrupt(0);
 }
 /*
  * Interrupt function for Timer1
  */
-void timer1Interrupt() {
+void timer1Interrupt()
+{
     tickHandler.handleInterrupt(1);
 }
 /*
  * Interrupt function for Timer2
  */
-void timer2Interrupt() {
+void timer2Interrupt()
+{
     tickHandler.handleInterrupt(2);
 }
 /*
  * Interrupt function for Timer3
  */
-void timer3Interrupt() {
+void timer3Interrupt()
+{
     tickHandler.handleInterrupt(3);
 }
 /*
  * Interrupt function for Timer4
  */
-void timer4Interrupt() {
+void timer4Interrupt()
+{
     tickHandler.handleInterrupt(4);
 }
 /*
  * Interrupt function for Timer5
  */
-void timer5Interrupt() {
+void timer5Interrupt()
+{
     tickHandler.handleInterrupt(5);
 }
 /*
  * Interrupt function for Timer6
  */
-void timer6Interrupt() {
+void timer6Interrupt()
+{
     tickHandler.handleInterrupt(6);
 }
 /*
  * Interrupt function for Timer7
  */
-void timer7Interrupt() {
+void timer7Interrupt()
+{
     tickHandler.handleInterrupt(7);
 }
 /*
  * Interrupt function for Timer8
  */
-void timer8Interrupt() {
+void timer8Interrupt()
+{
     tickHandler.handleInterrupt(8);
 }
 
@@ -235,7 +266,8 @@ void timer8Interrupt() {
  * Default implementation of the TickObserver method. Must be overwritten
  * by every sub-class.
  */
-void TickObserver::handleTick() {
+void TickObserver::handleTick()
+{
     Logger::error("TickObserver does not implement handleTick()");
 }
 

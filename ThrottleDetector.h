@@ -97,6 +97,18 @@ private:
 
 };
 
+extern evTimer Timer;
+
+extern evTimer Timer0;
+extern evTimer Timer1;
+extern evTimer Timer2;
+extern evTimer Timer3;
+extern evTimer Timer4;
+extern evTimer Timer5;
+extern evTimer Timer6;
+extern evTimer Timer7;
+extern evTimer Timer8;
+
 #endif /* THROTTLE_DETECTOR_H_ */
 
 
