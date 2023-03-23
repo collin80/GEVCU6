@@ -40,8 +40,6 @@ CanHandler canHandler = CanHandler(CanHandler::CAN_BUS_EV);
 CanHandler::CanHandler()
 {
 
-    // assign the correct bus instance to the pointer
-   bus = &CAN;
 
     for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
         observerData[i].observer = NULL;
@@ -64,7 +62,7 @@ void CanHandler::setup()
     if (realSpeed < 33333ul) realSpeed = 33333u; 
     if (realSpeed > 1000000ul) realSpeed = 1000000ul;
 
-    while (CAN_OK != CAN.begin(CAN_500KBPS)) {             // init can bus : baudrate = 500k
+    while (CAN_OK != CAN.begin(CAN_500KBPS)) {             // init can bus : baudrate = 500kf
         SERIAL_PORT_MONITOR.println("CAN init fail, retry...");
         delay(100);
     }
@@ -97,20 +95,14 @@ void CanHandler::attach(CanObserver* observer, uint32_t id, uint32_t mask, bool 
         return;
     }
 
-    int mailbox = bus->findFreeRXMailbox();
-
-    if (mailbox == -1) {
-        Logger::error("no free CAN mailbox on bus %d", 0);
-        return;
-    }
 
     observerData[pos].id = id;
     observerData[pos].mask = mask;
     observerData[pos].extended = extended;
-    observerData[pos].mailbox = mailbox;
     observerData[pos].observer = observer;
 
-    bus->setRXFilter((uint8_t) mailbox, id, mask, extended);
+    CAN.init_Filt(pos, extended, id);
+    CAN.init_Mask(pos, extended, (unsigned long)mask);
 
     Logger::debug("attached CanObserver (%X) for id=%X, mask=%X, mailbox=%d", observer, id, mask, mailbox);
 }
@@ -202,14 +194,24 @@ void CanHandler::process()
 
     CanObserver *observer;
 
-    if (bus->rx_avail()) {
-        bus->get_rx_buff(frame);
-      /*
+    unsigned char len = 0;
+    unsigned char buf[8];
+
+if (CAN_MSGAVAIL == CAN.checkReceive()) {
+
+        CAN.readMsgBuf(&len, buf);    // read data,  len: data length, buf: data buf
+
+        frame.length = len;
+        frame.data.bytes = buf;
+        frame.id = CAN.getCanId();
+        frame.extended = (bool)CAN.isExtendedFrame()
+        frame.rtr = CAN.isRemoteRequest();
+
        Logger::debug("CAN:%d dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",0,
                       frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
                       frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
                       frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
-        */
+    
         if(frame.id == CAN_SWITCH) CANIO(frame);
        
 
@@ -314,7 +316,7 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
         else CANioFrame.data.bytes[i] = 0xFF;
     }
      
-    bus->sendFrame(CANioFrame);
+    this->sendFrame(CANioFrame);
         
     CANioFrame.id = CAN_ANALOG_INPUTS;
     i = 0;
@@ -326,7 +328,7 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
         CANioFrame.data.bytes[j + 1] = lowByte(anaVal);
     }
         
-    bus->sendFrame(CANioFrame);
+    this->sendFrame(CANioFrame);
 
     CANioFrame.id = CAN_DIGITAL_INPUTS;
     CANioFrame.length = 4;
@@ -336,7 +338,7 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
         else CANioFrame.data.bytes[i] = 0xff;
     }
       
-    bus->sendFrame(CANioFrame);
+    this->sendFrame(CANioFrame);
 }
 
 
@@ -344,7 +346,13 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
 //(whatever happens to be open) or queue it to send (if nothing is open)
 void CanHandler::sendFrame(CAN_FRAME& frame)
 {
-    bus->sendFrame(frame);
+
+  Logger::warn("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", 0,frame.id, frame.data.bytes[0],
+                  frame.data.bytes[1],frame.data.bytes[2],frame.data.bytes[3],frame.data.bytes[4],
+                  frame.data.bytes[5],frame.data.bytes[6],frame.data.bytes[7]);
+
+
+    CAN.MCP_CAN::sendMsgBuf(frame.id, frame.extended, frame.rtr, frame.data.bytes);
 }
 
 void CanHandler::sendISOTP(int id, int length, uint8_t *data)
@@ -360,7 +368,7 @@ void CanHandler::sendISOTP(int id, int length, uint8_t *data)
         frame.length = length + 1;
         frame.data.byte[0] = SINGLE + (length << 4);
         for (int i = 0; i < length; i++) frame.data.byte[i + 1] = data[i];
-        bus->sendFrame(frame);
+        this->sendFrame(frame);
     }
     else //multi-frame sending
     {
@@ -371,7 +379,7 @@ void CanHandler::sendISOTP(int id, int length, uint8_t *data)
         frame.data.byte[0] = FIRST + (length >> 8);
         frame.data.byte[1] = (length & 0xFF);
         for (int i = 0; i < 6; i++) frame.data.byte[i + 2] = data[i];
-        bus->sendFrame(frame);
+        this->sendFrame(frame);
         temp -= 6;
         base = 6;
         while (temp > 7)
@@ -380,7 +388,7 @@ void CanHandler::sendISOTP(int id, int length, uint8_t *data)
             frame.data.byte[0] = CONSEC + (idx << 4);
             idx = (idx + 1) & 0xF;
             for (int i = 0; i < 7; i++) frame.data.byte[i + 1] = data[i + base];
-            bus->sendFrame(frame);
+            this->sendFrame(frame);
             temp -= 7;
             base += 7;
         }
@@ -389,7 +397,7 @@ void CanHandler::sendISOTP(int id, int length, uint8_t *data)
             frame.length = temp + 1;
             frame.data.byte[0] = CONSEC + (idx << 4);
             for (int i = 0; i < temp; i++) frame.data.byte[i + 1] = data[i + base];
-            bus->sendFrame(frame);
+            this->sendFrame(frame);
         }
     }
 }
@@ -424,7 +432,7 @@ void CanHandler::sendPDOMessage(int id, int length, unsigned char *data)
     frame.extended = false;
     frame.length = length;
     for (int x = 0; x < length; x++) frame.data.byte[x] = data[x];
-    bus->sendFrame(frame);
+    this->sendFrame(frame);
 }
 
 void CanHandler::sendSDORequest(SDO_FRAME *sframe)
@@ -446,7 +454,7 @@ void CanHandler::sendSDORequest(SDO_FRAME *sframe)
         frame.data.byte[3] = sframe->subIndex;
         for (int x = 0; x < sframe->dataLength; x++) frame.data.byte[4 + x] = sframe->data[x];
         //SerialUSB.println("plugging trigger");
-        bus->sendFrame(frame);
+        this->sendFrame(frame);
         //SerialUSB.println("sent frame");
     }
 }
@@ -469,7 +477,7 @@ void CanHandler::sendSDOResponse(SDO_FRAME *sframe)
         frame.data.byte[2] = sframe->index >> 8;
         frame.data.byte[3] = sframe->subIndex;
         for (int x = 0; x < sframe->dataLength; x++) frame.data.byte[4 + x] = sframe->data[x];
-        bus->sendFrame(frame);
+        this->sendFrame(frame);
     }
 }
 
@@ -480,7 +488,7 @@ void CanHandler::sendHeartbeat()
     frame.length = 1;
     frame.extended = false;
     frame.data.byte[0] = 5; //we're always operational
-    bus->sendFrame(frame);  
+    this->sendFrame(frame);  
 }
 
 void CanHandler::sendNMTMsg(int id, int cmd)
@@ -493,7 +501,7 @@ void CanHandler::sendNMTMsg(int id, int cmd)
     frame.data.byte[0] = cmd;
     frame.data.byte[1] = id;
     //the rest don't matter
-    bus->sendFrame(frame);
+    this->sendFrame(frame);
 }
 
 void CanHandler::setMasterID(int id)

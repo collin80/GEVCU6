@@ -113,7 +113,6 @@ private:
         CanObserver *observer;  // the observer object (e.g. a device)
     };
 
-    CANRaw *bus;    // the can bus instance which this CanHandler instance is assigned to
     CanObserverData observerData[CFG_CAN_NUM_OBSERVERS];    // Can observers
     uint32_t busSpeed;
 
