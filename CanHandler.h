@@ -34,6 +34,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <DueTimer.h>
 #include "Logger.h"
 
+#include "mcp2515_can.h"
+
 enum SDO_COMMAND
 {
     SDO_WRITE = 0x20,
@@ -82,7 +84,6 @@ class CanHandler
 public:
     enum CanBusNode {
         CAN_BUS_EV, // CAN0 is intended to be connected to the EV bus (controller, charger, etc.)
-        CAN_BUS_CAR // CAN1 is intended to be connected to the car's high speed bus (the one with the ECU)
     };
 
     CanHandler(CanBusNode busNumber);
@@ -133,6 +134,5 @@ private:
 };
 
 extern CanHandler canHandlerEv;
-extern CanHandler canHandlerCar;
 
 #endif /* CAN_HANDLER_H_ */

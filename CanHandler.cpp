@@ -30,8 +30,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "CanHandler.h"
 #include "sys_io.h"
 
+
+mcp2515_can CAN(SPI_CS_PIN); // Set CS pin
+
 CanHandler canHandlerEv = CanHandler(CanHandler::CAN_BUS_EV);
-CanHandler canHandlerCar = CanHandler(CanHandler::CAN_BUS_CAR);
 
 /*
  * Constructor of the can handler
@@ -41,11 +43,7 @@ CanHandler::CanHandler(CanBusNode canBusNode)
     this->canBusNode = canBusNode;
 
     // assign the correct bus instance to the pointer
-    if (canBusNode == CAN_BUS_CAR) {
-        bus = &CAN2;
-    } else {
-        bus = &CAN;
-    }
+   bus = &CAN;
 
     for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
         observerData[i].observer = NULL;
@@ -71,8 +69,11 @@ void CanHandler::setup()
     realSpeed = storedVal * 1000; //was stored in thousands, now in actual rate
     if (realSpeed < 33333ul) realSpeed = 33333u; 
     if (realSpeed > 1000000ul) realSpeed = 1000000ul;
-    bus->begin(realSpeed, 255);
-    bus->setNumTXBoxes(2);
+
+    while (CAN_OK != CAN.begin(CAN_500KBPS)) {             // init can bus : baudrate = 500k
+        SERIAL_PORT_MONITOR.println("CAN init fail, retry...");
+        delay(100);
+    }
     
     busSpeed = realSpeed;
  
@@ -127,7 +128,7 @@ void CanHandler::attach(CanObserver* observer, uint32_t id, uint32_t mask, bool 
  * \param id - id of the observer to detach (required as one CanObserver may register itself several times)
  * \param mask - mask of the observer to detach (dito)
  */
-void CanHandler::detach(CanObserver* observer, uint32_t id, uint32_t mask)
+void CanHandler::detach(CanObserver* observerserver* observer, uint32_t id, uint32_t mask)
 {
     for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
         if (observerData[i].observer == observer &&
@@ -147,13 +148,12 @@ void CanHandler::detach(CanObserver* observer, uint32_t id, uint32_t mask)
  */
 void CanHandler::logFrame(CAN_FRAME& frame)
 {
-    /*
     if (Logger::isDebug()) {
         Logger::debug("CAN: dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",
                       frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
                       frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
                       frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
-    }*/
+    }
 }
 
 /*

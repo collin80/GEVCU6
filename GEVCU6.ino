@@ -218,7 +218,6 @@ void setup() {
     //Logger::setLoglevel((Logger::LogLevel)0);
 	systemIO.setup();  
 	canHandlerEv.setup();
-	canHandlerCar.setup();
 	Logger::info("SYSIO init ok");	
 
 	initializeDevices();
@@ -238,7 +237,6 @@ void loop() {
 
 	// check if incoming frames are available in the can buffer and process them
 	canHandlerEv.process();
-	canHandlerCar.process();
 
 	serialConsole->loop();
 
