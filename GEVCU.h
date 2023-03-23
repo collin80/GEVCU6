@@ -42,7 +42,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "MemCache.h"
 #include "ThrottleDetector.h"
 #include "DeviceManager.h"
-#include "SerialConsole.h"
 #include "adafruitBLE.h"
 #include "Sys_Messages.h"
 #include "FaultHandler.h"

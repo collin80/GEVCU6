@@ -65,7 +65,6 @@ Random comments on things that should be coded up soon:
 PrefHandler *sysPrefs;
 MemCache *memCache;
 Heartbeat *heartbeat;
-SerialConsole *serialConsole;
 ADAFRUITBLE *btDevice;
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
 
@@ -219,8 +218,6 @@ void setup() {
 	Logger::info("SYSIO init ok");	
 
 	initializeDevices();
-    serialConsole = new SerialConsole(memCache, heartbeat);
-	serialConsole->printMenu();
 	btDevice = static_cast<ADAFRUITBLE *>(deviceManager.getDeviceByID(ADABLUE));
     deviceManager.sendMessage(DEVICE_WIFI, ADABLUE, MSG_CONFIG_CHANGE, NULL); //Load config into BLE interface
 
@@ -235,8 +232,6 @@ void loop() {
 
 	// check if incoming frames are available in the can buffer and process them
 	canHandler.process();
-
-	serialConsole->loop();
 
     systemIO.pollInitialization();
     
