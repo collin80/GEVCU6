@@ -211,12 +211,3 @@ void Throttle::loadConfiguration() {
                   config->positionForwardMotionStart, config->positionHalfPower);
     Logger::debug(THROTTLE, "MinRegen: %d MaxRegen: %d", config->minimumRegen, config->maximumRegen);
 }
-
-/*
- * Store the current configuration to EEPROM
- */
-void Throttle::saveConfiguration() {
-    //TODO remove 
-}
-
-

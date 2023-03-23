@@ -57,7 +57,6 @@ public:
     RawSignalData *acquireRawSignal();
 
     void loadConfiguration();
-    void saveConfiguration();
 
 protected:
     bool validateSignal(RawSignalData *);

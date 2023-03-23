@@ -52,7 +52,6 @@ public:
     DeviceId getId();
 
     void loadConfiguration();
-    void saveConfiguration();
 
 protected:
 

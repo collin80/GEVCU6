@@ -31,6 +31,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config.h"
 #include "DeviceTypes.h"
 #include "Sys_Messages.h"
+#include "TickHandler.h"
 
 /*
  * A abstract class to hold device configuration. It is to be accessed
@@ -57,7 +58,6 @@ public:
     const char* getCommonName();
 
     virtual void loadConfiguration();
-    virtual void saveConfiguration();
     DeviceConfiguration *getConfiguration();
     void setConfiguration(DeviceConfiguration *);
 

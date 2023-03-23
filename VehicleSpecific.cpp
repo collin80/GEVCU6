@@ -149,13 +149,3 @@ void VehicleSpecific::loadConfiguration() {
 
     Device::loadConfiguration(); // call parent
 }
-
-/*
- * Store the current configuration to EEPROM
- */
-void VehicleSpecific::saveConfiguration() {
-
-    Device::saveConfiguration(); // call parent
-}
-
-

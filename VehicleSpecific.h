@@ -45,7 +45,6 @@ public:
     DeviceType getType();
 
     void loadConfiguration();
-    void saveConfiguration();
 
 protected:
 

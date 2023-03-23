@@ -65,6 +65,7 @@ Heartbeat *heartbeat;
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
 
 byte i = 0;
+uint8_t loglevel;
 
 
 

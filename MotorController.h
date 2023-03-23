@@ -94,7 +94,6 @@ public:
     uint32_t getTickInterval();
 
     void loadConfiguration();
-    void saveConfiguration();
 
     void coolingcheck();
     void checkBrakeLight();

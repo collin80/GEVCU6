@@ -464,10 +464,6 @@ void DmocMotorController::loadConfiguration() {
     MotorController::loadConfiguration(); // call parent
 }
 
-void DmocMotorController::saveConfiguration() {
-    MotorController::saveConfiguration();
-}
-
 void DmocMotorController::timestamp()
 {
     milliseconds = (int) (millis()/1) %1000 ;

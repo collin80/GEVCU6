@@ -168,12 +168,4 @@ void PotBrake::loadConfiguration() {
     
 }
 
-/*
- * Store the current configuration to EEPROM
- */
-void PotBrake::saveConfiguration() {
-    //TODO remove?
-}
-
-
 

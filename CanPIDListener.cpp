@@ -302,12 +302,6 @@ void CanPIDListener::loadConfiguration() {
     //config->carType = Volvo_S80_Gas;
 }
 
-/*
- * Store the current configuration to EEPROM
- */
-void CanPIDListener::saveConfiguration() {
-    //TODO remove? 
-}
 
 
 

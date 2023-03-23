@@ -202,11 +202,3 @@ void PotThrottle::loadConfiguration() {
                   config->maximumLevel2);
 }
 
-/*
- * Store the current configuration to EEPROM
- */
-void PotThrottle::saveConfiguration() {
-    //TODO remove
-}
-
-

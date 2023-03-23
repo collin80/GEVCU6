@@ -74,9 +74,6 @@ DeviceId Device::getId() {
 void Device::loadConfiguration() {
 }
 
-void Device::saveConfiguration() {
-}
-
 DeviceConfiguration *Device::getConfiguration() {
     return this->deviceConfiguration;
 }

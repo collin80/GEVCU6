@@ -72,8 +72,6 @@ public:
     void taperRegen();
 
     virtual void loadConfiguration();
-    virtual void saveConfiguration();
-
 private:
 
     OperationState actualState; //what the controller is reporting it is

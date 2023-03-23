@@ -83,7 +83,6 @@ public:
 
     virtual RawSignalData *acquireRawSignal();
     void loadConfiguration();
-    void saveConfiguration();
 
 protected:
     ThrottleStatus status;
