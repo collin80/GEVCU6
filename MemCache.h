@@ -32,6 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Arduino.h>
 #include "config.h"
 #include "TickHandler.h"
+#include <Wire.h>
 
 //Total # of allowable pages to cache. Limits RAM usage
 #define NUM_CACHED_PAGES   16

@@ -53,8 +53,10 @@ Random comments on things that should be coded up soon:
 
 // The following includes are required in the .ino file by the Arduino IDE in order to properly
 // identify the required libraries for the build.
+#include <due_can.h>
 #include <BLE.h>
 #include <FirmwareReceiver.h>
+#include <Wire.h>
 #include <DueTimer.h>
 #include <SPI.h>
 
@@ -195,7 +197,8 @@ void setup() {
 	SerialUSB.println(CFG_VERSION);
 	SerialUSB.print("Build number: ");
 	SerialUSB.println(CFG_BUILD_NUM);
-	Wire.begin((uint32_t)1000000);
+	Wire.begin();
+	Wire.setClock(1000000);
 	Logger::info("TWI init ok");
 	memCache = new MemCache();
 	Logger::info("add MemCache (id: %X, %X)", MEMCACHE, memCache);

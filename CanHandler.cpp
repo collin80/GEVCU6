@@ -30,9 +30,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "CanHandler.h"
 #include "sys_io.h"
 
-
 mcp2515_can CAN(SPI_CS_PIN); // Set CS pin
-CanHandler canHandler = CanHandler(CanHandler::CAN_BUS_EV);
+CanHandler canHandler = CanHandler();
 
 /*
  * Constructor of the can handler
@@ -40,8 +39,8 @@ CanHandler canHandler = CanHandler(CanHandler::CAN_BUS_EV);
 CanHandler::CanHandler()
 {
 
-
-    for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
+    for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++)
+    {
         observerData[i].observer = NULL;
     }
     masterID = 0x05;
@@ -57,44 +56,47 @@ void CanHandler::setup()
     uint16_t storedVal;
     uint32_t realSpeed;
     sysPrefs->read(EESYS_CAN0_BAUD, &storedVal);
-    
-    realSpeed = storedVal * 1000; //was stored in thousands, now in actual rate
-    if (realSpeed < 33333ul) realSpeed = 33333u; 
-    if (realSpeed > 1000000ul) realSpeed = 1000000ul;
 
-    while (CAN_OK != CAN.begin(CAN_500KBPS)) {             // init can bus : baudrate = 500kf
+    realSpeed = storedVal * 1000; // was stored in thousands, now in actual rate
+    if (realSpeed < 33333ul)
+        realSpeed = 33333u;
+    if (realSpeed > 1000000ul)
+        realSpeed = 1000000ul;
+
+    while (CAN_OK != CAN.begin(CAN_500KBPS))
+    { // init can bus : baudrate = 500kf
         SERIAL_PORT_MONITOR.println("CAN init fail, retry...");
         delay(100);
     }
-    
+
     busSpeed = realSpeed;
- 
-    Logger::info("CAN%d init ok. Speed = %i", 0 ), busSpeed);
+
+    Logger::info("CAN%d init ok. Speed = %i", 0, busSpeed);
 }
 
-uint32_t CanHandler::getBusSpeed() {
+uint32_t CanHandler::getBusSpeed()
+{
     return busSpeed;
 }
 
 /*
  * Attach a CanObserver. Can frames which match the id/mask will be forwarded to the observer
  * via the method handleCanFrame(RX_CAN_FRAME).
- * Sets up a can bus mailbox if necessary.
  *
  *  \param observer - the observer object to register (must implement CanObserver class)
  *  \param id - the id of the can frame to listen to
  *  \param mask - the mask to be applied to the frames
  *  \param extended - set if extended frames must be supported
  */
-void CanHandler::attach(CanObserver* observer, uint32_t id, uint32_t mask, bool extended)
+void CanHandler::attach(CanObserver *observer, uint32_t id, uint32_t mask, bool extended)
 {
     int8_t pos = findFreeObserverData();
 
-    if (pos == -1) {
+    if (pos == -1)
+    {
         Logger::error("no free space in CanHandler::observerData, increase its size via CFG_CAN_NUM_OBSERVERS");
         return;
     }
-
 
     observerData[pos].id = id;
     observerData[pos].mask = mask;
@@ -104,7 +106,7 @@ void CanHandler::attach(CanObserver* observer, uint32_t id, uint32_t mask, bool 
     CAN.init_Filt(pos, extended, id);
     CAN.init_Mask(pos, extended, (unsigned long)mask);
 
-    Logger::debug("attached CanObserver (%X) for id=%X, mask=%X, mailbox=%d", observer, id, mask, mailbox);
+    Logger::debug("attached CanObserver (%X) for id=%X, mask=%X", observer, id, mask);
 }
 
 /*
@@ -114,15 +116,15 @@ void CanHandler::attach(CanObserver* observer, uint32_t id, uint32_t mask, bool 
  * \param id - id of the observer to detach (required as one CanObserver may register itself several times)
  * \param mask - mask of the observer to detach (dito)
  */
-void CanHandler::detach(CanObserver* observerserver* observer, uint32_t id, uint32_t mask)
+void CanHandler::detach(CanObserver *observer, uint32_t id, uint32_t mask)
 {
-    for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
+    for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++)
+    {
         if (observerData[i].observer == observer &&
-                observerData[i].id == id &&
-                observerData[i].mask == mask) {
+            observerData[i].id == id &&
+            observerData[i].mask == mask)
+        {
             observerData[i].observer = NULL;
-
-            //TODO: if no more observers on same mailbox, disable its interrupt, reset mailbox
         }
     }
 }
@@ -132,9 +134,10 @@ void CanHandler::detach(CanObserver* observerserver* observer, uint32_t id, uint
  *
  * \param frame - the received can frame to log
  */
-void CanHandler::logFrame(CAN_FRAME& frame)
+void CanHandler::logFrame(CAN_FRAME &frame)
 {
-    if (Logger::isDebug()) {
+    if (Logger::isDebug())
+    {
         Logger::debug("CAN: dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",
                       frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
                       frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
@@ -149,34 +152,10 @@ void CanHandler::logFrame(CAN_FRAME& frame)
  */
 int8_t CanHandler::findFreeObserverData()
 {
-    for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
-        if (observerData[i].observer == NULL) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-/*
- * Find a unused can mailbox according to entries in observerData[].
- *
- * \retval the mailbox index of the next unused mailbox
- */
-int8_t CanHandler::findFreeMailbox()
-{
-    uint8_t numRxMailboxes = 6; //there are 8 total and two are used for TX
-
-    for (uint8_t i = 0; i < numRxMailboxes; i++) {
-        bool used = false;
-
-        for (uint8_t j = 0; j < CFG_CAN_NUM_OBSERVERS; j++) {
-            if (observerData[j].observer != NULL && observerData[j].mailbox == i) {
-                used = true;
-            }
-        }
-
-        if (!used) {
+    for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++)
+    {
+        if (observerData[i].observer == NULL)
+        {
             return i;
         }
     }
@@ -197,27 +176,33 @@ void CanHandler::process()
     unsigned char len = 0;
     unsigned char buf[8];
 
-if (CAN_MSGAVAIL == CAN.checkReceive()) {
+    if (CAN_MSGAVAIL == CAN.checkReceive())
+    {
 
-        CAN.readMsgBuf(&len, buf);    // read data,  len: data length, buf: data buf
+        CAN.readMsgBuf(&len, buf); // read data,  len: data length, buf: data buf
 
-        frame.length = len;
-        frame.data.bytes = buf;
+        frame.length = (uint8_t)len;
+        for (int i = 0; i < len; i++)
+        {
+            frame.data.bytes[i] = uint8_t(buf[i]);
+        }
         frame.id = CAN.getCanId();
-        frame.extended = (bool)CAN.isExtendedFrame()
+        frame.extended = (bool)CAN.isExtendedFrame();
         frame.rtr = CAN.isRemoteRequest();
 
-       Logger::debug("CAN:%d dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",0,
+        Logger::debug("CAN:%d dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X", 0,
                       frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
                       frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
                       frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
-    
-        if(frame.id == CAN_SWITCH) CANIO(frame);
-       
 
-        for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++) {
+        if (frame.id == CAN_SWITCH)
+            CANIO(frame);
+
+        for (int i = 0; i < CFG_CAN_NUM_OBSERVERS; i++)
+        {
             observer = observerData[i].observer;
-            if (observer != NULL) {
+            if (observer != NULL)
+            {
                 // Apply mask to frame.id and observer.id. If they match, forward the frame to the observer
                 if (observer->isCANOpen())
                 {
@@ -225,44 +210,50 @@ if (CAN_MSGAVAIL == CAN.checkReceive()) {
                     {
                         observer->handlePDOFrame(&frame);
                     }
-                    if (frame.id == 0x600 + observer->getNodeID()) //SDO request targetted to our ID
+
+                    if (frame.id == 0x600 + observer->getNodeID()) // SDO request targetted to our ID
                     {
                         sFrame.nodeID = observer->getNodeID();
                         sFrame.index = frame.data.byte[1] + (frame.data.byte[2] * 256);
                         sFrame.subIndex = frame.data.byte[3];
                         sFrame.cmd = (SDO_COMMAND)(frame.data.byte[0] & 0xF0);
-            
+
                         if ((frame.data.byte[0] != 0x40) && (frame.data.byte[0] != 0x60))
                         {
-                            sFrame.dataLength = (3 - ((frame.data.byte[0] & 0xC) >> 2)) + 1;            
+                            sFrame.dataLength = (3 - ((frame.data.byte[0] & 0xC) >> 2)) + 1;
                         }
-                        else sFrame.dataLength = 0;
+                        else
+                            sFrame.dataLength = 0;
 
-                        for (int x = 0; x < sFrame.dataLength; x++) sFrame.data[x] = frame.data.byte[4 + x];
+                        for (int x = 0; x < sFrame.dataLength; x++)
+                            sFrame.data[x] = frame.data.byte[4 + x];
                         observer->handleSDORequest(&sFrame);
                     }
 
-                    if (frame.id == 0x580 + observer->getNodeID()) //SDO reply to our ID
+                    if (frame.id == 0x580 + observer->getNodeID()) // SDO reply to our ID
                     {
                         sFrame.nodeID = observer->getNodeID();
                         sFrame.index = frame.data.byte[1] + (frame.data.byte[2] * 256);
                         sFrame.subIndex = frame.data.byte[3];
                         sFrame.cmd = (SDO_COMMAND)(frame.data.byte[0] & 0xF0);
-            
+
                         if ((frame.data.byte[0] != 0x40) && (frame.data.byte[0] != 0x60))
                         {
-                            sFrame.dataLength = (3 - ((frame.data.byte[0] & 0xC) >> 2)) + 1;            
+                            sFrame.dataLength = (3 - ((frame.data.byte[0] & 0xC) >> 2)) + 1;
                         }
-                        else sFrame.dataLength = 0;
+                        else
+                            sFrame.dataLength = 0;
 
-                        for (int x = 0; x < sFrame.dataLength; x++) sFrame.data[x] = frame.data.byte[4 + x];
+                        for (int x = 0; x < sFrame.dataLength; x++)
+                            sFrame.data[x] = frame.data.byte[4 + x];
 
-                        observer->handleSDOResponse(&sFrame);                       
+                        observer->handleSDOResponse(&sFrame);
                     }
                 }
-                else //raw canbus
+                else // raw canbus
                 {
-                    if ((frame.id & observerData[i].mask) == (observerData[i].id & observerData[i].mask)) {
+                    if ((frame.id & observerData[i].mask) == (observerData[i].id & observerData[i].mask))
+                    {
                         observer->handleCanFrame(&frame);
                     }
                 }
@@ -292,65 +283,73 @@ void CanHandler::prepareOutputFrame(CAN_FRAME *frame, uint32_t id)
     frame->data.bytes[7] = 0;
 }
 
-void CanHandler::CANIO(CAN_FRAME& frame) {
+void CanHandler::CANIO(CAN_FRAME &frame)
+{
     static CAN_FRAME CANioFrame;
     int i;
 
-  Logger::warn("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", 0,frame.id, frame.data.bytes[0],
-                  frame.data.bytes[1],frame.data.bytes[2],frame.data.bytes[3],frame.data.bytes[4],
-                  frame.data.bytes[5],frame.data.bytes[6],frame.data.bytes[7]);
+    Logger::warn("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", 0, frame.id, frame.data.bytes[0],
+                 frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3], frame.data.bytes[4],
+                 frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
 
     CANioFrame.id = CAN_OUTPUTS;
     CANioFrame.length = 8;
-    CANioFrame.extended = 0; //standard frame
-    CANioFrame.rtr = 0;  
-  
-    //handle the incoming frame to set/unset/leave alone each digital output
-    for(i = 0; i < 8; i++) {
-        if (frame.data.bytes[i] == 0x88) systemIO.setDigitalOutput(i,true);
-        if (frame.data.bytes[i] == 0xFF) systemIO.setDigitalOutput(i,false);
+    CANioFrame.extended = 0; // standard frame
+    CANioFrame.rtr = 0;
+
+    // handle the incoming frame to set/unset/leave alone each digital output
+    for (i = 0; i < 8; i++)
+    {
+        if (frame.data.bytes[i] == 0x88)
+            systemIO.setDigitalOutput(i, true);
+        if (frame.data.bytes[i] == 0xFF)
+            systemIO.setDigitalOutput(i, false);
     }
-  
-    for(i = 0; i < 8; i++) {
-        if (systemIO.getDigitalOutput(i)) CANioFrame.data.bytes[i] = 0x88;
-        else CANioFrame.data.bytes[i] = 0xFF;
+
+    for (i = 0; i < 8; i++)
+    {
+        if (systemIO.getDigitalOutput(i))
+            CANioFrame.data.bytes[i] = 0x88;
+        else
+            CANioFrame.data.bytes[i] = 0xFF;
     }
-     
+
     this->sendFrame(CANioFrame);
-        
+
     CANioFrame.id = CAN_ANALOG_INPUTS;
     i = 0;
     int16_t anaVal;
-       
-    for(int j = 0; j < 8; j += 2) {
+
+    for (int j = 0; j < 8; j += 2)
+    {
         anaVal = systemIO.getAnalogIn(i++);
-        CANioFrame.data.bytes[j] = highByte (anaVal);
+        CANioFrame.data.bytes[j] = highByte(anaVal);
         CANioFrame.data.bytes[j + 1] = lowByte(anaVal);
     }
-        
+
     this->sendFrame(CANioFrame);
 
     CANioFrame.id = CAN_DIGITAL_INPUTS;
     CANioFrame.length = 4;
-  
-    for(i = 0; i < 4; i++) {
-        if (systemIO.getDigitalIn(i)) CANioFrame.data.bytes[i] = 0x88;
-        else CANioFrame.data.bytes[i] = 0xff;
+
+    for (i = 0; i < 4; i++)
+    {
+        if (systemIO.getDigitalIn(i))
+            CANioFrame.data.bytes[i] = 0x88;
+        else
+            CANioFrame.data.bytes[i] = 0xff;
     }
-      
+
     this->sendFrame(CANioFrame);
 }
 
-
-//Allow the canbus driver to figure out the proper mailbox to use
 //(whatever happens to be open) or queue it to send (if nothing is open)
-void CanHandler::sendFrame(CAN_FRAME& frame)
+void CanHandler::sendFrame(CAN_FRAME &frame)
 {
 
-  Logger::warn("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", 0,frame.id, frame.data.bytes[0],
-                  frame.data.bytes[1],frame.data.bytes[2],frame.data.bytes[3],frame.data.bytes[4],
-                  frame.data.bytes[5],frame.data.bytes[6],frame.data.bytes[7]);
-
+    Logger::warn("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", 0, frame.id, frame.data.bytes[0],
+                 frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3], frame.data.bytes[4],
+                 frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
 
     CAN.MCP_CAN::sendMsgBuf(frame.id, frame.extended, frame.rtr, frame.data.bytes);
 }
@@ -363,14 +362,15 @@ void CanHandler::sendISOTP(int id, int length, uint8_t *data)
     frame.id = id;
     frame.rtr = 0;
 
-    if (length < 8) //single frame
+    if (length < 8) // single frame
     {
         frame.length = length + 1;
         frame.data.byte[0] = SINGLE + (length << 4);
-        for (int i = 0; i < length; i++) frame.data.byte[i + 1] = data[i];
+        for (int i = 0; i < length; i++)
+            frame.data.byte[i + 1] = data[i];
         this->sendFrame(frame);
     }
-    else //multi-frame sending
+    else // multi-frame sending
     {
         int temp = length;
         uint8_t idx = 0;
@@ -378,7 +378,8 @@ void CanHandler::sendISOTP(int id, int length, uint8_t *data)
         frame.length = 8;
         frame.data.byte[0] = FIRST + (length >> 8);
         frame.data.byte[1] = (length & 0xFF);
-        for (int i = 0; i < 6; i++) frame.data.byte[i + 2] = data[i];
+        for (int i = 0; i < 6; i++)
+            frame.data.byte[i + 2] = data[i];
         this->sendFrame(frame);
         temp -= 6;
         base = 6;
@@ -387,7 +388,8 @@ void CanHandler::sendISOTP(int id, int length, uint8_t *data)
             frame.length = 8;
             frame.data.byte[0] = CONSEC + (idx << 4);
             idx = (idx + 1) & 0xF;
-            for (int i = 0; i < 7; i++) frame.data.byte[i + 1] = data[i + base];
+            for (int i = 0; i < 7; i++)
+                frame.data.byte[i + 1] = data[i + base];
             this->sendFrame(frame);
             temp -= 7;
             base += 7;
@@ -396,7 +398,8 @@ void CanHandler::sendISOTP(int id, int length, uint8_t *data)
         {
             frame.length = temp + 1;
             frame.data.byte[0] = CONSEC + (idx << 4);
-            for (int i = 0; i < temp; i++) frame.data.byte[i + 1] = data[i + base];
+            for (int i = 0; i < temp; i++)
+                frame.data.byte[i + 1] = data[i + base];
             this->sendFrame(frame);
         }
     }
@@ -404,7 +407,7 @@ void CanHandler::sendISOTP(int id, int length, uint8_t *data)
 
 void CanHandler::sendNodeStart(int id)
 {
-        sendNMTMsg(id, 1);
+    sendNMTMsg(id, 1);
 }
 
 void CanHandler::sendNodePreop(int id)
@@ -424,14 +427,18 @@ void CanHandler::sendNodeStop(int id)
 
 void CanHandler::sendPDOMessage(int id, int length, unsigned char *data)
 {
-    if (id > 0x57F) return; //invalid ID for a PDO message
-    if (id < 0x180) return; //invalid ID for a PDO message
-    if (length > 8 || length < 0) return; //invalid length
+    if (id > 0x57F)
+        return; // invalid ID for a PDO message
+    if (id < 0x180)
+        return; // invalid ID for a PDO message
+    if (length > 8 || length < 0)
+        return; // invalid length
     CAN_FRAME frame;
     frame.id = id;
     frame.extended = false;
     frame.length = length;
-    for (int x = 0; x < length; x++) frame.data.byte[x] = data[x];
+    for (int x = 0; x < length; x++)
+        frame.data.byte[x] = data[x];
     this->sendFrame(frame);
 }
 
@@ -445,17 +452,18 @@ void CanHandler::sendSDORequest(SDO_FRAME *sframe)
     if (sframe->dataLength <= 4)
     {
         frame.data.byte[0] = sframe->cmd;
-        if (sframe->dataLength > 0) //request to write data
+        if (sframe->dataLength > 0) // request to write data
         {
-            frame.data.byte[0] |= 0x0F - ((sframe->dataLength - 1) * 4); //kind of dumb the way this works...
+            frame.data.byte[0] |= 0x0F - ((sframe->dataLength - 1) * 4); // kind of dumb the way this works...
         }
         frame.data.byte[1] = sframe->index & 0xFF;
         frame.data.byte[2] = sframe->index >> 8;
         frame.data.byte[3] = sframe->subIndex;
-        for (int x = 0; x < sframe->dataLength; x++) frame.data.byte[4 + x] = sframe->data[x];
-        //SerialUSB.println("plugging trigger");
+        for (int x = 0; x < sframe->dataLength; x++)
+            frame.data.byte[4 + x] = sframe->data[x];
+        // SerialUSB.println("plugging trigger");
         this->sendFrame(frame);
-        //SerialUSB.println("sent frame");
+        // SerialUSB.println("sent frame");
     }
 }
 
@@ -469,14 +477,15 @@ void CanHandler::sendSDOResponse(SDO_FRAME *sframe)
     if (sframe->dataLength <= 4)
     {
         frame.data.byte[0] = sframe->cmd;
-        if (sframe->dataLength > 0) //responding with data
+        if (sframe->dataLength > 0) // responding with data
         {
-            frame.data.byte[0] |= 0x0F - ((sframe->dataLength - 1) * 4); 
+            frame.data.byte[0] |= 0x0F - ((sframe->dataLength - 1) * 4);
         }
         frame.data.byte[1] = sframe->index & 0xFF;
         frame.data.byte[2] = sframe->index >> 8;
         frame.data.byte[3] = sframe->subIndex;
-        for (int x = 0; x < sframe->dataLength; x++) frame.data.byte[4 + x] = sframe->data[x];
+        for (int x = 0; x < sframe->dataLength; x++)
+            frame.data.byte[4 + x] = sframe->data[x];
         this->sendFrame(frame);
     }
 }
@@ -487,12 +496,12 @@ void CanHandler::sendHeartbeat()
     frame.id = 0x700 + masterID;
     frame.length = 1;
     frame.extended = false;
-    frame.data.byte[0] = 5; //we're always operational
-    this->sendFrame(frame);  
+    frame.data.byte[0] = 5; // we're always operational
+    this->sendFrame(frame);
 }
 
 void CanHandler::sendNMTMsg(int id, int cmd)
-{       
+{
     id &= 0x7F;
     CAN_FRAME frame;
     frame.id = 0;
@@ -500,7 +509,7 @@ void CanHandler::sendNMTMsg(int id, int cmd)
     frame.length = 2;
     frame.data.byte[0] = cmd;
     frame.data.byte[1] = id;
-    //the rest don't matter
+    // the rest don't matter
     this->sendFrame(frame);
 }
 
@@ -509,14 +518,13 @@ void CanHandler::setMasterID(int id)
     masterID = id;
 }
 
-
 CanObserver::CanObserver()
 {
     canOpenMode = false;
     nodeID = 0x7F;
 }
 
-//setting can open mode causes the can handler to run its own handleCanFrame system where things are sorted out
+// setting can open mode causes the can handler to run its own handleCanFrame system where things are sorted out
 void CanObserver::setCANOpenMode(bool en)
 {
     canOpenMode = en;

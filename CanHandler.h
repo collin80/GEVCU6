@@ -30,8 +30,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "variant.h"
 #include <DueTimer.h>
 #include "Logger.h"
+#include <can_common.h>
 
 #include "mcp2515_can.h"
+
+#define SPI_CS_PIN 9
 
 enum SDO_COMMAND
 {
@@ -109,7 +112,6 @@ private:
         uint32_t id;    // what id to listen to
         uint32_t mask;  // the CAN frame mask to listen to
         bool extended;  // are extended frames expected
-        uint8_t mailbox;    // which mailbox is this observer assigned to
         CanObserver *observer;  // the observer object (e.g. a device)
     };
 
@@ -118,7 +120,6 @@ private:
 
     void logFrame(CAN_FRAME& frame);
     int8_t findFreeObserverData();
-    int8_t findFreeMailbox();
 
     //canopen support functions
     void sendNMTMsg(int, int);
