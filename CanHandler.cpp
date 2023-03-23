@@ -32,7 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 mcp2515_can CAN(SPI_CS_PIN); // Set CS pin
-CanHandler canHandlerEv = CanHandler(CanHandler::CAN_BUS_EV);
+CanHandler canHandler = CanHandler(CanHandler::CAN_BUS_EV);
 
 /*
  * Constructor of the can handler

@@ -46,8 +46,8 @@ void CanPIDListener::setup() {
     Device::setup();
 
     //TODO: FIXME Quickly coded as hard coded values. This is naughty.
-    canHandlerEv.attach(this, 0x7DF, 0x7DF, false);
-    canHandlerEv.attach(this, 0x7E0, 0x7E0, false);
+    canHandler.attach(this, 0x7DF, 0x7DF, false);
+    canHandler.attach(this, 0x7E0, 0x7E0, false);
     //TickHandler::getInstance()->attach(this, CFG_TICK_INTERVAL_CAN_THROTTLE);
 }
 
@@ -139,7 +139,7 @@ void CanPIDListener::handleCanFrame(CAN_FRAME *frame) {
         //here is where we'd send out response. Right now it sends over canbus but when we support other
         //alteratives they'll be sending here too.
         if (ret) {
-            canHandlerEv.sendFrame(outputFrame);
+            canHandler.sendFrame(outputFrame);
         }
     }
 }

@@ -72,7 +72,7 @@ public:
     int getNodeID();
 
 private:
-    bool canOpenMode;
+    bool canOpenMode; //TODO remove
     int nodeID;
 };
 
@@ -130,6 +130,6 @@ private:
     int masterID; //what is our ID as the master node?      
 };
 
-extern CanHandler canHandlerEv;
+extern CanHandler canHandler;
 
 #endif /* CAN_HANDLER_H_ */

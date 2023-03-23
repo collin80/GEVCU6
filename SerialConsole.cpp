@@ -82,7 +82,7 @@ void SerialConsole::printMenu() {
     SerialUSB.println("   h = help (displays this message)");
   
     Logger::console("   LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", Logger::getLogLevel());
-    Logger::console("   CAN0SPEED=%i - set first CAN bus speed (in thousands)", canHandlerEv.getBusSpeed() / 1000);
+    Logger::console("   CAN0SPEED=%i - set first CAN bus speed (in thousands)", canHandler.getBusSpeed() / 1000);
 
     SerialUSB<<"\nDEVICE SELECTION AND ACTIVATION\n\n";
     SerialUSB.println("     a = Re-setup Adafruit BLE");
@@ -570,7 +570,7 @@ void SerialConsole::handleConfigCmd() {
         if (newValue >= 33 && newValue <= 1000) {
             sysPrefs->write(EESYS_CAN0_BAUD, (uint16_t)(newValue));
             sysPrefs->saveChecksum();
-            canHandlerEv.setup();
+            canHandler.setup();
             Logger::console("Setting CAN0 speed to %i", newValue);
         }
         else Logger::console("Invalid speed. Enter a value between 33 and 1000");
