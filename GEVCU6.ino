@@ -53,9 +53,7 @@ Random comments on things that should be coded up soon:
 
 // The following includes are required in the .ino file by the Arduino IDE in order to properly
 // identify the required libraries for the build.
-#include <due_can.h>
 #include <BLE.h>
-#include <FirmwareReceiver.h>
 #include <Wire.h>
 #include "evTimer.h"
 #include <SPI.h>
@@ -71,12 +69,6 @@ ADAFRUITBLE *btDevice;
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
 
 byte i = 0;
-
-
-void watchdogSetup(void)
-{
-  watchdogEnable(250);
-}
 
 //initializes all the system EEPROM values. Chances are this should be broken out a bit but
 //there is only one checksum check for all of them so it's simple to do it all here.
@@ -244,6 +236,16 @@ void loop() {
     systemIO.pollInitialization();
     
     if (btDevice) btDevice->loop();
+
+	Timer.loop();
+	Timer1.loop();
+	Timer2.loop();
+	Timer3.loop();
+	Timer4.loop();
+	Timer5.loop();
+	Timer6.loop();
+	Timer7.loop();
+	Timer8.loop();
     
     watchdogReset();
 }
