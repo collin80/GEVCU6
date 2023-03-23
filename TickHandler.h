@@ -31,7 +31,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define TICKHANDLER_H_
 
 #include "config.h"
-#include <DueTimer.h>
+#include "evTimer.h"
 #include "Logger.h"
 
 #define NUM_TIMERS 9

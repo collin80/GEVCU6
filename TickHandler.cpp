@@ -73,7 +73,7 @@ void TickHandler::attach(TickObserver* observer, uint32_t interval) {
     timerEntry[timer].observer[observerIndex] = observer;
     Logger::debug("attached TickObserver (%X) as number %d to timer %d, %dus interval", observer, observerIndex, timer, interval);
 
-    switch (timer) { // restarting a timer which would already be running is no problem (see DueTimer.cpp)
+    switch (timer) { // restarting a timer which would already be running is no problem (see evTimer.cpp)
     case 0:
         Timer0.setPeriod(interval).attachInterrupt(timer0Interrupt).start();
         break;

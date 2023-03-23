@@ -57,7 +57,7 @@ Random comments on things that should be coded up soon:
 #include <BLE.h>
 #include <FirmwareReceiver.h>
 #include <Wire.h>
-#include <DueTimer.h>
+#include "evTimer.h"
 #include <SPI.h>
 
 #define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!

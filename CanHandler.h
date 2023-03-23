@@ -28,7 +28,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <Arduino.h>
 #include "variant.h"
-#include <DueTimer.h>
+#include "evTimer.h"
 #include "Logger.h"
 #include <can_common.h>
 
