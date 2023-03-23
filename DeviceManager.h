@@ -42,7 +42,7 @@ public:
     void addDevice(Device *device);
     void removeDevice(Device *device);
 //	void addTickObserver(TickObserver *observer, uint32_t frequency);
-//	void addCanObserver(CanObserver *observer, uint32_t id, uint32_t mask, bool extended, CanHandler::CanBusNode canBus);
+//	void addCanObserver(CanObserver *observer, uint32_t id, uint32_t mask, bool extended);
     void sendMessage(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, void* message);
     void setParameter(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, char *key, char *value);
     void setParameter(DeviceType deviceType, DeviceId deviceId, uint32_t msgType, char *key, uint32_t value);

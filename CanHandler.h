@@ -79,11 +79,8 @@ private:
 class CanHandler
 {
 public:
-    enum CanBusNode {
-        CAN_BUS_EV, // CAN0 is intended to be connected to the EV bus (controller, charger, etc.)
-    };
 
-    CanHandler(CanBusNode busNumber);
+    CanHandler( );
     void setup();
     uint32_t getBusSpeed();
     void attach(CanObserver *observer, uint32_t id, uint32_t mask, bool extended);
@@ -116,7 +113,6 @@ private:
         CanObserver *observer;  // the observer object (e.g. a device)
     };
 
-    CanBusNode canBusNode;  // indicator to which can bus this instance is assigned to
     CANRaw *bus;    // the can bus instance which this CanHandler instance is assigned to
     CanObserverData observerData[CFG_CAN_NUM_OBSERVERS];    // Can observers
     uint32_t busSpeed;

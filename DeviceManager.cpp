@@ -105,7 +105,7 @@ void DeviceManager::removeDevice(Device *device) {
  Mask, id, ext form the filter. canbus sets whether to attach to
  CAN0 or CAN1.
  */
-//void addCanObserver(CanObserver *observer, uint32_t id, uint32_t mask, bool extended, CanHandler::CanBusNode canBus) {
+//void addCanObserver(CanObserver *observer, uint32_t id, uint32_t mask, bool extended) {
 //}
 
 /*

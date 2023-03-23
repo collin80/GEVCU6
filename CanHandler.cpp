@@ -37,9 +37,8 @@ CanHandler canHandler = CanHandler(CanHandler::CAN_BUS_EV);
 /*
  * Constructor of the can handler
  */
-CanHandler::CanHandler(CanBusNode canBusNode)
+CanHandler::CanHandler()
 {
-    this->canBusNode = canBusNode;
 
     // assign the correct bus instance to the pointer
    bus = &CAN;
@@ -59,12 +58,8 @@ void CanHandler::setup()
     // Initialize the canbus at the specified baudrate
     uint16_t storedVal;
     uint32_t realSpeed;
-    if (canBusNode == CAN_BUS_EV) {
-        sysPrefs->read(EESYS_CAN0_BAUD, &storedVal);
-    }
-    else {
-        sysPrefs->read(EESYS_CAN1_BAUD, &storedVal);
-    }
+    sysPrefs->read(EESYS_CAN0_BAUD, &storedVal);
+    
     realSpeed = storedVal * 1000; //was stored in thousands, now in actual rate
     if (realSpeed < 33333ul) realSpeed = 33333u; 
     if (realSpeed > 1000000ul) realSpeed = 1000000ul;
@@ -76,7 +71,7 @@ void CanHandler::setup()
     
     busSpeed = realSpeed;
  
-    Logger::info("CAN%d init ok. Speed = %i", (canBusNode == CAN_BUS_EV ? 0 : 1), busSpeed);
+    Logger::info("CAN%d init ok. Speed = %i", 0 ), busSpeed);
 }
 
 uint32_t CanHandler::getBusSpeed() {
@@ -105,7 +100,7 @@ void CanHandler::attach(CanObserver* observer, uint32_t id, uint32_t mask, bool 
     int mailbox = bus->findFreeRXMailbox();
 
     if (mailbox == -1) {
-        Logger::error("no free CAN mailbox on bus %d", canBusNode);
+        Logger::error("no free CAN mailbox on bus %d", 0);
         return;
     }
 
@@ -210,7 +205,7 @@ void CanHandler::process()
     if (bus->rx_avail()) {
         bus->get_rx_buff(frame);
       /*
-       Logger::debug("CAN:%d dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",canBusNode,
+       Logger::debug("CAN:%d dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X",0,
                       frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
                       frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
                       frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
@@ -299,7 +294,7 @@ void CanHandler::CANIO(CAN_FRAME& frame) {
     static CAN_FRAME CANioFrame;
     int i;
 
-  Logger::warn("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", canBusNode,frame.id, frame.data.bytes[0],
+  Logger::warn("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", 0,frame.id, frame.data.bytes[0],
                   frame.data.bytes[1],frame.data.bytes[2],frame.data.bytes[3],frame.data.bytes[4],
                   frame.data.bytes[5],frame.data.bytes[6],frame.data.bytes[7]);
 
