@@ -47,7 +47,6 @@ extern bool runThrottle; //TODO: remove use of global variables !
 long ms;
 
 DmocMotorController::DmocMotorController() : MotorController() {
-    prefsHandler = new PrefHandler(DMOC645);
     step = SPEED_TORQUE;
 
     selectedGear = NEUTRAL;

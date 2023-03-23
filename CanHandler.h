@@ -29,7 +29,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Arduino.h>
 #include "evTimer.h"
 #include "Logger.h"
-#include <can_common.h>
+#include "can_common.h"
 
 #include "mcp2515_can.h"
 

@@ -31,7 +31,6 @@
  * Set which ADC channel to use
  */
 PotBrake::PotBrake() : Throttle() {
-    prefsHandler = new PrefHandler(POTBRAKEPEDAL);
     commonName = "Potentiometer (analog) brake";
 }
 
@@ -159,45 +158,21 @@ void PotBrake::loadConfiguration() {
 
     // we deliberately do not load config via parent class here !
 
-#ifdef USE_HARD_CODED
-    if (false) {
-#else
-    if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
-#endif
-        prefsHandler->read(EETH_BRAKE_MIN, (uint16_t *)&config->minimumLevel1);
-        prefsHandler->read(EETH_BRAKE_MAX, (uint16_t *)&config->maximumLevel1);
-        prefsHandler->read(EETH_MAX_BRAKE_REGEN, &config->maximumRegen);
-        prefsHandler->read(EETH_MIN_BRAKE_REGEN, &config->minimumRegen);
-        prefsHandler->read(EETH_ADC_1, &config->AdcPin1);
-        Logger::debug(POTBRAKEPEDAL, "BRAKE MIN: %l MAX: %l", config->minimumLevel1, config->maximumLevel1);
-        Logger::debug(POTBRAKEPEDAL, "Min: %l MaxRegen: %l", config->minimumRegen, config->maximumRegen);
-    } else { //checksum invalid. Reinitialize values and store to EEPROM
-
         //these four values are ADC values
         //The next three are tenths of a percent
-        config->maximumRegen = BrakeMaxRegenValue; //percentage of full power to use for regen at brake pedal transducer
-        config->minimumRegen = BrakeMinRegenValue;
-        config->minimumLevel1 = BrakeMinValue;
-        config->maximumLevel1 = BrakeMaxValue;
-        config->AdcPin1 = BrakeADC;
-        saveConfiguration();
-    }
+    config->maximumRegen = BrakeMaxRegenValue; //percentage of full power to use for regen at brake pedal transducer
+    config->minimumRegen = BrakeMinRegenValue;
+    config->minimumLevel1 = BrakeMinValue;
+    config->maximumLevel1 = BrakeMaxValue;
+    config->AdcPin1 = BrakeADC;
+    
 }
 
 /*
  * Store the current configuration to EEPROM
  */
 void PotBrake::saveConfiguration() {
-    PotBrakeConfiguration *config = (PotBrakeConfiguration *) getConfiguration();
-
-    // we deliberately do not save config via parent class here !
-
-    prefsHandler->write(EETH_BRAKE_MIN, (uint16_t)config->minimumLevel1);
-    prefsHandler->write(EETH_BRAKE_MAX, (uint16_t)config->maximumLevel1);
-    prefsHandler->write(EETH_MAX_BRAKE_REGEN, config->maximumRegen);
-    prefsHandler->write(EETH_MIN_BRAKE_REGEN, config->minimumRegen);
-    prefsHandler->write(EETH_ADC_1, config->AdcPin1);
-    prefsHandler->saveChecksum();
+    //TODO remove?
 }
 
 

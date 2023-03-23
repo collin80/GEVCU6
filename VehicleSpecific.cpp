@@ -43,7 +43,6 @@
  * Constructor
  */
 VehicleSpecific::VehicleSpecific() : Device() {
-    prefsHandler = new PrefHandler(VEHICLESPECIFIC);
     
     commonName = "VehicleSpecific";
     didInitialSetup = false;

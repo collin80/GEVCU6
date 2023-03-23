@@ -52,26 +52,14 @@ CanHandler::CanHandler()
  */
 void CanHandler::setup()
 {
-    // Initialize the canbus at the specified baudrate
-    uint16_t storedVal;
-    uint32_t realSpeed;
-    sysPrefs->read(EESYS_CAN0_BAUD, &storedVal);
-
-    realSpeed = storedVal * 1000; // was stored in thousands, now in actual rate
-    if (realSpeed < 33333ul)
-        realSpeed = 33333u;
-    if (realSpeed > 1000000ul)
-        realSpeed = 1000000ul;
-
     while (CAN_OK != CAN.begin(CAN_500KBPS))
     { // init can bus : baudrate = 500kf
         SERIAL_PORT_MONITOR.println("CAN init fail, retry...");
         delay(100);
     }
 
-    busSpeed = realSpeed;
 
-    Logger::info("CAN%d init ok. Speed = %i", 0, busSpeed);
+    Logger::info("CAN init ok. Speed = %i", CAN_500KBPS);
 }
 
 uint32_t CanHandler::getBusSpeed()

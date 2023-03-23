@@ -299,9 +299,6 @@ void ThrottleDetector::detectMaxCalibrate() {
         // Done!
         state = DoNothing;
         tickHandler.detach(this);
-
-        // send updates to ichip wifi
-        deviceManager.sendMessage(DEVICE_WIFI, ICHIP2128, MSG_CONFIG_CHANGE, NULL);
     }
 }
 

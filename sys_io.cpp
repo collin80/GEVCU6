@@ -81,19 +81,13 @@ void SystemIO::setup_ADC_params()
     int i;
     //requires the value to be contiguous in memory
     for (i = 0; i < 7; i++) {
-        sysPrefs->read(EESYS_ADC0_GAIN + 4*i, &adc_comp[i].gain);
-        sysPrefs->read(EESYS_ADC0_OFFSET + 4*i, &adc_comp[i].offset);
         if (adc_comp[i].gain == 0xFFFF) adc_comp[i].gain = 1024;
         Logger::debug("ADC:%d GAIN: %d Offset: %d", i, adc_comp[i].gain, adc_comp[i].offset);
     }
 }
 
 void SystemIO::setSystemType(SystemType systemType) {
-    if (systemType >= GEVCU1 && systemType <= GEVCU6)
-    {
-        sysType = systemType;
-        sysPrefs->write(EESYS_SYSTEM_TYPE, (uint8_t)sysType);
-    }
+        sysType = GEVCU6;
 }
 
 SystemType SystemIO::getSystemType() {
@@ -106,72 +100,39 @@ void SystemIO::setup() {
     //the first order of business is to figure out what hardware we are running on and fill in
     //the pin tables.
 
-    sysPrefs->read(EESYS_SYSTEM_TYPE, (uint8_t *) &sysType);
-    if (sysType == GEVCU6) {
-        Logger::info("Running on GEVCU 6.2 hardware");
-        dig[0]=48;
-        dig[1]=49;
-        dig[2]=50;
-        dig[3]=51;
-        adc[0][0] = 255;
-        adc[0][1] = 255; //doesn't use SAM3X analog
-        adc[1][0] = 255;
-        adc[1][1] = 255;
-        adc[2][0] = 255;
-        adc[2][1] = 255;
-        adc[3][0] = 255;
-        adc[3][1] = 255;
-        out[0] = 4;
-        out[1] = 5;
-        out[2] = 6;
-        out[3] = 7;
-        out[4] = 2;
-        out[5] = 3;
-        out[6] = 8;
-        out[7] = 9;
-        useSPIADC = true;
-        pinMode(26, OUTPUT); //Chip Select for first ADC chip
-        pinMode(28, OUTPUT); //Chip select for second ADC chip
-        pinMode(30, OUTPUT); //chip select for third ADC chip
-        digitalWrite(26, HIGH);
-        digitalWrite(28, HIGH);
-        digitalWrite(30, HIGH);
-        SPI.begin();
-        pinMode(32, INPUT); //Data Ready indicator
-        SPI.begin(); //sets up with default 4Mhz, MSB first
-    } else {
-        Logger::info("Running on unknown hardware");
-        dig[0]=48;
-        dig[1]=49;
-        dig[2]=50;
-        dig[3]=51;
-        adc[0][0] = 255;
-        adc[0][1] = 255; //doesn't use SAM3X analog
-        adc[1][0] = 255;
-        adc[1][1] = 255;
-        adc[2][0] = 255;
-        adc[2][1] = 255;
-        adc[3][0] = 255;
-        adc[3][1] = 255;
-        out[0] = 4;
-        out[1] = 5;
-        out[2] = 6;
-        out[3] = 7;
-        out[4] = 2;
-        out[5] = 3;
-        out[6] = 8;
-        out[7] = 9;
-        useSPIADC = true;
-        pinMode(26, OUTPUT); //Chip Select for first ADC chip
-        pinMode(28, OUTPUT); //Chip select for second ADC chip
-        pinMode(30, OUTPUT); //chip select for third ADC chip
-        digitalWrite(26, HIGH);
-        digitalWrite(28, HIGH);
-        digitalWrite(30, HIGH);
-        SPI.begin();
-        pinMode(32, INPUT); //Data Ready indicator
-        SPI.begin(); //sets up with default 4Mhz, MSB first        
-    }
+    // TODO check pins
+    Logger::info("Running on GEVCU 6.2 hardware");
+    dig[0]=48;
+    dig[1]=49;
+    dig[2]=50;
+    dig[3]=51;
+    adc[0][0] = 255;
+    adc[0][1] = 255; //doesn't use SAM3X analog
+    adc[1][0] = 255;
+    adc[1][1] = 255;
+    adc[2][0] = 255;
+    adc[2][1] = 255;
+    adc[3][0] = 255;
+    adc[3][1] = 255;
+    out[0] = 4;
+    out[1] = 5;
+    out[2] = 6;
+    out[3] = 7;
+    out[4] = 2;
+    out[5] = 3;
+    out[6] = 8;
+    out[7] = 9;
+    useSPIADC = true;
+    pinMode(26, OUTPUT); //Chip Select for first ADC chip
+    pinMode(28, OUTPUT); //Chip select for second ADC chip
+    pinMode(30, OUTPUT); //chip select for third ADC chip
+    digitalWrite(26, HIGH);
+    digitalWrite(28, HIGH);
+    digitalWrite(30, HIGH);
+    SPI.begin();
+    pinMode(32, INPUT); //Data Ready indicator
+    SPI.begin(); //sets up with default 4Mhz, MSB first
+    
 
     for (i = 0; i < NUM_DIGITAL; i++) pinMode(dig[i], INPUT);
     for (i = 0; i < NUM_OUTPUT; i++) {
@@ -646,8 +607,7 @@ bool SystemIO::calibrateADCOffset(int adc, bool update)
     accum /= 500;
     if (adc < 4) accum >>= 11;
     else accum >>= 5;
-    //if (accum > 2) accum -= 2;
-    if (update) sysPrefs->write(EESYS_ADC0_OFFSET + (4*adc), (uint16_t)(accum));    
+    //if (accum > 2) accum -= 2; 
     Logger::console("ADC %i offset is now %i", adc, accum);
     return true;
 }
@@ -705,7 +665,6 @@ bool SystemIO::calibrateADCGain(int adc, int32_t target, bool update)
     //we've got a reading accum and a target. The rational gain is target/accum    
     adc_comp[adc].gain = (int16_t)((16384ull * target) / accum);
     
-    if (update) sysPrefs->write(EESYS_ADC0_GAIN + (4*adc), adc_comp[adc].gain);
     Logger::console("Accum: %i    Target: %i", accum, target);
     Logger::console("ADC %i gain is now %i", adc, adc_comp[adc].gain);
     return true;

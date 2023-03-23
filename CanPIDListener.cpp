@@ -31,9 +31,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "CanPIDListener.h"
 
 CanPIDListener::CanPIDListener() : Device() {
-
-    prefsHandler = new PrefHandler(PIDLISTENER);
-
     responseId = 0;
     responseMask = 0x7ff;
     responseExtended = false;
@@ -299,36 +296,17 @@ void CanPIDListener::loadConfiguration() {
 
     Device::loadConfiguration(); // call parent
 
-#ifdef USE_HARD_CODED
-    if (false) {
-#else
-    if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
-#endif
-        Logger::debug(PIDLISTENER, (char *)Constants::validChecksum);
-        //prefsHandler->read(EETH_MIN_ONE, &config->minimumLevel1);
-        //prefsHandler->read(EETH_MAX_ONE, &config->maximumLevel1);
-        //prefsHandler->read(EETH_CAR_TYPE, &config->carType);
-    } else { //checksum invalid. Reinitialize values and store to EEPROM
-        Logger::warn(PIDLISTENER, (char *)Constants::invalidChecksum);
-        //config->minimumLevel1 = Throttle1MinValue;
-        //config->maximumLevel1 = Throttle1MaxValue;
-        //config->carType = Volvo_S80_Gas;
-        saveConfiguration();
-    }
+    Logger::warn(PIDLISTENER, (char *)Constants::invalidChecksum);
+    //config->minimumLevel1 = Throttle1MinValue;
+    //config->maximumLevel1 = Throttle1MaxValue;
+    //config->carType = Volvo_S80_Gas;
 }
 
 /*
  * Store the current configuration to EEPROM
  */
 void CanPIDListener::saveConfiguration() {
-    CanPIDConfiguration *config = (CanPIDConfiguration *) getConfiguration();
-
-    Device::saveConfiguration(); // call parent
-
-    //prefsHandler->write(EETH_MIN_ONE, config->minimumLevel1);
-    //prefsHandler->write(EETH_MAX_ONE, config->maximumLevel1);
-    //prefsHandler->write(EETH_CAR_TYPE, config->carType);
-    //prefsHandler->saveChecksum();
+    //TODO remove? 
 }
 
 

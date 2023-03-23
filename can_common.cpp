@@ -1,4 +1,4 @@
-#include <can_common.h>
+#include "can_common.h"
 
 //CAN FD only allows discrete frame lengths after the normal CAN 8 byte limit. They are encoded below
 //as a FLASH based look up table for ease of use

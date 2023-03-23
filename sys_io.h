@@ -33,8 +33,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Arduino.h>
 #include <SPI.h>
 #include "config.h"
-#include "eeprom_layout.h"
-#include "PrefHandler.h"
 #include "Logger.h"
 #include <avr/wdt.h>
 
@@ -156,7 +154,6 @@ private:
     ExtendedIODev extendedAnalogIn[NUM_EXT_IO];    
 };
 
-extern PrefHandler *sysPrefs;
 extern SystemIO systemIO;
 
 #endif

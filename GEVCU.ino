@@ -53,7 +53,6 @@ Random comments on things that should be coded up soon:
 
 // The following includes are required in the .ino file by the Arduino IDE in order to properly
 // identify the required libraries for the build.
-#include <BLE.h>
 #include <Wire.h>
 #include "evTimer.h"
 #include <SPI.h>
@@ -62,58 +61,12 @@ Random comments on things that should be coded up soon:
 #define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
 
 //Evil, global variables
-PrefHandler *sysPrefs;
-MemCache *memCache;
 Heartbeat *heartbeat;
-ADAFRUITBLE *btDevice;
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
 
 byte i = 0;
 
 
-//initializes all the system EEPROM values. Chances are this should be broken out a bit but
-//there is only one checksum check for all of them so it's simple to do it all here.
-
-void initSysEEPROM() {
-	//three temporary storage places to make saving to EEPROM easy
-	uint8_t eight;
-	uint16_t sixteen;
-	uint32_t thirtytwo;
-
-	eight = 6; //GEVCU 6.2 board
-	sysPrefs->write(EESYS_SYSTEM_TYPE, eight);
-
-	sixteen = 1024; //no gain
-	sysPrefs->write(EESYS_ADC0_GAIN, sixteen);
-	sysPrefs->write(EESYS_ADC1_GAIN, sixteen);
-	sysPrefs->write(EESYS_ADC2_GAIN, sixteen);
-	sysPrefs->write(EESYS_ADC3_GAIN, sixteen);
-    sysPrefs->write(EESYS_ADC_PACKH_GAIN, sixteen);
-    sysPrefs->write(EESYS_ADC_PACKL_GAIN, sixteen);
-    sysPrefs->write(EESYS_ADC_PACKC_GAIN, sixteen);
-
-
-	sixteen = 0; //no offset
-	sysPrefs->write(EESYS_ADC0_OFFSET, sixteen);
-	sysPrefs->write(EESYS_ADC1_OFFSET, sixteen);
-	sysPrefs->write(EESYS_ADC2_OFFSET, sixteen);
-	sysPrefs->write(EESYS_ADC3_OFFSET, sixteen);
-    sysPrefs->write(EESYS_ADC_PACKH_OFFSET, sixteen);
-    sysPrefs->write(EESYS_ADC_PACKL_OFFSET, sixteen);
-    sysPrefs->write(EESYS_ADC_PACKC_OFFSET, sixteen);
-
-
-	sixteen = CFG_CAN0_SPEED;
-	sysPrefs->write(EESYS_CAN0_BAUD, sixteen);
-    sixteen = CFG_CAN1_SPEED;
-	sysPrefs->write(EESYS_CAN1_BAUD, sixteen);
-
-	eight = 2;  //0=debug, 1=info,2=warn,3=error,4=off
-	sysPrefs->write(EESYS_LOG_LEVEL, eight);
-
-	sysPrefs->saveChecksum();
-    sysPrefs->forceCacheWrite();
-}
 
 /*
 Creating objects here is all you need to do to register them. The pointer
@@ -124,9 +77,7 @@ void createObjects() {
 	PotThrottle *paccelerator = new PotThrottle();
 	PotBrake *pbrake = new PotBrake();
     VehicleSpecific *vehicleSpecific = new VehicleSpecific();
-    TestThrottle *testAccel = new TestThrottle();
 	DmocMotorController *dmotorController = new DmocMotorController();
-    ADAFRUITBLE *ble = new ADAFRUITBLE();
 }
 
 void initializeDevices() {
@@ -134,10 +85,6 @@ void initializeDevices() {
 	heartbeat = new Heartbeat();
 	Logger::info("add: Heartbeat (id: %X, %X)", HEARTBEAT, heartbeat);
 	heartbeat->setup();
-
-	//fault handler is always enabled too - its also statically allocated so no using -> here
-	//This is initialized before the other devices so that they can go ahead and use it if they fault upon start up
-	faultHandler.setup();
 
 	/*
 	We used to instantiate all the objects here along with other code. To simplify things this is done somewhat
@@ -152,7 +99,6 @@ void initializeDevices() {
 	 *	out there as they initialize. For instance, a motor controller could see if a BMS
 	 *	exists and supports a function that the motor controller wants to access.
 	 */
-    sysPrefs->forceCacheWrite();
 	deviceManager.sendMessage(DEVICE_ANY, INVALID, MSG_STARTUP, NULL);
 
 }
@@ -196,19 +142,6 @@ void setup() {
 	Wire.begin();
 	Wire.setClock(1000000);
 	Logger::info("TWI init ok");
-	memCache = new MemCache();
-	Logger::info("add MemCache (id: %X, %X)", MEMCACHE, memCache);
-	memCache->setup();
-	sysPrefs = new PrefHandler(SYSTEM);
-	if (!sysPrefs->checksumValid()) 
-        {
-	      Logger::info("Initializing system EEPROM settings");
-	      initSysEEPROM();
-	    } 
-        else {Logger::info("Using existing EEPROM system values");}//checksum is good, read in the values stored in EEPROM
-
-	uint8_t loglevel;
-	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
 	loglevel = 0; //force debugging log level
     Logger::console("LogLevel: %i", loglevel);
 	Logger::setLoglevel((Logger::LogLevel)loglevel);
@@ -218,8 +151,6 @@ void setup() {
 	Logger::info("SYSIO init ok");	
 
 	initializeDevices();
-	btDevice = static_cast<ADAFRUITBLE *>(deviceManager.getDeviceByID(ADABLUE));
-    deviceManager.sendMessage(DEVICE_WIFI, ADABLUE, MSG_CONFIG_CHANGE, NULL); //Load config into BLE interface
 
    
 	Logger::info("System Ready");	
@@ -234,8 +165,6 @@ void loop() {
 	canHandler.process();
 
     systemIO.pollInitialization();
-    
-    if (btDevice) btDevice->loop();
 
 	Timer.loop();
 	Timer1.loop();

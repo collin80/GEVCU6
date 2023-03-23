@@ -199,27 +199,14 @@ void Throttle::loadConfiguration() {
 
     Device::loadConfiguration(); // call parent
 
-#ifdef USE_HARD_CODED
-    if (false) {
-#else
-    if (prefsHandler->checksumValid()) { //checksum is good, read in the values stored in EEPROM
-#endif
-        prefsHandler->read(EETH_REGEN_MIN, &config->positionRegenMinimum);
-        prefsHandler->read(EETH_REGEN_MAX, &config->positionRegenMaximum);
-        prefsHandler->read(EETH_FWD, &config->positionForwardMotionStart);
-        prefsHandler->read(EETH_MAP, &config->positionHalfPower);
-        prefsHandler->read(EETH_CREEP, &config->creep);
-        prefsHandler->read(EETH_MIN_ACCEL_REGEN, &config->minimumRegen);
-        prefsHandler->read(EETH_MAX_ACCEL_REGEN, &config->maximumRegen);
-    } else { //checksum invalid. Reinitialize values, leave storing them to the subclasses
-        config->positionRegenMinimum = ThrottleRegenMinValue;
-        config->positionRegenMaximum = ThrottleRegenMaxValue;
-        config->positionForwardMotionStart = ThrottleFwdValue;
-        config->positionHalfPower = ThrottleMapValue;
-        config->creep = ThrottleCreepValue;
-        config->minimumRegen = ThrottleMinRegenValue; //percentage of minimal power to use when regen starts
-        config->maximumRegen = ThrottleMaxRegenValue; //percentage of full power to use for regen at throttle
-    }
+    config->positionRegenMinimum = ThrottleRegenMinValue;
+    config->positionRegenMaximum = ThrottleRegenMaxValue;
+    config->positionForwardMotionStart = ThrottleFwdValue;
+    config->positionHalfPower = ThrottleMapValue;
+    config->creep = ThrottleCreepValue;
+    config->minimumRegen = ThrottleMinRegenValue; //percentage of minimal power to use when regen starts
+    config->maximumRegen = ThrottleMaxRegenValue; //percentage of full power to use for regen at throttle
+    
     Logger::debug(THROTTLE, "RegenMax: %l RegenMin: %l Fwd: %l Map: %l", config->positionRegenMaximum, config->positionRegenMinimum,
                   config->positionForwardMotionStart, config->positionHalfPower);
     Logger::debug(THROTTLE, "MinRegen: %d MaxRegen: %d", config->minimumRegen, config->maximumRegen);
@@ -229,20 +216,7 @@ void Throttle::loadConfiguration() {
  * Store the current configuration to EEPROM
  */
 void Throttle::saveConfiguration() {
-    ThrottleConfiguration *config = (ThrottleConfiguration *) getConfiguration();
-
-    Device::saveConfiguration(); // call parent
-
-    prefsHandler->write(EETH_REGEN_MIN, config->positionRegenMinimum);
-    prefsHandler->write(EETH_REGEN_MAX, config->positionRegenMaximum);
-    prefsHandler->write(EETH_FWD, config->positionForwardMotionStart);
-    prefsHandler->write(EETH_MAP, config->positionHalfPower);
-    prefsHandler->write(EETH_CREEP, config->creep);
-    prefsHandler->write(EETH_MIN_ACCEL_REGEN, config->minimumRegen);
-    prefsHandler->write(EETH_MAX_ACCEL_REGEN, config->maximumRegen);
-    prefsHandler->saveChecksum();
-
-    Logger::console("Throttle configuration saved");
+    //TODO remove 
 }
 
 

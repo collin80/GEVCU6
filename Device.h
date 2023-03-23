@@ -30,10 +30,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Arduino.h>
 #include "config.h"
 #include "DeviceTypes.h"
-#include "eeprom_layout.h"
-#include "PrefHandler.h"
 #include "Sys_Messages.h"
-#include "FaultHandler.h"
 
 /*
  * A abstract class to hold device configuration. It is to be accessed
@@ -65,7 +62,6 @@ public:
     void setConfiguration(DeviceConfiguration *);
 
 protected:
-    PrefHandler *prefsHandler;
     const char *commonName;
 
 private:

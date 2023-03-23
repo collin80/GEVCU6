@@ -35,8 +35,6 @@
 #include "TickHandler.h"
 #include "Logger.h"
 #include "DeviceManager.h"
-#include "FaultHandler.h"
-#include "FaultCodes.h"
 
 class VehicleSpecific: public Device {
 public:

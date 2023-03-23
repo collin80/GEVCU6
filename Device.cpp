@@ -29,7 +29,6 @@
 
 Device::Device() {
     deviceConfiguration = NULL;
-    prefsHandler = NULL;
     //since all derived classes eventually call this base method this will cause every device to auto register itself with the device manager
     deviceManager.addDevice(this);
     commonName = "Generic Device";
@@ -53,7 +52,7 @@ uint32_t Device::getTickInterval() {
 
 //just bubbles up the value from the preference handler.
 bool Device::isEnabled() {
-    return prefsHandler->isEnabled();
+    return true; /// TODO check this logic.. always true
 }
 
 void Device::handleMessage(uint32_t msgType, void* message) {
