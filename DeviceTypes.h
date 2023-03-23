@@ -41,17 +41,12 @@ enum DeviceType {
 
 enum DeviceId { //unique device ID for every piece of hardware possible
     DMOC645 = 0x1000,
-    TCCHCHARGE = 0x1011,
-    LEAR=0x1012,
     THROTTLE = 0x1030,
     POTACCELPEDAL = 0x1031,
     POTBRAKEPEDAL = 0x1032,
     VEHICLESPECIFIC = 0x3000,
-    FAULTSYS = 0x4000,
-    EVICTUS = 0x4400,
-    SYSTEM = 0x5000,
-    HEARTBEAT = 0x5001,
     PIDLISTENER = 0x6000,
+    SYSTEM = 0x5000,
     INVALID = 0xFFFF
 };
 

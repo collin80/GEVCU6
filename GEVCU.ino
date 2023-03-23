@@ -61,8 +61,7 @@ Random comments on things that should be coded up soon:
 #define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
 
 //Evil, global variables
-Heartbeat *heartbeat;
-template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream SerialUSB
+template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream Serial
 
 byte i = 0;
 uint8_t loglevel;
@@ -82,11 +81,6 @@ void createObjects() {
 }
 
 void initializeDevices() {
-	//heartbeat is always enabled now
-	heartbeat = new Heartbeat();
-	Logger::info("add: Heartbeat (id: %X, %X)", HEARTBEAT, heartbeat);
-	heartbeat->setup();
-
 	/*
 	We used to instantiate all the objects here along with other code. To simplify things this is done somewhat
 	automatically now. Just instantiate your new device object in createObjects above. This takes care of the details
@@ -136,10 +130,10 @@ void setup() {
        
 	pinMode(BLINK_LED, OUTPUT);
 	digitalWrite(BLINK_LED, LOW);
-    SerialUSB.begin(CFG_SERIAL_SPEED);
-	SerialUSB.println(CFG_VERSION);
-	SerialUSB.print("Build number: ");
-	SerialUSB.println(CFG_BUILD_NUM);
+    Serial.begin(CFG_SERIAL_SPEED);
+	Serial.println(CFG_VERSION);
+	Serial.print("Build number: ");
+	Serial.println(CFG_BUILD_NUM);
 	Wire.begin();
 	Wire.setClock(1000000);
 	Logger::info("TWI init ok");

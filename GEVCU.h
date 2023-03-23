@@ -35,7 +35,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "PotBrake.h"
 #include "MotorController.h"
 #include "DmocMotorController.h"
-#include "Heartbeat.h"
 #include "sys_io.h"
 #include "CanHandler.h"
 #include "ThrottleDetector.h"

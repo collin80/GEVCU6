@@ -449,9 +449,7 @@ void CanHandler::sendSDORequest(SDO_FRAME *sframe)
         frame.data.byte[3] = sframe->subIndex;
         for (int x = 0; x < sframe->dataLength; x++)
             frame.data.byte[4 + x] = sframe->data[x];
-        // SerialUSB.println("plugging trigger");
         this->sendFrame(frame);
-        // SerialUSB.println("sent frame");
     }
 }
 

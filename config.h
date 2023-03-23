@@ -40,7 +40,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * SERIAL CONFIGURATION
  */
 #define CFG_SERIAL_SPEED 115200
-//#define SerialUSB Serial // re-route serial-usb output to programming port ;) comment if output should go to std usb
 
 
 //The defines that used to be here to configure devices are gone now.

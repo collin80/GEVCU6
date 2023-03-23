@@ -200,24 +200,24 @@ boolean Logger::isDebug() {
  */
 void Logger::log(DeviceId deviceId, LogLevel level, const char *format, va_list args) {
     lastLogTime = millis();
-    SerialUSB.print(lastLogTime);
-    SerialUSB.print(" - ");
+    Serial.print(lastLogTime);
+    Serial.print(" - ");
 
     switch (level) {
     case Debug:
-        SerialUSB.print("DEBUG");
+        Serial.print("DEBUG");
         break;
     case Info:
-        SerialUSB.print("INFO");
+        Serial.print("INFO");
         break;
     case Warn:
-        SerialUSB.print("WARNING");
+        Serial.print("WARNING");
         break;
     case Error:
-        SerialUSB.print("ERROR");
+        Serial.print("ERROR");
         break;
     }
-    SerialUSB.print(": ");
+    Serial.print(": ");
 
     if (deviceId)
         printDeviceName(deviceId);
@@ -250,70 +250,70 @@ void Logger::logMessage(const char *format, va_list args) {
             if (*format == '\0')
                 break;
             if (*format == '%') {
-                SerialUSB.print(*format);
+                Serial.print(*format);
                 continue;
             }
             if (*format == 's') {
                 register char *s = (char *) va_arg( args, int );
-                SerialUSB.print(s);
+                Serial.print(s);
                 continue;
             }
             if (*format == 'd' || *format == 'i') {
-                SerialUSB.print(va_arg( args, int ), DEC);
+                Serial.print(va_arg( args, int ), DEC);
                 continue;
             }
             if (*format == 'f') {
-                SerialUSB.print(va_arg( args, double ), 2);
+                Serial.print(va_arg( args, double ), 2);
                 continue;
             }
             if (*format == 'x') {
-                SerialUSB.print(va_arg( args, int ), HEX);
+                Serial.print(va_arg( args, int ), HEX);
                 continue;
             }
             if (*format == 'X') {
-                SerialUSB.print("0x");
-                SerialUSB.print(va_arg( args, int ), HEX);
+                Serial.print("0x");
+                Serial.print(va_arg( args, int ), HEX);
                 continue;
             }
             if (*format == 'b') {
-                SerialUSB.print(va_arg( args, int ), BIN);
+                Serial.print(va_arg( args, int ), BIN);
                 continue;
             }
             if (*format == 'B') {
-                SerialUSB.print("0b");
-                SerialUSB.print(va_arg( args, int ), BIN);
+                Serial.print("0b");
+                Serial.print(va_arg( args, int ), BIN);
                 continue;
             }
             if (*format == 'l') {
-                SerialUSB.print(va_arg( args, long ), DEC);
+                Serial.print(va_arg( args, long ), DEC);
                 continue;
             }
 
             if (*format == 'c') {
-                SerialUSB.print(va_arg( args, int ));
+                Serial.print(va_arg( args, int ));
                 continue;
             }
             if (*format == 't') {
                 if (va_arg( args, int ) == 1) {
-                    SerialUSB.print("T");
+                    Serial.print("T");
                 } else {
-                    SerialUSB.print("F");
+                    Serial.print("F");
                 }
                 continue;
             }
             if (*format == 'T') {
                 if (va_arg( args, int ) == 1) {
-                    SerialUSB.print(Constants::trueStr);
+                    Serial.print(Constants::trueStr);
                 } else {
-                    SerialUSB.print(Constants::falseStr);
+                    Serial.print(Constants::falseStr);
                 }
                 continue;
             }
 
         }
-        SerialUSB.print(*format);
+        Serial.print(*format);
     }
-    SerialUSB.println();
+    Serial.println();
 }
 
 /*
@@ -325,28 +325,19 @@ void Logger::logMessage(const char *format, va_list args) {
 void Logger::printDeviceName(DeviceId deviceId) {
     switch (deviceId) {
     case DMOC645:
-        SerialUSB.print("DMOC645");
-        break;
-    case TCCHCHARGE:
-        SerialUSB.print("TCCH");
-        break;
-    case THROTTLE:
-        SerialUSB.print("THROTTLE");
+        Serial.print("DMOC645");
         break;
     case POTACCELPEDAL:
-        SerialUSB.print("POTACCEL");
+        Serial.print("POTACCEL");
         break;
     case POTBRAKEPEDAL:
-        SerialUSB.print("POTBRAKE");
+        Serial.print("POTBRAKE");
         break;
     case SYSTEM:
-        SerialUSB.print("SYSTEM");
-        break;
-    case HEARTBEAT:
-        SerialUSB.print("HEARTBEAT");
+        Serial.print("SYSTEM");
         break;
     }
-    SerialUSB.print(" - ");
+    Serial.print(" - ");
 
 }
 
