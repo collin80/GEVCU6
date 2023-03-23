@@ -33,8 +33,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
-#include <due_can.h>
-
 #define CFG_BUILD_NUM	1061      //increment this every time a git commit is done. 
 #define CFG_VERSION "GEVCU 2021-03-12"
 

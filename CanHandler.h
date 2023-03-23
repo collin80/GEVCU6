@@ -27,9 +27,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CAN_HANDLER_H_
 
 #include <Arduino.h>
-#include "config.h"
-#include "due_can.h"
-#include <due_wire.h>
 #include "variant.h"
 #include <DueTimer.h>
 #include "Logger.h"

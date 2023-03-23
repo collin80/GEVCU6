@@ -53,10 +53,8 @@ Random comments on things that should be coded up soon:
 
 // The following includes are required in the .ino file by the Arduino IDE in order to properly
 // identify the required libraries for the build.
-#include <due_can.h>
 #include <BLE.h>
 #include <FirmwareReceiver.h>
-#include <due_wire.h>
 #include <DueTimer.h>
 #include <SPI.h>
 
