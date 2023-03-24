@@ -4,38 +4,18 @@
 #include <Arduino.h>
 
 /** Define the typical baudrate for CAN communication. */
-#ifdef CAN_BPS_500K
-#undef CAN_BPS_1000K
-#undef CAN_BPS_800K
-#undef CAN_BPS_500K
-#undef CAN_BPS_250K
-#undef CAN_BPS_125K
-#undef CAN_BPS_50K
-#undef CAN_BPS_33333
-#undef CAN_BPS_25K
-#endif
 
-#define CAN_BPS_1000K	1000000
-#define CAN_BPS_800K	800000
 #define CAN_BPS_500K	500000
-#define CAN_BPS_250K	250000
-#define CAN_BPS_125K	125000
-#define CAN_BPS_50K		50000
-#define CAN_BPS_33333	33333
-#define CAN_BPS_25K		25000
 
 
 #define SIZE_LISTENERS	4 //number of classes that can register as listeners with this class
 #define CAN_DEFAULT_BAUD	500000
-#define CAN_DEFAULT_FD_RATE 4000000
 
 //some defines to allow older API to still work
 #define attachMBHandler setCallback
 #define detachMBHandler removeCallback
 #define attachGeneralHandler setGeneralHandler
 #define detachGeneralHandler removeGeneralHandler
-
-extern const uint8_t fdLengthEncoding[65];
 
 class BitRef
 {
@@ -148,29 +128,12 @@ public:
     
 };
 
-class CAN_FRAME_FD
-{
-public:
-    CAN_FRAME_FD();
-
-    BytesUnion_FD data;   // 64 bytes - lots of ways to access it.
-    uint32_t id;          // EID if ide set, SID otherwise
-    uint32_t fid;         // family ID
-    uint32_t timestamp;   // CAN timer value when mailbox message was received.
-    uint8_t rrs;          // RRS for CAN-FD (optional 12th standard ID bit)
-    uint8_t priority;     // Priority but only important for TX frames and then only for special uses. (0-31)
-    uint8_t extended;     // Extended ID flag
-    uint8_t fdMode;       // 0 = normal CAN frame, 1 = CAN-FD frame
-    uint8_t length;       // Number of data bytes
-};
-
 class CANListener
 {
 public:
   CANListener();
 
   virtual void gotFrame(CAN_FRAME *frame, int mailbox);
-  virtual void gotFrameFD(CAN_FRAME_FD *frame, int mailbox);
 
   void setCallback(uint8_t mailBox);
   void removeCallback(uint8_t mailBox);
@@ -206,11 +169,6 @@ public:
 	virtual bool rx_avail() = 0;
 	virtual uint16_t available() = 0; //like rx_avail but returns the number of waiting frames
 	virtual uint32_t get_rx_buff(CAN_FRAME &msg) = 0;
-    //These aren't abstract because not all CAN drivers would support FD
-    virtual uint32_t get_rx_buffFD(CAN_FRAME_FD &msg);
-    virtual uint32_t set_baudrateFD(uint32_t nominalSpeed, uint32_t dataSpeed);
-    virtual bool sendFrameFD(CAN_FRAME_FD& txFrame);
-    virtual uint32_t initFD(uint32_t nominalRate, uint32_t dataRate);    
 
     //Public API common to all subclasses - don't need to be re-implemented
     //wrapper for syntactic sugar reasons
@@ -238,24 +196,11 @@ public:
     void attachCANInterrupt( void (*cb)(CAN_FRAME *) ) {setGeneralCallback(cb);}
 	void attachCANInterrupt(uint8_t mailBox, void (*cb)(CAN_FRAME *));
 	void detachCANInterrupt(uint8_t mailBox);
-    bool supportsFDMode();
     bool isFaulted();
     bool hasRXFault();
     bool hasTXFault();
     void setDebuggingMode(bool mode);
 
-    //pubic API for CAN-FD mode
-    inline uint32_t readFD(CAN_FRAME_FD &msg) { return get_rx_buffFD(msg); }
-    uint32_t beginFD(uint32_t nominalBaudRate, uint32_t fastBaudRate);
-    uint32_t beginFD(uint32_t nominalBaudRate, uint32_t fastBaudRate, uint8_t enPin);
-    uint32_t beginFD();
-    uint32_t getDataSpeedFD();
-    void setGeneralCallbackFD( void (*cb)(CAN_FRAME_FD *) );
-    void setCallbackFD(uint8_t mailbox, void (*cb)(CAN_FRAME_FD *));
-    void removeGeneralCallbackFD();
-    void removeCallbackFD(uint8_t mailbox);
-    bool canToFD(CAN_FRAME &source, CAN_FRAME_FD &dest);
-	bool fdToCan(CAN_FRAME_FD &source, CAN_FRAME &dest);
     
     bool debuggingMode;
 
@@ -263,13 +208,9 @@ protected:
 	CANListener *listener[SIZE_LISTENERS];
     void (*cbGeneral)(CAN_FRAME *); //general callback if no per-mailbox or per-filter entries matched
     void (*cbCANFrame[32])(CAN_FRAME *); //array of function pointers - disgusting syntax though.
-    void (*cbGeneralFD)(CAN_FRAME_FD *); //general callback if no per-mailbox or per-filter entries matched - FD version
-    void (*cbCANFrameFD[32])(CAN_FRAME_FD *); //array of function pointers - disgusting syntax though - FD version
     uint32_t busSpeed;
-    uint32_t fd_DataSpeed;
     int numFilters;
     int enablePin;
-    bool fdSupported;
     bool faulted;
     bool rxFault;
     bool txFault;    
