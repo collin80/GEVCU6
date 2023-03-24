@@ -75,13 +75,13 @@ bool PotBrake::validateSignal(RawSignalData *rawSignal) {
 
     if (rawSignal->input1 > (config->maximumLevel1 + CFG_THROTTLE_TOLERANCE)) {
         if (status == OK)
-            Logger::error(POTBRAKEPEDAL, (char *)Constants::valueOutOfRange, rawSignal->input1);
+            Logger::debug(POTBRAKEPEDAL, (char *)Constants::valueOutOfRange, rawSignal->input1);
         status = ERR_HIGH_T1;
         return true; // even if it's too high, let it process and apply full regen !
     }
     if (rawSignal->input1 < (config->minimumLevel1 - CFG_THROTTLE_TOLERANCE)) {
         if (status == OK)
-            Logger::error(POTBRAKEPEDAL, (char *)Constants::valueOutOfRange, rawSignal->input1);
+            Logger::debug(POTBRAKEPEDAL, (char *)Constants::valueOutOfRange, rawSignal->input1);
         status = ERR_LOW_T1;
         return false;
     }

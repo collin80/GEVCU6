@@ -138,9 +138,6 @@ void setup() {
 	Wire.setClock(1000000);
 	Logger::info("TWI init ok");
 	loglevel = 0; //force debugging log level
-    Logger::console("LogLevel: %i", loglevel);
-	Logger::setLoglevel((Logger::LogLevel)loglevel);
-    //Logger::setLoglevel((Logger::LogLevel)0);
 	systemIO.setup();  
 	canHandler.setup();
 	Logger::info("SYSIO init ok");	

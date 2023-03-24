@@ -35,18 +35,13 @@
 class Logger {
 public:
     enum LogLevel {
-        Debug = 0, Info = 1, Warn = 2, Error = 3, Off = 4
+        Debug = 0, Info = 1
     };
     static void debug(const char *, ...);
     static void debug(DeviceId, const char *, ...);
     static void info(const char *, ...);
     static void info(DeviceId, const char *, ...);
-    static void warn(const char *, ...);
-    static void warn(DeviceId, const char *, ...);
-    static void error(const char *, ...);
-    static void error(DeviceId, const char *, ...);
     static void console(const char *, ...);
-    static void setLoglevel(LogLevel);
     static LogLevel getLogLevel();
     static uint32_t getLastLogTime();
     static boolean isDebug();

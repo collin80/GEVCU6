@@ -83,58 +83,6 @@ void Logger::info(DeviceId deviceId, const char *message, ...) {
 }
 
 /*
- * Output a warning message with a variable amount of parameters
- * printf() style, see Logger::log()
- */
-void Logger::warn(const char *message, ...) {
-    if (logLevel > Warn)
-        return;
-    va_list args;
-    va_start(args, message);
-    Logger::log((DeviceId) NULL, Warn, message, args);
-    va_end(args);
-}
-
-/*
- * Output a warning message with the name of a device appended before the message
- * printf() style, see Logger::log()
- */
-void Logger::warn(DeviceId deviceId, const char *message, ...) {
-    if (logLevel > Warn)
-        return;
-    va_list args;
-    va_start(args, message);
-    Logger::log(deviceId, Warn, message, args);
-    va_end(args);
-}
-
-/*
- * Output a error message with a variable amount of parameters
- * printf() style, see Logger::log()
- */
-void Logger::error(const char *message, ...) {
-    if (logLevel > Error)
-        return;
-    va_list args;
-    va_start(args, message);
-    Logger::log((DeviceId) NULL, Error, message, args);
-    va_end(args);
-}
-
-/*
- * Output a error message with the name of a device appended before the message
- * printf() style, see Logger::log()
- */
-void Logger::error(DeviceId deviceId, const char *message, ...) {
-    if (logLevel > Error)
-        return;
-    va_list args;
-    va_start(args, message);
-    Logger::log(deviceId, Error, message, args);
-    va_end(args);
-}
-
-/*
  * Output a comnsole message with a variable amount of parameters
  * printf() style, see Logger::logMessage()
  */
@@ -143,13 +91,6 @@ void Logger::console(const char *message, ...) {
     va_start(args, message);
     Logger::logMessage(message, args);
     va_end(args);
-}
-
-/*
- * Set the log level. Any output below the specified log level will be omitted.
- */
-void Logger::setLoglevel(LogLevel level) {
-    logLevel = level;
 }
 
 /*
@@ -209,12 +150,6 @@ void Logger::log(DeviceId deviceId, LogLevel level, const char *format, va_list 
         break;
     case Info:
         Serial.print("INFO");
-        break;
-    case Warn:
-        Serial.print("WARNING");
-        break;
-    case Error:
-        Serial.print("ERROR");
         break;
     }
     Serial.print(": ");

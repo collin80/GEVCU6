@@ -296,10 +296,7 @@ void CanPIDListener::loadConfiguration() {
 
     Device::loadConfiguration(); // call parent
 
-    Logger::warn(PIDLISTENER, (char *)Constants::invalidChecksum);
-    //config->minimumLevel1 = Throttle1MinValue;
-    //config->maximumLevel1 = Throttle1MaxValue;
-    //config->carType = Volvo_S80_Gas;
+    Logger::info(PIDLISTENER, (char *)Constants::invalidChecksum);
 }
 
 

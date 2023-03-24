@@ -65,7 +65,7 @@ void TickHandler::attach(TickObserver *observer, uint32_t interval)
         timer = findTimer(0); // no timer with given tick interval exist -> look for unused (interval == 0)
         if (timer == -1)
         {
-            Logger::error("No free timer available for interval=%d", interval);
+            Logger::debug("No free timer available for interval=%d", interval);
             return;
         }
         timerEntry[timer].interval = interval;
@@ -74,7 +74,7 @@ void TickHandler::attach(TickObserver *observer, uint32_t interval)
     int observerIndex = findObserver(timer, 0);
     if (observerIndex == -1)
     {
-        Logger::error("No free observer slot for timer %d with interval %d", timer, timerEntry[timer].interval);
+        Logger::debug("No free observer slot for timer %d with interval %d", timer, timerEntry[timer].interval);
         return;
     }
     timerEntry[timer].observer[observerIndex] = observer;
@@ -268,7 +268,7 @@ void timer8Interrupt()
  */
 void TickObserver::handleTick()
 {
-    Logger::error("TickObserver does not implement handleTick()");
+    Logger::debug("TickObserver does not implement handleTick()");
 }
 
 TickHandler tickHandler;
