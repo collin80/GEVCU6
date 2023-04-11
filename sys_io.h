@@ -36,6 +36,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "eeprom_layout.h"
 #include "PrefHandler.h"
 #include "Logger.h"
+#include "TickHandler.h"
 
 class CANIODevice;
 
@@ -89,7 +90,15 @@ public:
     uint8_t localOffset;
 };
 
-class SystemIO
+struct SLOWPWM_SPECS
+{
+    uint32_t freqInterval;
+    uint32_t triggerPoint;
+    bool pwmActive;
+    uint32_t progress;
+};
+
+class SystemIO: public TickObserver
 {
 public:
     SystemIO();
@@ -102,7 +111,13 @@ public:
     int32_t getAnalogOut(uint8_t which);
     boolean getDigitalIn(uint8_t which); //get value of one of the 4 digital inputs
     void setDigitalOutput(uint8_t which, boolean active); //set output high or not
-    boolean getDigitalOutput(uint8_t which); //get current value of output state (high?)    
+    void setDigitalPWM(uint8_t which, uint16_t duty);
+    boolean getDigitalOutput(uint8_t which); //get current value of output state (high?)
+
+    void setDigitalSlowPWM(uint8_t which, uint8_t freq, uint16_t duty);
+    void updateDigitalSlowPWMDuty(uint8_t which, uint16_t duty);
+    void updateDigitalSlowPWMFreq(uint8_t which, uint8_t freq);
+    void handleTick();
     
     void setDigitalInLatchMode(int which, LatchModes::LATCHMODE mode);
     void unlockDigitalInLatch(int which);
@@ -137,6 +152,9 @@ private:
     SystemType sysType;
 
     ADC_COMP adc_comp[NUM_ANALOG]; //GEVCU 6.2 has 7 adc inputs but three are special
+
+    SLOWPWM_SPECS digPWMOutput[NUM_OUTPUT];
+    uint32_t lastMicros;
 
     bool useSPIADC;
     bool adc2Initialized;

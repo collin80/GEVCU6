@@ -58,6 +58,14 @@ SystemIO::SystemIO()
     adc2Initialized = false;
     adc3Initialized = false;
     lastInitAttempt = 0;
+
+    for (int i = 0; i < NUM_OUTPUT; i++)
+    {
+        digPWMOutput[i].triggerPoint = 0;
+        digPWMOutput[i].progress = 0;
+        digPWMOutput[i].pwmActive = false;
+        digPWMOutput[i].freqInterval = 0;
+    }
 }
 
 bool SystemIO::isInitialized()
@@ -184,6 +192,12 @@ void SystemIO::setup() {
     setup_ADC_params();
 
     setupSPIADC();
+
+    tickHandler.attach(this, 1000); //interval is set in microseconds. We want 1ms timer
+    lastMicros = micros();
+
+    //Due can handle 12 bit precision for duty cycle values (0-4095)
+    analogWriteResolution(12);
 }
 
 bool SystemIO::setupSPIADC()
@@ -564,12 +578,107 @@ void SystemIO::setDigitalOutput(uint8_t which, boolean active) {
         if (active)
             digitalWrite(out[which], HIGH);
         else digitalWrite(out[which], LOW);
+        digPWMOutput[which].pwmActive = false; //if we used this function then PWM has to stop
     }
     else
     {
         CANIODevice *dev;
         dev = extendedDigitalOut[which - NUM_OUTPUT].device;
         if (dev) return dev->setDigitalOutput(extendedDigitalOut[which - NUM_OUTPUT].localOffset, active);
+    }
+}
+
+//by default the PWM frequency of all pins is 1kHz on the SAM3X
+//The pins are on a variety of hardware timers but nothing has yet been done to try
+//to reprogram the timing. It may be problematic to reprogram the TIO pins as they 
+//likely share timers with other hardware that cannot just be changed.
+//Pin 2 = TIOA0
+//Pin 3 = TIOA7
+//Pin 4 = TIOB6
+//Pin 5 = TIOA6
+//Pin 6 = PWML7
+//Pin 7 = PWML6
+//Pin 8 = PWML5
+//Pin 9 = PWML4
+void SystemIO::setDigitalPWM(uint8_t which, uint16_t duty)
+{
+    if (which >= NUM_OUTPUT) return;
+    if (duty > 4095) return;
+    analogWrite(out[which], duty);
+    digPWMOutput[which].pwmActive = false; //our slow PWM system must be turned off
+}
+
+//Which is 0-7 to specify which output to turn into PWM
+//Freq is 1-255 to set frequency in hertz. Really only works well up to maybe 60Hz
+//Duty is in tenths of a percent 0-1000
+//Calling this function causes the output to become PWM. Calling setDigitalOutput
+//turns off PWM on the given output
+void SystemIO::setDigitalSlowPWM(uint8_t which, uint8_t freq, uint16_t duty)
+{
+    if (which >= NUM_OUTPUT) return;
+    if (duty > 1000) return;
+    if (freq == 0) return;
+    digPWMOutput[which].progress = 0;
+    digPWMOutput[which].pwmActive = true;
+    digPWMOutput[which].freqInterval = 1000000ul / freq; //# of uS in each full cycle
+    //now, how far into the progress do we need to get before turning on the output?
+    double prog = duty / 1000.0;
+    digPWMOutput[which].triggerPoint = (uint32_t)(digPWMOutput[which].freqInterval * prog);
+    digitalWrite(out[which], LOW); //set it low to start
+}
+
+void SystemIO::updateDigitalSlowPWMDuty(uint8_t which, uint16_t duty)
+{
+    if (which >= NUM_OUTPUT) return;
+    if (duty > 1000) return;
+    double prog = duty / 1000.0;
+    digPWMOutput[which].triggerPoint = (uint32_t)(digPWMOutput[which].freqInterval * prog);
+}
+
+void SystemIO::updateDigitalSlowPWMFreq(uint8_t which, uint8_t freq)
+{
+    if (which >= NUM_OUTPUT) return;
+    if (freq == 0) return;
+    uint32_t newval = 1000000ul / freq;
+    double ratio = (double)newval / (double)digPWMOutput[which].freqInterval;
+    digPWMOutput[which].freqInterval = newval; //# of uS in each full cycle
+    digPWMOutput[which].triggerPoint *= ratio;
+}
+
+/*
+A lot was precalculated to save time here. Just figure out how much time has passed since the last call
+then add that to the progress value of each enabled PWM output. If the result goes over the trigger threshold
+then set the output high, otherwise set it low. This should be pretty stable for any PWM not right near the two
+ends of the spectrum. But, given our crappy resolution, none of this will work great if the PWM frequency is too
+high or the duty is at either end. Frequencies under 40Hz should be OK and duty cycles between 10 and 90 percent
+are probably fine. This is sufficient to drive the PWM of water pumps or the Tesla water heater, probably OK
+for gauges too.
+*/
+void SystemIO::handleTick()
+{
+    uint32_t now = micros();
+    uint32_t interval = now - lastMicros;
+    lastMicros = now;
+
+    for (int i = 0; i < NUM_OUTPUT; i++)
+    {
+        if (!digPWMOutput[i].pwmActive) continue;
+        digPWMOutput[i].progress += interval;
+        //Logger::debug("%i: %u %u %u", i, digPWMOutput[i].progress, digPWMOutput[i].freqInterval, digPWMOutput[i].triggerPoint);
+        if (digPWMOutput[i].progress >= digPWMOutput[i].triggerPoint)
+        {
+            Logger::debug("%i on!", i);
+            digitalWrite(out[i], HIGH);
+        }
+        else
+        {
+            Logger::debug("%i OFF!", i);
+            digitalWrite(out[i], LOW);
+        }
+        //we have to constrain the progress variable to be within the freqInterval value but do so here
+        //after we've already done our output calc because this should yield the closest match to our
+        //desired pulse width. But, still the pulse width is likely to jitter by +/- 1ms
+        if (digPWMOutput[i].progress > digPWMOutput[i].freqInterval) digPWMOutput[i].progress -= digPWMOutput[i].freqInterval;
     }
 }
 
