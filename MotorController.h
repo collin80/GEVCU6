@@ -187,7 +187,7 @@ protected:
     int16_t throttleRequested; // -1000 to 1000 (per mille of throttle level)
     int16_t speedRequested; // in rpm
     int16_t speedActual; // in rpm
-    int16_t torqueRequested; // in 0.1 Nm
+    int32_t torqueRequested; // in 0.1 Nm
     int16_t torqueActual; // in 0.1 Nm
     int16_t torqueAvailable; // the maximum available torque in 0.1Nm
 
@@ -198,8 +198,6 @@ protected:
     int16_t temperatureMotor; // temperature of motor in 0.1 degree C
     int16_t temperatureInverter; // temperature of inverter power stage in 0.1 degree C
     int16_t temperatureSystem; // temperature of controller in 0.1 degree C
-
-
 
     uint16_t prechargeTime; //time in ms that precharge should last
     uint32_t milliStamp; //how long we have precharged so far

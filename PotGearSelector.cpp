@@ -32,6 +32,8 @@ PotGearSelector::PotGearSelector() : Device()
 {
     prefsHandler = new PrefHandler(POTGEAR);
     commonName = "Potentiometer Gear Selector";
+    positionAccum = 0;
+    counter = 0;
 }
 
 void PotGearSelector::setup()
@@ -44,7 +46,7 @@ void PotGearSelector::setup()
 
     Device::setup(); // run the parent class version of this function
 
-    tickHandler.attach(this, CFG_TICK_INTERVAL_DCDC);
+    tickHandler.attach(this, CFG_TICK_INTERVAL_POT_THROTTLE);
 }
 
 void PotGearSelector::handleTick() {
@@ -57,39 +59,77 @@ void PotGearSelector::handleTick() {
 
     int16_t gearSelector = systemIO.getAnalogIn(config->adcPin);
 
+    //this will trend the gear position. It's deceptive. You might think
+    //this would trend it over 5 readings but that's not how the math actually
+    //shakes out. It takes far longer, perhaps 10-15 readings to actually get
+    //pretty close.It takes on the order of 30 iterations to actually settle
+    //at the exact value. 
+    positionAccum = ((positionAccum * 4) + gearSelector) / 5;
+    gearSelector = positionAccum;
+
+    //and even then, don't actually look at the readings except every so often
+    counter++;
+    if (counter < 8) return;
+
+    counter = 0;
+
+    Logger::debug("PotGear Val: %d", gearSelector);
+
     bool foundGearPos = false;
 
-    if (gearSelector > (config->parkPosition - config->hysteresis) &&  gearSelector < (config->parkPosition + config->hysteresis))
+    if ((gearSelector > ((int16_t)config->parkPosition - (int16_t)config->hysteresis)) &&
+        (gearSelector < ((int16_t)config->parkPosition + (int16_t)config->hysteresis)))
     {
         Logger::debug("Setting gear to Park(neutral)");
-        if (motorController) motorController->setSelectedGear(MotorController::NEUTRAL);
+        if (motorController)
+        {
+            motorController->setOpState(MotorController::DISABLED);
+            motorController->setSelectedGear(MotorController::NEUTRAL);
+        }
         foundGearPos = true;
     }
 
-    if (gearSelector > (config->neutralPosition - config->hysteresis) &&  gearSelector < (config->neutralPosition + config->hysteresis))
+    if ((gearSelector > ((int16_t)config->neutralPosition - (int16_t)config->hysteresis)) && 
+        (gearSelector < ((int16_t)config->neutralPosition + (int16_t)config->hysteresis)))
     {
         Logger::debug("Setting gear to neutral");
-        if (motorController) motorController->setSelectedGear(MotorController::NEUTRAL);
+        if (motorController)
+        {
+            motorController->setOpState(MotorController::DISABLED);
+            motorController->setSelectedGear(MotorController::NEUTRAL);
+        }
         foundGearPos = true;
     }
 
-    if (gearSelector > (config->drivePosition - config->hysteresis) &&  gearSelector < (config->drivePosition + config->hysteresis))
+    if ( (gearSelector > ((int16_t)config->drivePosition - (int16_t)config->hysteresis)) &&
+         (gearSelector < ((int16_t)config->drivePosition + (int16_t)config->hysteresis)))
     {
         Logger::debug("Setting gear to drive");
-        if (motorController) motorController->setSelectedGear(MotorController::DRIVE);
+        if (motorController)
+        {
+            motorController->setOpState(MotorController::ENABLE);
+            motorController->setSelectedGear(MotorController::DRIVE);
+        }
         foundGearPos = true;
     }
 
-    if (gearSelector > (config->reversePosition - config->hysteresis) &&  gearSelector < (config->reversePosition + config->hysteresis))
+    if ( (gearSelector > ((int16_t)config->reversePosition - (int16_t)config->hysteresis)) && 
+         (gearSelector < ((int16_t)config->reversePosition + (int16_t)config->hysteresis)) )
     {
         Logger::debug("Setting gear to reverse");
-        if (motorController) motorController->setSelectedGear(MotorController::REVERSE);
+        if (motorController)
+        {
+            motorController->setOpState(MotorController::ENABLE);
+            motorController->setSelectedGear(MotorController::REVERSE);
+        }
         foundGearPos = true;
     }
 
     if (!foundGearPos)
     {
         Logger::debug("Gear selector ADC out of bounds! Is it misconfigured?");
+        motorController->setOpState(MotorController::DISABLED);
+        motorController->setSelectedGear(MotorController::NEUTRAL);
     }
 }
 
@@ -129,12 +169,12 @@ void PotGearSelector::loadConfiguration()
     }
     else { //checksum invalid. Reinitialize values and store to EEPROM
         Logger::info((char *)Constants::invalidChecksum);
-        config->adcPin = 3;
-        config->parkPosition = 500;
-        config->reversePosition = 1500;
-        config->neutralPosition = 2500;
-        config->drivePosition = 3500;
-        config->hysteresis = 100;
+        config->adcPin = 2;
+        config->parkPosition = 1830;
+        config->reversePosition = 1630;
+        config->neutralPosition = 1400;
+        config->drivePosition = 1200;
+        config->hysteresis = 80;
         saveConfiguration();
     }
 }
@@ -153,4 +193,6 @@ void PotGearSelector::saveConfiguration()
     prefsHandler->write(EEGEARSEL_HYST, config->hysteresis);
     prefsHandler->saveChecksum();
     prefsHandler->forceCacheWrite();
+
+    Logger::debug("Wrote pot gear cfg");
 }

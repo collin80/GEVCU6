@@ -66,6 +66,7 @@ enum DeviceId { //unique device ID for every piece of hardware possible
     DCDC = 0x1050,
     POTGEAR = 0x1100,
     THINKBMS = 0x2000,
+    TESLABMS = 0x2050,
     BUILTINBMS = 0x2100,
     VEHICLESPECIFIC = 0x3000,
     FAULTSYS = 0x4000,

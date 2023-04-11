@@ -143,7 +143,7 @@ void MotorController::handleTick() {
         throttleRequested = brake->getLevel();
     //Logger::debug("Throttle: %d", throttleRequested);
 
-    if (!donePrecharge)checkPrecharge();
+    if (!donePrecharge) checkPrecharge();
 
     if(skipcounter++ > 30)    //A very low priority loop for checks that only need to be done once per second.
     {
@@ -212,8 +212,8 @@ void MotorController::handleTick() {
         checkReverseLight();
 
         //Store kilowatt hours, but only once in awhile.
-        prefsHandler->write(EEMC_KILOWATTHRS, kiloWattHours);
-        prefsHandler->saveChecksum();
+        //prefsHandler->write(EEMC_KILOWATTHRS, kiloWattHours);
+        //prefsHandler->saveChecksum();
 
     }
 }
@@ -222,17 +222,17 @@ void MotorController::handleTick() {
 void MotorController::checkPrecharge()
 {
 
-    int prechargetime=getprechargeR();
-    int contactor=getmainContactorRelay();
-    int relay=getprechargeRelay();
+    int prechargetime = getprechargeR();
+    int contactor = getmainContactorRelay();
+    int relay = getprechargeRelay();
 
     if (relay>7 || relay<0 || contactor<0 || contactor>7)  //We don't have a contactor and a precharge relay
     {
-        donePrecharge=true;         //Let's end this charade.
+        donePrecharge = true;         //Let's end this charade.
         return;
     }
 
-    if ((millis()-premillis)< prechargetime) //Check milliseconds since startup against our entered delay in milliseconds
+    if ( (millis()-premillis) < prechargetime) //Check milliseconds since startup against our entered delay in milliseconds
     {
         if(!prelay)
         {
@@ -260,10 +260,9 @@ void MotorController::checkPrecharge()
         Logger::info("MAIN CONTACTOR ENABLED...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
                     systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
                     systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
-        donePrecharge=true; //Time's up.  Let's don't do ANY of this on future ticks.
+        donePrecharge = true; //Time's up.  Let's don't do ANY of this on future ticks.
         //Generally, we leave the precharge relay on.  This doesn't hurt much in any configuration.  But when using two contactors
         //one positive with a precharge resistor and one on the negative leg to act as precharge, we need to leave precharge on.
-
     }
 }
 
@@ -271,7 +270,7 @@ void MotorController::checkPrecharge()
 //exceeds a specified value.  Annunciators are set on website to indicate status.
 void MotorController::coolingcheck()
 {
-    int coolfan=getCoolFan();
+    int coolfan = getCoolFan();
 
     if(coolfan>=0 and coolfan<8)    //We have 8 outputs 0-7 If they entered something else, there is no point in doing this check.
     {
@@ -324,7 +323,7 @@ void MotorController::checkBrakeLight()
 //If a reverse light output is configured, this will turn it on anytime the gear state is in REVERSE
 void MotorController::checkReverseLight()
 {
-    uint16_t reverseLight=getRevLight();
+    uint16_t reverseLight = getRevLight();
     if(reverseLight >=0 && reverseLight <8) //255 means none selected.  We don't have a reverselight output configured.
     {
         if(selectedGear==REVERSE)  //If the selected gear IS reverse
@@ -343,7 +342,7 @@ void MotorController::checkReverseLight()
 //If we have an ENABLE input configured, this will set opstation to ENABLE anytime it is true (12v), DISABLED if not.
 void MotorController:: checkEnableInput()
 {
-    uint16_t enableinput=getEnableIn();
+    uint16_t enableinput = getEnableIn();
     if(enableinput >= 0 && enableinput<4) //Do we even have an enable input configured ie NOT 255.
     {
         if((systemIO.getDigitalIn(enableinput))||testenableinput) //If it's ON let's set our opstate to ENABLE
@@ -364,7 +363,7 @@ void MotorController:: checkEnableInput()
 //IF we have a reverse input configured, this will set our selected gear to REVERSE any time the input is true, DRIVE if not
 void MotorController:: checkReverseInput()
 {
-    uint16_t reverseinput=getReverseIn();
+    uint16_t reverseinput = getReverseIn();
     if(reverseinput >= 0 && reverseinput<4)  //If we don't have a Reverse Input, do nothing
     {
         if((systemIO.getDigitalIn(reverseinput))||testreverseinput)
@@ -649,6 +648,8 @@ void MotorController::saveConfiguration() {
     prefsHandler->write(EEMC_TAPER_LOWER, config->regenTaperLower);
     prefsHandler->write(EEMC_TAPER_UPPER, config->regenTaperUpper);
     //prefsHandler->write(EESYS_CAPACITY, config->capacity);
+
+    Logger::debug("Saved config in MotorController");
 
     prefsHandler->saveChecksum();
     prefsHandler->forceCacheWrite();

@@ -1,7 +1,9 @@
 /*
- * GEVCU.h
+ * TeslaBatteryManager.h
  *
-Copyright (c) 2013 Collin Kidder, Michael Neuweiler, Charles Galpin
+ * Interface to EVTV's controller for Model S modules
+ *
+Copyright (c) 2023 Collin Kidder
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -24,58 +26,33 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
  */
 
-#ifndef GEVCU_H_
-#define GEVCU_H_
+#ifndef TESLABATT_H_
+#define TESLABATT_H_
 
 #include <Arduino.h>
 #include "config.h"
 #include "Device.h"
-#include "Throttle.h"
-#include "CanThrottle.h"
-#include "CanBrake.h"
-#include "PotThrottle.h"
-#include "TestThrottle.h"
-#include "PotBrake.h"
-#include "BatteryManager.h"
-#include "ThinkBatteryManager.h"
-#include "BuiltinBMS.h"
-#include "TeslaBatteryManager.h"
-#include "MotorController.h"
-#include "DmocMotorController.h"
-#include "BrusaMotorController.h"
-#include "CKMotorController.h"
-#include "RMSMotorController.h"
-#include "TestMotorController.h"
-#include "C300MotorController.h"
-#include "Heartbeat.h"
-#include "sys_io.h"
-#include "CanHandler.h"
-#include "MemCache.h"
-#include "ThrottleDetector.h"
 #include "DeviceManager.h"
-#include "SerialConsole.h"
-#include "ELM327_Emu.h"
-#include "adafruitBLE.h"
-#include "Sys_Messages.h"
-#include "CodaMotorController.h"
-#include "FaultHandler.h"
-#include "DCDCController.h"
-#include "EVIC.h"
-#include "Powerkeypad.h"
-#include "VehicleSpecific.h"
-#include "OvarChargerDCDC.h"
-#include "PotGearSelector.h"
+#include "BatteryManager.h"
+#include "CanHandler.h"
 
-#ifdef __cplusplus
-extern "C" {
+class TeslaBatteryManager : public BatteryManager, CanObserver
+{
+public:
+    TeslaBatteryManager();
+    void setup();
+    void handleTick();
+    void handleCanFrame(CAN_FRAME *frame);
+    DeviceId getId();
+    bool hasPackVoltage();
+    bool hasPackCurrent();
+    bool hasTemperatures();
+    bool isChargeOK();
+    bool isDischargeOK();
+protected:
+private:
+    void sendKeepAlive();
+    int trafficLostCounter;
+};
+
 #endif
-void loop();
-void setup();
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
-
-#endif /* GEVCU_H_ */
-
-

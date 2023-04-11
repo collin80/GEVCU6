@@ -52,8 +52,8 @@ public:
     int getPackVoltage(); //in tenths of a volt
     signed int getPackCurrent(); //in tenths of an amp
     int getSOC();
-    //bool allowCharging();
-    //bool allowDischarging();
+    int getHighTemperature();
+    bool getFaulted();
     DeviceType getType();
     void setup();
     void handleTick();
@@ -78,6 +78,7 @@ protected:
     //some BMS systems will report one way and some the other.
     int dischargeLimit, chargeLimit;
     bool allowCharge, allowDischarge;
+    bool isFaulted;
 
 private:
 };

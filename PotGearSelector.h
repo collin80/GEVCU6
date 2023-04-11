@@ -36,6 +36,8 @@ public:
 protected:
 
 private:
+    uint32_t positionAccum;
+    int counter;
 };
 
 #endif

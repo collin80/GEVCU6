@@ -144,6 +144,7 @@ void createObjects() {
     C300MotorController *c300MotorController = new C300MotorController();
 	ThinkBatteryManager *thinkBMS = new ThinkBatteryManager();
     BuiltinBatteryManager *builtinBMS = new BuiltinBatteryManager();
+    TeslaBatteryManager *teslaBMS = new TeslaBatteryManager();
 	ELM327Emu *emu = new ELM327Emu();
     ADAFRUITBLE *ble = new ADAFRUITBLE();
     EVIC *eVIC = new EVIC();
@@ -229,7 +230,7 @@ void setup() {
 
 	uint8_t loglevel;
 	sysPrefs->read(EESYS_LOG_LEVEL, &loglevel);
-	loglevel = 0; //force debugging log level
+	//loglevel = 0; //force debugging log level
     Logger::console("LogLevel: %i", loglevel);
 	Logger::setLoglevel((Logger::LogLevel)loglevel);
     //Logger::setLoglevel((Logger::LogLevel)0);

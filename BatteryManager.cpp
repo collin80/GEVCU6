@@ -33,6 +33,7 @@ BatteryManager::BatteryManager() : Device()
     packVoltage = 0;
     packCurrent = 0;
     SOC = 0;
+    isFaulted = false;
 }
 
 BatteryManager::~BatteryManager()
@@ -75,6 +76,16 @@ signed int BatteryManager::getPackCurrent()
 int BatteryManager::getSOC()
 {
     return SOC;
+}
+
+int BatteryManager::getHighTemperature()
+{
+    return highestCellTemp;
+}
+
+bool BatteryManager::getFaulted()
+{
+    return isFaulted;
 }
 
 void BatteryManager::loadConfiguration() {
