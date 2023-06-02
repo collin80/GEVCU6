@@ -161,12 +161,12 @@ void CanHandler::process()
 
     CanObserver *observer;
 
-    unsigned char len = 0;
+    unsigned char len = 8;
     unsigned char buf[8];
 
     if (CAN_MSGAVAIL == CAN.checkReceive())
     {
-
+        Logger::info("RECEIVED");
         CAN.readMsgBuf(&len, buf); // read data,  len: data length, buf: data buf
 
         frame.length = (uint8_t)len;
@@ -178,7 +178,7 @@ void CanHandler::process()
         frame.extended = (bool)CAN.isExtendedFrame();
         frame.rtr = CAN.isRemoteRequest();
 
-        Logger::debug("CAN:%d dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X", 0,
+        Logger::info("RECEIVED CAN:%d dlc=%X fid=%X id=%X ide=%X rtr=%X data=%X,%X,%X,%X,%X,%X,%X,%X", 0,
                       frame.length, frame.fid, frame.id, frame.extended, frame.rtr,
                       frame.data.bytes[0], frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3],
                       frame.data.bytes[4], frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
@@ -335,13 +335,11 @@ void CanHandler::CANIO(CAN_FRAME &frame)
 void CanHandler::sendFrame(CAN_FRAME &frame)
 {
 
-    Logger::info("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", 0, frame.id, frame.data.bytes[0],
-                 frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3], frame.data.bytes[4],
-                 frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
+    // Logger::debug("CANIO %d msg: %X   %X   %X   %X   %X   %X   %X   %X  %X", 0, frame.id, frame.data.bytes[0],
+    //              frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3], frame.data.bytes[4],
+    //              frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
 
     CAN.MCP_CAN::sendMsgBuf(frame.id, frame.extended, 8, frame.data.bytes);
-
-    // CAN.MCP_CAN::sendMsgBuf(frame.id, frame.extended, frame.rtr, frame.data.bytes);
 }
 
 void CanHandler::sendISOTP(int id, int length, uint8_t *data)

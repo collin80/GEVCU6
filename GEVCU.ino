@@ -120,7 +120,7 @@ void setup() {
     //               Thresh  Enable   Force Reset
     SUPC->SUPC_SMMR = 0xA | (1<<8) | (1<<12);
 	#endif
-	//Watchdog.enable(200000);	
+	//Watchdog.enable(2000);	
 
 #ifdef DEBUG_STARTUP_DELAY
     for (int c = 0; c < 200; c++) {
