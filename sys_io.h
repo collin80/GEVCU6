@@ -34,7 +34,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <SPI.h>
 #include "config.h"
 #include "Logger.h"
-#include <avr/wdt.h>
+#include <Adafruit_SleepyDog.h>
+
 
 class CANIODevice;
 

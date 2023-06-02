@@ -52,10 +52,10 @@ CanHandler::CanHandler()
  */
 void CanHandler::setup()
 {
-    while (CAN_OK != CAN.begin(CAN_500KBPS))
-    { // init can bus : baudrate = 500kf
+    while (CAN_OK != CAN.begin(16)) // TODO move to config
+    {
         SERIAL_PORT_MONITOR.println("CAN init fail, retry...");
-        delay(100);
+        delay(200);
     }
 
 
@@ -339,7 +339,9 @@ void CanHandler::sendFrame(CAN_FRAME &frame)
                  frame.data.bytes[1], frame.data.bytes[2], frame.data.bytes[3], frame.data.bytes[4],
                  frame.data.bytes[5], frame.data.bytes[6], frame.data.bytes[7]);
 
-    CAN.MCP_CAN::sendMsgBuf(frame.id, frame.extended, frame.rtr, frame.data.bytes);
+    CAN.MCP_CAN::sendMsgBuf(frame.id, frame.extended, 8, frame.data.bytes);
+
+    // CAN.MCP_CAN::sendMsgBuf(frame.id, frame.extended, frame.rtr, frame.data.bytes);
 }
 
 void CanHandler::sendISOTP(int id, int length, uint8_t *data)

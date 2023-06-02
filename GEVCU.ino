@@ -56,7 +56,8 @@ Random comments on things that should be coded up soon:
 #include <Wire.h>
 #include "evTimer.h"
 #include <SPI.h>
-#include <avr/wdt.h>
+#include <Adafruit_SleepyDog.h>
+
 
 #define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
 
@@ -102,15 +103,15 @@ void setup() {
     //Most boards pre 6.2 have outputs on 2-9 and a problem where their outputs can trigger on for just a quick moment
     //upon start up. So, try to pull the outputs low as soon as we can just to be sure.
     //This project is now GEVCU6.2 specific but still, doesn't hurt to set your outputs properly.
-    for (int i = 2; i < 10; i++) {
+    for (int i = 4; i < 6; i++) {
         pinMode(i, OUTPUT);
         digitalWrite(i, LOW);
     }
     
-    pinMode(64, OUTPUT); //DFU for BLE Module
-    digitalWrite(64, HIGH);
-    pinMode(65, OUTPUT); //reset for BLE module
-    digitalWrite(65, HIGH);
+    // pinMode(64, OUTPUT); //DFU for BLE Module
+    // digitalWrite(64, HIGH);
+    // pinMode(65, OUTPUT); //reset for BLE module
+    // digitalWrite(65, HIGH);
     
 	#ifdef SUPC
     //Activate the supply monitor at 2.8v and make it hold the CPU in reset under that point
@@ -119,13 +120,12 @@ void setup() {
     //               Thresh  Enable   Force Reset
     SUPC->SUPC_SMMR = 0xA | (1<<8) | (1<<12);
 	#endif
-	wdt_enable(WDTO_2S);
-	
+	//Watchdog.enable(200000);	
+
 #ifdef DEBUG_STARTUP_DELAY
     for (int c = 0; c < 200; c++) {
         delay(25);  //This delay lets you see startup.  But it breaks DMOC645 really badly.  You have to have comm quickly upon start up
-        wdt_reset();
-    }
+    	Watchdog.reset();    }
 #endif
        
 	pinMode(BLINK_LED, OUTPUT);
@@ -168,5 +168,5 @@ void loop() {
 	Timer7.loop();
 	Timer8.loop();
     
-    wdt_reset();
-}
+
+    Watchdog.reset();}

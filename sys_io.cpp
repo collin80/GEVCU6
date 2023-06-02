@@ -101,9 +101,9 @@ void SystemIO::setup() {
     //the pin tables.
 
     // TODO check pins
-    Logger::info("Running on GEVCU 6.2 hardware");
-    dig[0]=48;
-    dig[1]=49;
+    Logger::info("Running on Feather M0 hardware");
+    dig[0]=4;
+    dig[1]=5;
     dig[2]=50;
     dig[3]=51;
     adc[0][0] = 255;
@@ -123,14 +123,14 @@ void SystemIO::setup() {
     out[6] = 8;
     out[7] = 9;
     useSPIADC = true;
-    pinMode(26, OUTPUT); //Chip Select for first ADC chip
-    pinMode(28, OUTPUT); //Chip select for second ADC chip
-    pinMode(30, OUTPUT); //chip select for third ADC chip
-    digitalWrite(26, HIGH);
-    digitalWrite(28, HIGH);
-    digitalWrite(30, HIGH);
+    // pinMode(26, OUTPUT); //Chip Select for first ADC chip
+    // pinMode(28, OUTPUT); //Chip select for second ADC chip
+    // pinMode(30, OUTPUT); //chip select for third ADC chip
+    // digitalWrite(26, HIGH);
+    // digitalWrite(28, HIGH);
+    // digitalWrite(30, HIGH);
     SPI.begin();
-    pinMode(32, INPUT); //Data Ready indicator
+    // pinMode(32, INPUT); //Data Ready indicator
     SPI.begin(); //sets up with default 4Mhz, MSB first
     
 
@@ -240,6 +240,7 @@ bool SystemIO::setupSPIADC()
         return true;
         break;
     }
+    return false;
 }
 
 void SystemIO::installExtendedIO(CANIODevice *device)
@@ -453,6 +454,7 @@ boolean SystemIO::setAnalogOut(uint8_t which, int32_t level)
     CANIODevice *dev;
     dev = extendedAnalogOut[which].device;
     if (dev) dev->setAnalogOutput(extendedAnalogOut[which].localOffset, level);    
+    return false;
 }
 
 int32_t SystemIO::getAnalogOut(uint8_t which)
@@ -461,6 +463,7 @@ int32_t SystemIO::getAnalogOut(uint8_t which)
     CANIODevice *dev;
     dev = extendedAnalogOut[which].device;
     if (dev) return dev->getAnalogOutput(extendedAnalogOut[which].localOffset);    
+    return false;
 }
 
 
@@ -513,6 +516,7 @@ boolean SystemIO::getDigitalIn(uint8_t which) {
         dev = extendedDigitalIn[which - NUM_DIGITAL].device;
         if (dev) return dev->getDigitalInput(extendedDigitalIn[which - NUM_DIGITAL].localOffset);
     }
+    return false;
 }
 
 //set output high or not
@@ -549,6 +553,7 @@ boolean SystemIO::getDigitalOutput(uint8_t which) {
         dev = extendedDigitalOut[which - NUM_OUTPUT].device;
         if (dev) return dev->getDigitalOutput(extendedDigitalOut[which - NUM_OUTPUT].localOffset);
     }
+    return false;
 }
 
 int32_t SystemIO::getSPIADCReading(int CS, int sensor)
@@ -601,7 +606,8 @@ bool SystemIO::calibrateADCOffset(int adc, bool update)
 
         //normally one shouldn't call watchdog reset in multiple
         //places but this is a special case.
-        wdt_reset();
+
+        Watchdog.reset();
         delay(2);
     }
     accum /= 500;
@@ -635,7 +641,8 @@ bool SystemIO::calibrateADCGain(int adc, int32_t target, bool update)
 
         //normally one shouldn't call watchdog reset in multiple
         //places but this is a special case.
-        wdt_reset();
+
+        Watchdog.reset();
         delay(2);
     }
     accum /= 500;
