@@ -123,10 +123,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ThrottleADC2			16		//Which pin to use
 #define PrechargeRelay      9 // precharge relay pin digital out
 #define MainContactorRelay  18 // main contactor realy pin - digital out
-#define CoolFan             6  //output to use for cooling fan
+#define CoolFan             255  //output to use for cooling fan
 #define BrakeLight          255 //temperature to turn it off
 #define RevLight            255 //temperature to turn it off
-#define EnableIn            255 //enable  digital input pin  //9
+#define EnableIn            17 //enable  digital input pin  //9
 #define ReverseIn           255 //reverse digital input pin  //
 
 #define DefaultPackCapacity   1200       //in tenths of AH

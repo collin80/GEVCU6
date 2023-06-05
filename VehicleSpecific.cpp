@@ -70,61 +70,62 @@ void VehicleSpecific::setup() {
  * function is called 10 times per second.
  */
 void VehicleSpecific::handleTick() {
-    Device::handleTick(); // Call parent which controls the workflow
-    Logger::debug("VS Tick Handler");
+    // Device::handleTick(); // Call parent which controls the workflow
+    // Logger::debug("VS Tick Handler");
 
-    MotorController * motor = deviceManager.getMotorController();
+    // MotorController * motor = deviceManager.getMotorController();
 
-    if (waitTicksStartup > 0) 
-    {
-        waitTicksStartup--;
-        return;
-    }
+    // if (waitTicksStartup > 0) 
+    // {
+    //     waitTicksStartup--;
+    //     return;
+    // }
     
-    if (!didInitialSetup)
-    {
-        didInitialSetup = true;
-        systemIO.setAnalogOut(1, 1); //set second button's LED to RED
-        systemIO.setAnalogOut(0, 1000); //send batch
-        if (motor) motor->setSelectedGear(MotorController::NEUTRAL);
-    }
+    // if (!didInitialSetup)
+    // {
+    //     didInitialSetup = true;
+    //     systemIO.setAnalogOut(1, 1); //set second button's LED to RED
+    //     systemIO.setAnalogOut(0, 1000); //send batch
+    //     if (motor) motor->setSelectedGear(MotorController::NEUTRAL);
+    // }
     
-    //button 0 on the pad is reverse
-    //button 1 is neutral
-    //button 2 is drive
-    //button 3 is status
-    //button 4 is cruise set / minus
-    //button 5 is cruise resume / plus
-    //button 6 is turtle mode
-    //button 7 is rabbit mode
-    //There are four digital inputs before us (0-3) so buttons start at digital input 4
-    if (systemIO.getDigitalIn(5)) //set drive mode neutral
-    {
-        Logger::debug("VS Setting gear to neutral");
-        systemIO.setAnalogOut(0, 0);
-        systemIO.setAnalogOut(1, 1);
-        systemIO.setAnalogOut(2, 0);
-        systemIO.setAnalogOut(0, 1000);
-        if (motor) motor->setSelectedGear(MotorController::NEUTRAL);
-    }
-    if (systemIO.getDigitalIn(6)) //set drive mode to drive
-    {
-        Logger::debug("VS Setting gear to drive");
-        systemIO.setAnalogOut(0, 0);
-        systemIO.setAnalogOut(1, 0);
-        systemIO.setAnalogOut(2, 1);        
-        systemIO.setAnalogOut(0, 1000);
-        if (motor) motor->setSelectedGear(MotorController::DRIVE);
-    }
-    if (systemIO.getDigitalIn(4)) //set drive mode to reverse
-    {
-        Logger::debug("VS Setting gear to reverse");
-        systemIO.setAnalogOut(0, 1);
-        systemIO.setAnalogOut(1, 0);
-        systemIO.setAnalogOut(2, 0);        
-        systemIO.setAnalogOut(0, 1000);
-        if (motor) motor->setSelectedGear(MotorController::REVERSE);
-    }
+    // //button 0 on the pad is reverse
+    // //button 1 is neutral
+    // //button 2 is drive
+    // //button 3 is status
+    // //button 4 is cruise set / minus
+    // //button 5 is cruise resume / plus
+    // //button 6 is turtle mode
+    // //button 7 is rabbit mode
+    // //There are four digital inputs before us (0-3) so buttons start at digital input 4
+    // int 
+    // if (systemIO.getDigitalIn(5)) //set drive mode neutral
+    // {
+    //     Logger::debug("VS Setting gear to neutral");
+    //     systemIO.setAnalogOut(0, 0);
+    //     systemIO.setAnalogOut(1, 1);
+    //     systemIO.setAnalogOut(2, 0);
+    //     systemIO.setAnalogOut(0, 1000);
+    //     if (motor) motor->setSelectedGear(MotorController::NEUTRAL);
+    // }
+    // if (systemIO.getDigitalIn(6)) //set drive mode to drive
+    // {
+    //     Logger::debug("VS Setting gear to drive");
+    //     systemIO.setAnalogOut(0, 0);
+    //     systemIO.setAnalogOut(1, 0);
+    //     systemIO.setAnalogOut(2, 1);        
+    //     systemIO.setAnalogOut(0, 1000);
+    //     if (motor) motor->setSelectedGear(MotorController::DRIVE);
+    // }
+    // if (systemIO.getDigitalIn(4)) //set drive mode to reverse
+    // {
+    //     Logger::debug("VS Setting gear to reverse");
+    //     systemIO.setAnalogOut(0, 1);
+    //     systemIO.setAnalogOut(1, 0);
+    //     systemIO.setAnalogOut(2, 0);        
+    //     systemIO.setAnalogOut(0, 1000);
+    //     if (motor) motor->setSelectedGear(MotorController::REVERSE);
+    // }
     
 }
 
