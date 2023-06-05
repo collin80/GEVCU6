@@ -82,8 +82,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 //#define USE_HARD_CODED
 #define ThrottleNumPots			2		//# of pots to use by default
-#define ThrottleADC1			0		//Which pin to use
-#define ThrottleADC2			1		//Which pin to use
 #define ThrottleSubtype			1		//subtype 1 is a standard linear pot throttle
 #define ThrottleRegenMinValue	270		//where does Regen stop (1/10 of percent)
 #define ThrottleRegenMaxValue	0		//where Regen is at maximum (1/10 of percent)
@@ -101,7 +99,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define BrakeMaxValue			3200		//Value ADC reads when brake is pushed all of the way down
 #define BrakeMinRegenValue		0		//percent of full power to use for brake regen (min)
 #define BrakeMaxRegenValue		50		//percent of full power to use for brake regen (max)
-#define BrakeADC				0       //which ADC pin to use
+#define CoolOff             35 //temperature to turn it off
+#define CoolOn              40 //temperature (in C) to turn on cooling fan
 
 
 #define MaxTorqueValue      2000 //in tenths of a Nm
@@ -109,23 +108,26 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define RPMSlewRateValue    10000 // rpm/sec the requested speed should change (speed mode)
 #define TorqueSlewRateValue 6000 // 0.1Nm/sec the requested torque output should change (torque mode)
 #define KilowattHrs         11000 //not currently used
-#define PrechargeR          6000 //millliseconds precharge
+#define PrechargeR          5000 //millliseconds precharge
 #define NominalVolt         3200 //a reasonable figure for a lithium cell pack driving the DMOC (in tenths of a volt)
-#define PrechargeRelay      4 // precharge relay pin digital out
-#define MainContactorRelay  5 // main contactor realy pin - digital out
 #define ReversePercent      50
-#define CoolFan             6  //output to use for cooling fan
-#define CoolOn              40 //temperature (in C) to turn on cooling fan
-#define BrakeLight          255 //temperature to turn it off
-#define CoolOff             35 //temperature to turn it off
-#define RevLight            255 //temperature to turn it off
-#define EnableIn            0 //enable  digital input pin
-#define ReverseIn           255 //reverse digital input pin
 #define MaxRegenWatts       40000 //in actual watts, there is no scale here
 #define MaxAccelWatts       150000
 #define BatteryCapacity     100
 #define RegenTaperUpper     500
 #define RegenTaperLower     75
+
+// PINS 
+#define BrakeADC				14       //which ADC pin to use
+#define ThrottleADC1		    15  	//Which pin to use
+#define ThrottleADC2			16		//Which pin to use
+#define PrechargeRelay      9 // precharge relay pin digital out
+#define MainContactorRelay  18 // main contactor realy pin - digital out
+#define CoolFan             6  //output to use for cooling fan
+#define BrakeLight          255 //temperature to turn it off
+#define RevLight            255 //temperature to turn it off
+#define EnableIn            255 //enable  digital input pin  //9
+#define ReverseIn           255 //reverse digital input pin  //
 
 #define DefaultPackCapacity   1200       //in tenths of AH
 #define DefaultPackRemaining  50000000l //in millionths of AH
@@ -156,9 +158,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define BLINK_LED           13 //13 is L, 73 is TX, 72 is RX
 
 #define NUM_ANALOG	7
-#define NUM_DIGITAL	0
+#define NUM_DIGITAL	4
 #define NUM_OUTPUT	2
 #define NUM_EXT_IO  24
+#define MAX_PORT 24
 
 //CAN message ID ASSIGNMENTS FOR I/0 MANAGEMENT
 #define CAN_SWITCH 0x606

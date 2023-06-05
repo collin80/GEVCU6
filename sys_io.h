@@ -95,14 +95,13 @@ public:
     SystemIO();
     
     void setup();
-    void setup_ADC_params();
 
     int16_t getAnalogIn(uint8_t which); //get value of one of the 4 analog inputs
     boolean setAnalogOut(uint8_t which, int32_t level);
     int32_t getAnalogOut(uint8_t which);
-    boolean getDigitalIn(uint8_t which); //get value of one of the 4 digital inputs
-    void setDigitalOutput(uint8_t which, boolean active); //set output high or not
-    boolean getDigitalOutput(uint8_t which); //get current value of output state (high?)    
+    boolean getDigitalIn(uint8_t pin); //get value of one of the 4 digital inputs
+    void setDigitalOutput(uint8_t pin, boolean active); //set output high or not
+    boolean getDigitalOutput(uint8_t pin); //get current value of output state (high?)    
     
     void setDigitalInLatchMode(int which, LatchModes::LATCHMODE mode);
     void unlockDigitalInLatch(int which);
@@ -127,12 +126,6 @@ public:
 
 private:
     int32_t getSPIADCReading(int CS, int sensor);
-    int16_t getRawADC(uint8_t which);
-    bool setupSPIADC();
-
-    uint8_t dig[NUM_DIGITAL];
-    uint8_t adc[NUM_ANALOG][2];
-    uint8_t out[NUM_OUTPUT];
 
     SystemType sysType;
 

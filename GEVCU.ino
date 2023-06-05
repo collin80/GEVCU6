@@ -59,7 +59,7 @@ Random comments on things that should be coded up soon:
 #include <Adafruit_SleepyDog.h>
 
 
-#define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
+// #define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
 
 //Evil, global variables
 template<class T> inline Print &operator <<(Print &obj, T arg) { obj.print(arg); return obj; } //Lets us stream Serial
@@ -103,15 +103,6 @@ void setup() {
     //Most boards pre 6.2 have outputs on 2-9 and a problem where their outputs can trigger on for just a quick moment
     //upon start up. So, try to pull the outputs low as soon as we can just to be sure.
     //This project is now GEVCU6.2 specific but still, doesn't hurt to set your outputs properly.
-    for (int i = 4; i < 6; i++) {
-        pinMode(i, OUTPUT);
-        digitalWrite(i, LOW);
-    }
-    
-    // pinMode(64, OUTPUT); //DFU for BLE Module
-    // digitalWrite(64, HIGH);
-    // pinMode(65, OUTPUT); //reset for BLE module
-    // digitalWrite(65, HIGH);
     
 	#ifdef SUPC
     //Activate the supply monitor at 2.8v and make it hold the CPU in reset under that point
@@ -137,7 +128,8 @@ void setup() {
 	Wire.begin();
 	Wire.setClock(1000000);
 	Logger::info("TWI init ok");
-	loglevel = 0; //force debugging log level
+	loglevel = 1; //force debugging log level
+	Logger:
 	systemIO.setup();  
 	canHandler.setup();
 	Logger::info("SYSIO init ok");	

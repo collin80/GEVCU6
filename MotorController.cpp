@@ -95,10 +95,10 @@ void MotorController::setup() {
     Logger::console("PREDELAY=%i - Precharge delay time", config->prechargeR);
 
     //show our work
-    Logger::console("PRECHARGING...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
-                    systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
-                    systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
-    coolflag = false;
+    
+    Logger::info("PRECHARGE ENABLED...PreCharge:%d, main:%d", 
+        systemIO.getDigitalOutput(config->prechargeRelay), systemIO.getDigitalOutput(config->mainContactorRelay));
+   coolflag = false;
       
 
     Device::setup();
@@ -221,17 +221,13 @@ void MotorController::checkPrecharge()
     int prechargetime=getprechargeR();
     int contactor=getmainContactorRelay();
     int relay=getprechargeRelay();
+    int runTime=millis()-premillis;
 
-    if (relay>7 || relay<0 || contactor<0 || contactor>7)  //We don't have a contactor and a precharge relay
-    {
-        donePrecharge=true;         //Let's end this charade.
-        return;
-    }
-
-    if ((millis()-premillis)< prechargetime) //Check milliseconds since startup against our entered delay in milliseconds
+    if (runTime< prechargetime) //Check milliseconds since startup against our entered delay in milliseconds
     {
         if(!prelay)
         {
+            Logger::info("turn on precharge");
             systemIO.setDigitalOutput(contactor, 0); //Make sure main contactor off
             statusBitfield2 &= ~(1 << 17); //clear bitTurn off MAIN CONTACTOR annunciator
             statusBitfield1 &= ~(1 << contactor);//clear bitTurn off main contactor output annunciator
@@ -241,21 +237,24 @@ void MotorController::checkPrecharge()
             throttleRequested = 0; //Keep throttle at zero during precharge
             prelay=true;
             Logger::info("Starting precharge sequence - wait %i milliseconds", prechargetime);
-            Logger::info("PRECHARGE ENABLED...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
-                systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
-                systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
+            Logger::info("PRECHARGE ENABLED...PreCharge:%d, main:%d", 
+                systemIO.getDigitalOutput(relay), systemIO.getDigitalOutput(contactor));
+
+        
 
         }
     }
     else
     {
+         Logger::info("turn on main");
         systemIO.setDigitalOutput(contactor, 1); //Main contactor on
         statusBitfield2 |=1 << 17; //set bit to turn on MAIN CONTACTOR annunciator
         statusBitfield1 |=1 << contactor;//setbit to Turn on main contactor output annunciator
         Logger::info("Precharge sequence complete after %i milliseconds", prechargetime);
-        Logger::info("MAIN CONTACTOR ENABLED...DOUT0:%d, DOUT1:%d, DOUT2:%d, DOUT3:%d,DOUT4:%d, DOUT5:%d, DOUT6:%d, DOUT7:%d", 
-                    systemIO.getDigitalOutput(0), systemIO.getDigitalOutput(1), systemIO.getDigitalOutput(2), systemIO.getDigitalOutput(3),
-                    systemIO.getDigitalOutput(4), systemIO.getDigitalOutput(5), systemIO.getDigitalOutput(6), systemIO.getDigitalOutput(7));
+        Logger::info("PRECHARGE ENABLED...PreCharge:%d, main:%d", 
+                systemIO.getDigitalOutput(relay), systemIO.getDigitalOutput(contactor));
+        
+        
         donePrecharge=true; //Time's up.  Let's don't do ANY of this on future ticks.
         //Generally, we leave the precharge relay on.  This doesn't hurt much in any configuration.  But when using two contactors
         //one positive with a precharge resistor and one on the negative leg to act as precharge, we need to leave precharge on.

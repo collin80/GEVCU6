@@ -72,17 +72,6 @@ void SystemIO::pollInitialization()
     if (millis() > (lastInitAttempt + 10))
     {
         lastInitAttempt = millis();
-        setupSPIADC();
-    }
-}
-
-void SystemIO::setup_ADC_params()
-{
-    int i;
-    //requires the value to be contiguous in memory
-    for (i = 0; i < 7; i++) {
-        if (adc_comp[i].gain == 0xFFFF) adc_comp[i].gain = 1024;
-        Logger::debug("ADC:%d GAIN: %d Offset: %d", i, adc_comp[i].gain, adc_comp[i].offset);
     }
 }
 
@@ -102,145 +91,52 @@ void SystemIO::setup() {
 
     // TODO check pins
     Logger::info("Running on Feather M0 hardware");
-    dig[0]=4;
-    dig[1]=5;
-    dig[2]=50;
-    dig[3]=51;
-    adc[0][0] = 255;
-    adc[0][1] = 255; //doesn't use SAM3X analog
-    adc[1][0] = 255;
-    adc[1][1] = 255;
-    adc[2][0] = 255;
-    adc[2][1] = 255;
-    adc[3][0] = 255;
-    adc[3][1] = 255;
-    out[0] = 4;
-    out[1] = 5;
-    out[2] = 6;
-    out[3] = 7;
-    out[4] = 2;
-    out[5] = 3;
-    out[6] = 8;
-    out[7] = 9;
-    useSPIADC = true;
-    // pinMode(26, OUTPUT); //Chip Select for first ADC chip
-    // pinMode(28, OUTPUT); //Chip select for second ADC chip
-    // pinMode(30, OUTPUT); //chip select for third ADC chip
-    // digitalWrite(26, HIGH);
-    // digitalWrite(28, HIGH);
-    // digitalWrite(30, HIGH);
-    SPI.begin();
-    // pinMode(32, INPUT); //Data Ready indicator
-    SPI.begin(); //sets up with default 4Mhz, MSB first
-    
 
-    for (i = 0; i < NUM_DIGITAL; i++) pinMode(dig[i], INPUT);
-    for (i = 0; i < NUM_OUTPUT; i++) {
-        if (out[i] != 255) {
-            pinMode(out[i], OUTPUT);
-            digitalWrite(out[i], LOW);
-        }
-    }    
+    // PreCharge Relay // pref 17
+    pinMode(PrechargeRelay, OUTPUT);
+    SystemIO::setDigitalOutput(PrechargeRelay,0);
 
-    setup_ADC_params();
+    // Main Relay  // pref 18
+    pinMode(MainContactorRelay, OUTPUT);
+    SystemIO::setDigitalOutput(MainContactorRelay, 0);
 
-    setupSPIADC();
-}
+    // brake pedal (Analog) // pref A0/14/ BrakeADC
+    pinMode(BrakeADC, INPUT);
 
-bool SystemIO::setupSPIADC()
-{
-    byte result;
-    //ADC chips use this format for SPI command byte: 0-1 = reserved set as 0, 2 = read en (0=write), 3-7 = register address
+    //gas pedal 1 (Analog) // pref A1/15 // ThrottleADC1
+    pinMode(ThrottleADC1, INPUT);
 
-    switch (sysioState)
-    {
-    case SYSSTATE_UNINIT:
-        SPI.beginTransaction(spi_settings);
-        SPI.transfer(0);
-        SPI.endTransaction();
-        Logger::info("Trying to wait ADC1 as ready");
-        SPI.beginTransaction(spi_settings);
-        digitalWrite(CS1, LOW); //select first ADC chip
-        SPI.transfer(ADE7913_READ | ADE7913_STATUS0);
-        result = SPI.transfer(0);
-        digitalWrite(CS1, HIGH);
-        SPI.endTransaction();
-        if (result & 1)  //not ready yet
-        {
-            return false;
-        }
-        else
-        {
-            sysioState = SYSSTATE_ADC1OK;
-            Logger::info("ADC1 is ready. Trying to enable clock out");
-            //Now enable the CLKOUT function on first unit so that the other two will wake up
-            SPI.beginTransaction(spi_settings);
-            digitalWrite(CS1, LOW);
-            SPI.transfer(ADE7913_WRITE |  ADE7913_CONFIG);
-            SPI.transfer(1 | 2 << 4); //Set clock out enable and ADC_FREQ to 2khz
-            digitalWrite(CS1, HIGH);
-            SPI.endTransaction();
-            break;
-        }
-        break;
-    case SYSSTATE_ADC1OK:
-        if (!adc2Initialized)
-        {
-            SPI.beginTransaction(spi_settings);
-            digitalWrite(CS2, LOW); //select second ADC chip
-            SPI.transfer(ADE7913_READ | ADE7913_STATUS0);
-            result = SPI.transfer(0);
-            digitalWrite(CS2, HIGH);
-            SPI.endTransaction();
-            if (result & 1)  //not ready yet
-            {
-               
-            }
-            else
-            {
-                adc2Initialized = true;
-            }
-        }
-        if (!adc3Initialized)
-        {
-            SPI.beginTransaction(spi_settings);
-            digitalWrite(CS3, LOW); //select third ADC chip
-            SPI.transfer(ADE7913_READ | ADE7913_STATUS0);
-            result = SPI.transfer(0);
-            digitalWrite(CS3, HIGH);
-            SPI.endTransaction();
-            if (result & 1)  //not ready yet
-            {
-            }
-            else
-            {
-                adc3Initialized = true;
-            }
-        }
-        if (adc2Initialized && adc3Initialized)
-        {
-            SPI.beginTransaction(spi_settings);
-            digitalWrite(CS2, LOW);
-            SPI.transfer(ADE7913_WRITE |  ADE7913_CONFIG);
-            SPI.transfer(3 << 4 | 1 << 7); //Set ADC_FREQ to 1khz and lower bandwidth to 2khz
-            digitalWrite(CS2, HIGH);
-            SPI.endTransaction();
-            SPI.beginTransaction(spi_settings);
-            digitalWrite(CS3, LOW);
-            SPI.transfer(ADE7913_WRITE |  ADE7913_CONFIG);
-            SPI.transfer(3 << 4 | 1 << 7); //Set ADC_FREQ to 1khz and lower bandwidth to 2khz
-            digitalWrite(CS3, HIGH);
-            SPI.endTransaction();
-      
-            Logger::info("ADC chips 2 and 3 have been successfully started!");
-            sysioState = SYSSTATE_INITIALIZED;
-        }
-        break;
-    case SYSSTATE_INITIALIZED: //nothing to do, already all set!
-        return true;
-        break;
+    // gas pedal 2 (Analog) // pref A2/16 // ThrottleADC2
+    pinMode(ThrottleADC2, INPUT);
+
+    // enable (Digital) // pref 17// EnablePin
+    if (EnableIn < 24 ) {
+        pinMode(EnableIn, INPUT);
     }
-    return false;
+
+    // reverse 2 (Digital) // pref 18 // ReverseIn
+    if (ReverseIn < 24 ) {
+        pinMode(ReverseIn, INPUT);
+    }
+
+    //Digital // CoolFan
+    if (CoolFan < 24 ) {
+        pinMode(CoolFan, OUTPUT);
+    }
+
+    //Digital // BrakeLight
+    if (BrakeLight < 24 ) {
+        pinMode(BrakeLight, OUTPUT);
+    }
+
+    //Digital // RevLight
+    if (RevLight < 24 ) {
+        pinMode(RevLight, OUTPUT);
+    }
+
+    // adjust ADC
+    // analogReference(AR_INTERNAL_3_0);
+    analogReadResolution(12);
 }
 
 void SystemIO::installExtendedIO(CANIODevice *device)
@@ -376,32 +272,6 @@ int SystemIO::numAnalogOutputs()
     return numAnaOut;
 }
 
-
-/*
-Get an ADC reading but without any gain or offset
-*/
-int16_t SystemIO::getRawADC(uint8_t which) {
-    int32_t val;
-
-    int32_t valu;
-    
-    if (!isInitialized()) return 0;
-    
-    //first 4 analog readings must match old methods
-    if (which < 2)
-    {
-        valu = getSPIADCReading(CS1, (which & 1) + 1);
-    }
-    else if (which < 4) valu = getSPIADCReading(CS2, (which & 1) + 1);
-    //the next three are new though. 4 = current sensor, 5 = pack high (ref to mid), 6 = pack low (ref to mid)
-    else if (which == 4) valu = getSPIADCReading(CS1, 0);
-    else if (which == 5) valu = getSPIADCReading(CS3, 1);
-    else if (which == 6) valu = getSPIADCReading(CS3, 2);
-    val = valu / 2048; //cut reading down to 13 bit signed value +/- 4096 essentially
-    
-    return val;
-}
-
 /*
 get value of one of the analog inputs
 On GEVCU6.2 or higher
@@ -506,52 +376,49 @@ int32_t SystemIO::getPackLowReading()
 }
 
 //get value of one of the 4 digital inputs
-boolean SystemIO::getDigitalIn(uint8_t which) {
-    if (which >= numDigIn) return false;
+boolean SystemIO::getDigitalIn(uint8_t pin) {
     
-    if (which < NUM_DIGITAL) return !(digitalRead(dig[which]));
+    if (pin < MAX_PORT) return !(digitalRead(pin));
     else
     {
         CANIODevice *dev;
-        dev = extendedDigitalIn[which - NUM_DIGITAL].device;
-        if (dev) return dev->getDigitalInput(extendedDigitalIn[which - NUM_DIGITAL].localOffset);
+        dev = extendedDigitalIn[pin - NUM_DIGITAL].device;
+        if (dev) return dev->getDigitalInput(extendedDigitalIn[pin - NUM_DIGITAL].localOffset);
     }
     return false;
 }
 
 //set output high or not
-void SystemIO::setDigitalOutput(uint8_t which, boolean active) {
-    if (which >= numDigOut) return;
+void SystemIO::setDigitalOutput(uint8_t pin, boolean active) {
+    Logger::info("SET DIGITAL:  pin %d  numDigOut %d MAX_PORT %d active %s", pin, numDigOut, MAX_PORT, active);
     
-    if (which < NUM_OUTPUT)
+    if (pin < MAX_PORT)
     {
-        if (out[which] == 255) return;
         if (active)
-            digitalWrite(out[which], HIGH);
-        else digitalWrite(out[which], LOW);
+            digitalWrite(pin, LOW);
+        else digitalWrite(pin, HIGH);
     }
     else
     {
         CANIODevice *dev;
-        dev = extendedDigitalOut[which - NUM_OUTPUT].device;
-        if (dev) return dev->setDigitalOutput(extendedDigitalOut[which - NUM_OUTPUT].localOffset, active);
+        dev = extendedDigitalOut[pin - NUM_OUTPUT].device;
+        if (dev) return dev->setDigitalOutput(extendedDigitalOut[pin - NUM_OUTPUT].localOffset, active);
     }
 }
 
 //get current value of output state (high?)
-boolean SystemIO::getDigitalOutput(uint8_t which) {
-    if (which >= numDigOut) return false;
+boolean SystemIO::getDigitalOutput(uint8_t pin) {
     
-    if (which < NUM_OUTPUT)
+    if (pin < NUM_OUTPUT)
     {
-        if (out[which] == 255) return false;
-        return digitalRead(out[which]);
+        if (pin == 255) return false;
+        return digitalRead(pin);
     }
     else
     {
         CANIODevice *dev;
-        dev = extendedDigitalOut[which - NUM_OUTPUT].device;
-        if (dev) return dev->getDigitalOutput(extendedDigitalOut[which - NUM_OUTPUT].localOffset);
+        dev = extendedDigitalOut[pin - NUM_OUTPUT].device;
+        if (dev) return dev->getDigitalOutput(extendedDigitalOut[pin - NUM_OUTPUT].localOffset);
     }
     return false;
 }

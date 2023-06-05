@@ -285,7 +285,7 @@ void CanHandler::CANIO(CAN_FRAME &frame)
     CANioFrame.extended = 0; // standard frame
     CANioFrame.rtr = 0;
 
-    // handle the incoming frame to set/unset/leave alone each digital output
+    // handle the incoming frame to set/unset/leave alone each digital output  // TODO change to read ports from config ( just contactor/precharge pins )
     for (i = 0; i < 8; i++)
     {
         if (frame.data.bytes[i] == 0x88)
