@@ -49,6 +49,8 @@ RMSMotorController::RMSMotorController() : MotorController()
 
 void RMSMotorController::setup()
 {
+    RMSMotorControllerConfiguration *config = (RMSMotorControllerConfiguration *)getConfiguration();
+
     tickHandler.detach(this);
 
     Logger::info("add device: Rinehart Inverter (id:%X, %X)", RINEHARTINV, this);
@@ -62,6 +64,7 @@ void RMSMotorController::setup()
 
     operationState = ENABLE;
     selectedGear = NEUTRAL;
+
     //RMS does not require a frame 25 times per second but it ensures that
     //we are sending plenty of traffic and even if some get lost we're OK
     //I believe the actual timeout is not getting a frame within 500ms.
@@ -99,7 +102,7 @@ void RMSMotorController::handleCanFrame(CAN_FRAME *frame)
         handleCANMsgTemperature3(data);
         break;
     case 0xA3: //Analog input voltages
-        handleCANMsgAnalogInputs(data);	    
+        handleCANMsgAnalogInputs(data);
         break;
     case 0xA4: //Digital input status
         handleCANMsgDigitalInputs(data);
@@ -108,7 +111,7 @@ void RMSMotorController::handleCanFrame(CAN_FRAME *frame)
         handleCANMsgMotorPos(data);
         break;
     case 0xA6: //Current info
-        handleCANMsgCurrent(data);	    
+        handleCANMsgCurrent(data);
         break;
     case 0xA7: //Voltage info
         handleCANMsgVoltage(data);
@@ -132,10 +135,10 @@ void RMSMotorController::handleCanFrame(CAN_FRAME *frame)
         handleCANMsgModFluxWeaken(data);
         break;
     case 0xAE: //Firmware Info
-        handleCANMsgFirmwareInfo(data);   	
+        handleCANMsgFirmwareInfo(data);
         break;
     case 0xAF: //Diagnostic Data
-        handleCANMsgDiagnostic(data);			
+        handleCANMsgDiagnostic(data);
         break;
     }
 }
@@ -475,8 +478,9 @@ void RMSMotorController::handleCANMsgDiagnostic(uint8_t *data)
 {
 }
 
-void RMSMotorController::handleTick() {
-
+void RMSMotorController::handleTick()
+{
+    RMSMotorControllerConfiguration *config = (RMSMotorControllerConfiguration *)getConfiguration();
     MotorController::handleTick(); //kick the ball up to papa
 
     if (isCANControlled) sendCmdFrame();   //Send out control message if inverter tells us it's set to CAN control. Otherwise just listen
@@ -497,6 +501,8 @@ void RMSMotorController::handleTick() {
 void RMSMotorController::sendCmdFrame()
 {
     RMSMotorControllerConfiguration *config = (RMSMotorControllerConfiguration *)getConfiguration();
+    BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DeviceType::DEVICE_BMS));
+    if (!bms) return;
 
     CAN_FRAME output;
     output.length = 8;
@@ -519,7 +525,10 @@ void RMSMotorController::sendCmdFrame()
 
     Logger::debug("Op: %d Locked: %t Gear: %d", operationState, isLockedOut, selectedGear);
 
-    if(operationState == ENABLE && !isLockedOut && selectedGear != NEUTRAL /*&& donePrecharge*/)
+    //only enable the controller if discharge is OK according to the BMS, we're in enabled state, we're not
+    //locked out, and we're not in neutral.
+    if(bms->isDischargeOK() && (operationState == ENABLE) && 
+        !isLockedOut && (selectedGear != NEUTRAL) /*&& donePrecharge*/)
     {
         output.data.bytes[5] = 1;
     }

@@ -31,6 +31,7 @@
 #include <Arduino.h>
 #include "config.h"
 #include "MotorController.h"
+#include "BatteryManager.h"
 #include "sys_io.h"
 #include "TickHandler.h"
 #include "CanHandler.h"
@@ -40,6 +41,7 @@
  */
 class RMSMotorControllerConfiguration : public MotorControllerConfiguration {
 public:
+
 };
 
 class RMSMotorController: public MotorController, CanObserver {
