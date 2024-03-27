@@ -61,7 +61,7 @@ Random comments on things that should be coded up soon:
 #include <SPI.h>
 #include <microsmooth.h>
 
-#define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
+//#define DEBUG_STARTUP_DELAY         //if this is defined there is a large start up delay so you can see the start up messages. NOT for production!
 
 //Evil, global variables
 PrefHandler *sysPrefs;
@@ -152,6 +152,7 @@ void createObjects() {
     VehicleSpecific *vehicleSpecific = new VehicleSpecific();
     OvarCharger *ovarcharge = new OvarCharger();
     PotGearSelector *potgear = new PotGearSelector();
+	PWMHeater *pwmheat = new PWMHeater();
 }
 
 void initializeDevices() {

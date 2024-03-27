@@ -41,6 +41,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "BatteryManager.h"
 #include "OvarChargerDCDC.h"
 #include "PotGearSelector.h"
+#include "PWMHeater.h"
 
 class SerialConsole {
 public:

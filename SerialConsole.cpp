@@ -69,6 +69,7 @@ void SerialConsole::printMenu() {
     BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
     OvarCharger *charger = static_cast<OvarCharger *>(deviceManager.getDeviceByID(OVARCHARGE));
     PotGearSelector *potgear = static_cast<PotGearSelector *>(deviceManager.getDeviceByID(POTGEAR));
+    PWMHeater *pwmheat = static_cast<PWMHeater *>(deviceManager.getDeviceByID(PWMHEATER));
    
     //Show build # here as well in case people are using the native port and don't get to see the start up messages
     SerialUSB.print("Build number: ");
@@ -192,6 +193,18 @@ void SerialConsole::printMenu() {
         Logger::console("   NOMV=%i - Fully charged pack voltage that automatically resets kWh counter", config->nominalVolt/10);        
     } 
 
+    if (pwmheat && pwmheat->getConfiguration())
+    {
+        PWMHeaterConfiguration *config = (PWMHeaterConfiguration *) pwmheat->getConfiguration();
+        SerialUSB<<"\nHEATER CONTROLS\n\n";
+
+        Logger::console("   PWMTEMP=%i - Desired water temperature in C", config->desiredWaterTemp);
+        Logger::console("   PWMPIN=%i - PWM output in (0-7)", config->pwmPin);
+        Logger::console("   PWMPUMP=%i - Pump output pin (0-7, 255) 255 = No pump output pin", config->pumpOutputPin);
+        Logger::console("   PWMANA = %i - Analog input for temperature sensing (0-3)", config->analogTempPin);
+        Logger::console("   PWMENABLE=%i - Digital input to trigger heater output (0-7, 255 = None)", config->enablePin);  
+    }
+
     SerialUSB<<"\nANALOG AND DIGITAL IO\n\n";
     SerialUSB.println("   A = Autocompensate ADC inputs");
     SerialUSB.println("   J = set all digital outputs low");
@@ -285,6 +298,7 @@ void SerialConsole::handleConfigCmd() {
     BatteryManagerConfiguration *bmsConfig = NULL;
     OvarChargerConfiguration *chargerConfig = NULL;
     PotGearSelConfiguration *potgearConfig = NULL;
+    PWMHeaterConfiguration *pwmConfig = NULL;
 
     Throttle *accelerator = deviceManager.getAccelerator();
     Throttle *brake = deviceManager.getBrake();
@@ -292,6 +306,7 @@ void SerialConsole::handleConfigCmd() {
     BatteryManager *bms = static_cast<BatteryManager *>(deviceManager.getDeviceByType(DEVICE_BMS));
     OvarCharger *charger = static_cast<OvarCharger *>(deviceManager.getDeviceByID(OVARCHARGE));
     PotGearSelector *potgear = static_cast<PotGearSelector *>(deviceManager.getDeviceByID(POTGEAR));
+    PWMHeater *pwmheat = static_cast<PWMHeater *>(deviceManager.getDeviceByID(PWMHEATER));
 
     int i;
     int newValue;
@@ -328,6 +343,8 @@ void SerialConsole::handleConfigCmd() {
         chargerConfig = static_cast<OvarChargerConfiguration *>(charger->getConfiguration());
     if (potgear)
         potgearConfig = static_cast<PotGearSelConfiguration *>(potgear->getConfiguration());
+    if (pwmheat)
+        pwmConfig = static_cast<PWMHeaterConfiguration *>(pwmheat->getConfiguration());
 
     // strtol() is able to parse also hex values (e.g. a string "0xCAFE"), useful for enable/disable by device id
     newValue = strtol((char *) (cmdBuffer + i), NULL, 0);
@@ -491,8 +508,42 @@ void SerialConsole::handleConfigCmd() {
             charger->saveConfiguration();
         }
         else Logger::console("Invalid charger amperage limit. Please enter a value between 10 and 1000");
-
-
+        
+    } else if (cmdString == String("PWMTEMP") && pwmConfig) {
+        if ((newValue >= 0) && (newValue <= 200)) {
+            Logger::console("Setting temperature target to %i", newValue);
+            pwmConfig->desiredWaterTemp = newValue;
+            pwmheat->saveConfiguration();
+        }
+        else Logger::console("Invalid temperature target!");
+    } else if (cmdString == String("PWMPIN") && pwmConfig) {
+        if ((newValue >= 0) && (newValue <= 7) || (newValue == 255)) {
+            Logger::console("Setting PWM pin to %i", newValue);
+            pwmConfig->pwmPin = newValue;
+            pwmheat->saveConfiguration();
+        }
+        else Logger::console("Invalid digital output. Please use 0-7 or 255 to disable");
+    } else if (cmdString == String("PWMPUMP") && pwmConfig) {
+        if ((newValue >= 0) && (newValue <= 7) || (newValue == 255)) {
+            Logger::console("Setting pump output to %i", newValue);
+            pwmConfig->pumpOutputPin = newValue;
+            pwmheat->saveConfiguration();
+        }
+        else Logger::console("Invalid pump output number. Please use 0-7 or 255 to disable");
+    } else if (cmdString == String("PWMANA") && pwmConfig) {
+        if ((newValue >= 0) && (newValue <= 3) || (newValue == 255)) {
+            Logger::console("Setting temperature ADC to %i", newValue);
+            pwmConfig->analogTempPin = newValue;
+            pwmheat->saveConfiguration();
+        }
+        else Logger::console("Invalid ADC pin. Please use 0-3 or 255 to disable");
+    } else if (cmdString == String("PWMENABLE") && pwmConfig) {
+        if ((newValue >= 0) && (newValue <= 3) || (newValue == 255)) {
+            Logger::console("Setting pwm enable input to %i", newValue);
+            pwmConfig->enablePin = newValue;
+            pwmheat->saveConfiguration();
+        }
+        else Logger::console("Invalid input pin. Please use 0-3 or 255 to disable");
 
     } else if (cmdString == String("GEARADC") && potgearConfig) {
         if ((newValue >= 0) && (newValue <= 3) || (newValue == 255)) {

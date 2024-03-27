@@ -65,6 +65,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "VehicleSpecific.h"
 #include "OvarChargerDCDC.h"
 #include "PotGearSelector.h"
+#include "PWMHeater.h"
 
 #ifdef __cplusplus
 extern "C" {
