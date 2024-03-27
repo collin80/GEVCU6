@@ -101,8 +101,9 @@ void PotGearSelector::handleTick() {
         foundGearPos = true;
     }
 
-    if ( (gearSelector > ((int16_t)config->drivePosition - (int16_t)config->hysteresis)) &&
-         (gearSelector < ((int16_t)config->drivePosition + (int16_t)config->hysteresis)))
+    /*if ( (gearSelector > ((int16_t)config->drivePosition - (int16_t)config->hysteresis)) &&
+         (gearSelector < ((int16_t)config->drivePosition + (int16_t)config->hysteresis))) */
+    if (gearSelector < ((int16_t)config->drivePosition + (int16_t)config->hysteresis))
     {
         Logger::debug("Setting gear to drive");
         if (motorController)

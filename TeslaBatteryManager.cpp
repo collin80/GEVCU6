@@ -66,9 +66,9 @@ void TeslaBatteryManager::handleCanFrame(CAN_FRAME *frame) {
     case 0x650:
         packVoltage = (frame->data.bytes[1] * 256 + frame->data.bytes[0]);
         packCurrent = (frame->data.bytes[3] * 256 + frame->data.bytes[2]);
-        SOC = frame->data.bytes[4];
-        highestCellTemp = ((S8)frame->data.bytes[5]) * 10;
-        lowestCellTemp = ((S8)frame->data.bytes[6]) * 10;
+        SOC = frame->data.bytes[4] / 2;
+        highestCellTemp = (((S8)frame->data.bytes[5]) * 10) - 200;
+        lowestCellTemp = (((S8)frame->data.bytes[6]) * 10) - 200;
         //lower bits of byte 7 tell the actual reason
         if (frame->data.bytes[7] != 0) //if BMS registers some sort of fault
         {
@@ -125,7 +125,12 @@ void TeslaBatteryManager::handleCanFrame(CAN_FRAME *frame) {
                 faultHandler.cancelOngoingFault(TESLABMS, FAULT_HV_BATT_ISOLATION);
             }
         }
-        else isFaulted = false;
+        else 
+        {
+            isFaulted = false;
+            allowDischarge = true;
+            allowCharge = true;
+        }
         break;
     case 0x651:
         lowestCellV = (frame->data.bytes[1] * 256 + frame->data.bytes[0]);
