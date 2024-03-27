@@ -193,7 +193,7 @@ void SystemIO::setup() {
 
     setupSPIADC();
 
-    tickHandler.attach(this, 1000); //interval is set in microseconds. We want 1ms timer
+    tickHandler.attach(this, 500); //interval is set in microseconds. We want 1ms timer
     lastMicros = micros();
 
     //Due can handle 12 bit precision for duty cycle values (0-4095)
@@ -624,6 +624,8 @@ void SystemIO::setDigitalSlowPWM(uint8_t which, uint8_t freq, uint16_t duty)
     //now, how far into the progress do we need to get before turning on the output?
     double prog = duty / 1000.0;
     digPWMOutput[which].triggerPoint = (uint32_t)(digPWMOutput[which].freqInterval * prog);
+    Logger::debug("Frequency Interval: %i", digPWMOutput[which].freqInterval);
+    Logger::debug("Trigger Point: %i", digPWMOutput[which].triggerPoint);
     digitalWrite(out[which], LOW); //set it low to start
 }
 
@@ -631,14 +633,28 @@ void SystemIO::updateDigitalSlowPWMDuty(uint8_t which, uint16_t duty)
 {
     if (which >= NUM_OUTPUT) return;
     if (duty > 1000) return;
-    double prog = duty / 1000.0;
-    digPWMOutput[which].triggerPoint = (uint32_t)(digPWMOutput[which].freqInterval * prog);
+    if (duty == 0)
+    {
+        digPWMOutput[which].pwmActive = false;
+        digitalWrite(out[which], LOW); //turn it off
+    }
+    else
+    {
+        digPWMOutput[which].pwmActive = true;
+        double prog = duty / 1000.0;
+        digPWMOutput[which].triggerPoint = (uint32_t)(digPWMOutput[which].freqInterval * prog);
+    }
 }
 
 void SystemIO::updateDigitalSlowPWMFreq(uint8_t which, uint8_t freq)
 {
     if (which >= NUM_OUTPUT) return;
-    if (freq == 0) return;
+    if (freq == 0)
+    {
+        digPWMOutput[which].pwmActive = false;
+        digitalWrite(out[which], LOW);
+        return;
+    }
     uint32_t newval = 1000000ul / freq;
     double ratio = (double)newval / (double)digPWMOutput[which].freqInterval;
     digPWMOutput[which].freqInterval = newval; //# of uS in each full cycle
@@ -667,18 +683,18 @@ void SystemIO::handleTick()
         //Logger::debug("%i: %u %u %u", i, digPWMOutput[i].progress, digPWMOutput[i].freqInterval, digPWMOutput[i].triggerPoint);
         if (digPWMOutput[i].progress >= digPWMOutput[i].triggerPoint)
         {
-            Logger::debug("%i on!", i);
+            //Logger::debug("%i on! %i", i, digPWMOutput[i].progress);
             digitalWrite(out[i], HIGH);
         }
         else
         {
-            Logger::debug("%i OFF!", i);
+            //Logger::debug("%i OFF! %i", i, digPWMOutput[i].progress);
             digitalWrite(out[i], LOW);
         }
         //we have to constrain the progress variable to be within the freqInterval value but do so here
         //after we've already done our output calc because this should yield the closest match to our
         //desired pulse width. But, still the pulse width is likely to jitter by +/- 1ms
-        if (digPWMOutput[i].progress > digPWMOutput[i].freqInterval) digPWMOutput[i].progress -= digPWMOutput[i].freqInterval;
+        if (digPWMOutput[i].progress >= digPWMOutput[i].freqInterval) digPWMOutput[i].progress -= digPWMOutput[i].freqInterval;
     }
 }
 

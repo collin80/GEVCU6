@@ -170,7 +170,7 @@ private:
     ExtendedIODev extendedDigitalOut[NUM_EXT_IO];
     ExtendedIODev extendedDigitalIn[NUM_EXT_IO];
     ExtendedIODev extendedAnalogOut[NUM_EXT_IO];
-    ExtendedIODev extendedAnalogIn[NUM_EXT_IO];    
+    ExtendedIODev extendedAnalogIn[NUM_EXT_IO];
 };
 
 extern PrefHandler *sysPrefs;
