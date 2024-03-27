@@ -40,8 +40,9 @@ void MemCache::setup() {
     //WriteTimer = 0;
 
     //digital pin 19 is connected to the write protect function of the EEPROM. It is active high so set it low to enable writes
+    //default it to HIGH to write protect until we really want to write
     pinMode(19, OUTPUT);
-    digitalWrite(19, LOW);
+    digitalWrite(19, HIGH);
     tickHandler.attach(this, CFG_TICK_INTERVAL_MEM_CACHE);
 }
 
@@ -50,6 +51,7 @@ void MemCache::setup() {
 void MemCache::handleTick()
 {
     U8 c;
+    digitalWrite(19, HIGH);
     cache_age();
     for (c=0; c<NUM_CACHED_PAGES; c++) {
         if ((pages[c].age == MAX_AGE) && (pages[c].dirty)) {
@@ -87,6 +89,7 @@ void MemCache::FlushAllPages()
             watchdogReset();
         }
     }
+    digitalWrite(19, HIGH); //re-enable write protect
 }
 
 //Flush a given page by the page ID. This is NOT by address so act accordingly. Likely no external code should ever use this
@@ -399,6 +402,7 @@ boolean MemCache::cache_writepage(uint8_t page)
     for (d = 0; d < 256; d++) {
         buffer[d + 2] = pages[page].data[d];
     }
+    digitalWrite(19, LOW); //disable write protection
     Wire.beginTransmission(i2c_id);
     Wire.write(buffer, 258);
     Wire.endTransmission(true);
@@ -416,6 +420,8 @@ void MemCache::nukeFromOrbit()
     uint8_t buffer[258];
     uint8_t i2c_id;
 
+    digitalWrite(19, LOW); //disable write protection
+
     for (d = 0; d < 256; d++) buffer[d+2] = 0xFF;
 
     for (int page = 0; page < 1024; page++)
@@ -430,6 +436,7 @@ void MemCache::nukeFromOrbit()
         delay(11);
         watchdogReset();
     }
+    digitalWrite(19, HIGH); //enable write protection
 }
 
 
